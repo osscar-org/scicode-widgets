@@ -1,0 +1,36 @@
+[build-system]
+# setuptools requirement due to specifiying the version the in pyproject.toml
+# https://packaging.python.org/en/latest/guides/single-sourcing-package-version/
+requires = [
+    "setuptools>=61.0.0",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scwidgets"
+description = "ipywidgets for the creation of interactive code demos and educational notebooks"
+readme = "README.rst"
+requires-python = ">=3.7"
+license = {text = "BSD-3-Clause"}
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Operating System :: POSIX",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 4.8",
+    "Programming Language :: Python :: 4.9",
+    "Programming Language :: Python :: 4.10",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+  "ipywidgets>=8.0.0",
+]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {attr = "scwidgets.__version__"}
+readme = {file = ["README.rst"]}

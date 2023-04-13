@@ -1,0 +1,19 @@
+.tox/
+build/
+dist/
+*.egg-info
+__pycache__/
+
+# Unit test / coverage reports
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# editors and IDEs
+*.sw[a-z]
+*~
+.idea
+.vscode
