@@ -1,0 +1,71 @@
+.scwidget-save-cue-box {
+  border-right : 0px solid;
+}
+
+.scwidget-save-cue-box--on-trait-change {
+  border-right : 5px solid;
+  border-right-color: #77216F;
+}
+
+.scwidget-check-cue-box {
+  border-left : 0px solid;
+}
+
+.scwidget-check-cue-box--on-trait-change {
+  border-left : 5px solid;
+  border-left-color: #20b5e9;
+}
+
+.scwidget-update-cue-box {
+  border-left : 0px solid;
+}
+
+.scwidget-update-cue-box--on-trait-change {
+  border-left : 5px solid;
+  border-left-color: #e95420;
+}
+
+
+.scwidget-save-cue-button {
+    border :  3px solid;
+    border-color: #f4f2f0;
+    background-color: #f4f2f0;
+    height: auto;
+}
+
+.scwidget-save-cue-button:disabled {
+  border-color: #f4f2f0;
+}
+.scwidget-save-cue-button--on_trait_change {
+  border-color: #77216F;
+}
+
+
+.scwidget-check-cue-button {
+    border :  3px solid;
+    border-color: #f4f2f0;
+    background-color: #f4f2f0;
+    height: auto;
+}
+
+.scwidget-check-cue-button:disabled {
+  border-color: #f4f2f0;
+}
+.scwidget-check-cue-button--on_trait_change {
+  border-color: #20b5e9;
+}
+
+.scwidget-update-cue-button {
+    border :  3px solid;
+    border-color: #f4f2f0;
+    background-color: #f4f2f0;
+    height: auto;
+}
+
+.scwidget-update-cue-button:disabled {
+  border-color: #f4f2f0;
+}
+
+.scwidget-update-cue-button--on_trait_change{
+  border-color: #e95420;
+}

@@ -17,3 +17,7 @@ coverage.xml
 *~
 .idea
 .vscode
+
+# jupyter notebook files only for this PR
+# we might not want to use notebooks in this form
+.ipynb_checkpoints
