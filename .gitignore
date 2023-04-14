@@ -17,3 +17,5 @@ coverage.xml
 *~
 .idea
 .vscode
+
+.ipynb
