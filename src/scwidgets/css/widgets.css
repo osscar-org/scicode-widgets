@@ -1,0 +1,44 @@
+/* scwidgets default cue box */
+
+.scwidget-cue-box {
+  border-left : 0px solid;
+}
+
+.scwidget-cue-box--cue {
+  border-left : 5px solid;
+  border-left-color: #000000;
+}
+
+/* scwidgets save cue box */
+
+.scwidget-save-cue-box {
+  border-left : 0px solid;
+}
+
+.scwidget-save-cue-box--cue {
+  border-left : 5px solid;
+  border-left-color: #77216F;
+}
+
+/* scwidgets check cue box */
+
+.scwidget-check-cue-box {
+  border-left : 0px solid;
+}
+
+.scwidget-check-cue-box--cue {
+  border-left : 5px solid;
+  border-left-color: #20b5e9;
+}
+
+/* scwidgets update cue box */
+
+.scwidget-update-cue-box {
+  border-left : 0px solid;
+}
+
+.scwidget-update-cue-box--cue {
+  border-left : 5px solid;
+  border-left-color: #e95420;
+}
+

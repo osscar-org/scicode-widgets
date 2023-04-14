@@ -36,3 +36,6 @@ dynamic = ["version"]
 [tool.setuptools.dynamic]
 version = {attr = "scwidgets.__version__"}
 readme = {file = ["README.rst"]}
+
+[tool.setuptools.package-data]
+scwidgets = ["css/widgets.css"]

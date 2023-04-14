@@ -13,6 +13,22 @@
 #     name: python3
 # ---
 
-from ipywidgets import Button
+# +
+from ipywidgets import Label
 
-Button(description="Text")
+import scwidgets
+from scwidgets import CueBox
+
+# -
+
+scwidgets.get_css_style()
+
+widget1 = Label("Text")
+cued_widget1 = CueBox(widget1)
+cued_widget1
+
+widget2 = Label("Text")
+cued_widget2 = CueBox(widget2)
+cued_widget2
+
+widget2.value = "Changed Text"
