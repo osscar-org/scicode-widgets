@@ -1,0 +1,5 @@
+numpy
+chemiscope
+ase
+matplotib
+widget_code_input
