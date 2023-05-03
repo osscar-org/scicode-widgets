@@ -1,7 +1,11 @@
+Important
+=========
+
+So far scicode-widget has been created by prototyping without much concern about the code quality. This resulted in faster development time but in cost of readability and maintanability of the code. Since we finished now the prototype phase and have converged on a codebase with which we are satisfied, we are in the process of refactoring the resulting code. While we are refactoring we recommend the usage of the `vertical-slice branch <https://github.com/osscar-org/scicode-widgets/tree/vertical-slice>`_ till all features have been implemented in the refactor.
+
+
 scicode-widgets
 ===============
-
-So far scicode-widget has been created by prototyping without much concert about the code quality. This resulted in faster development time but in cost of readability and maintanability of the code. Since we finished now the prototype phase and have converged on a codebase with which we are satisfied, we are in the process of refactoring the resulting code. While we are refactoring we recommend the usage of the `vertical-slice branch <https://github.com/osscar-org/scicode-widgets/tree/vertical-slice>`_ till all features have been implemented in the refactor.
 
 .. marker-package-description
 
