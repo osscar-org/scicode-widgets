@@ -22,6 +22,9 @@
     border-color: #e95420;
     background-color: #e95420;
 }
+.scwidget-box--selected{
+    background-color: #bdbdbd;
+}
 .scwidget-box--unchecked{
     border-color: #20b5e9;
     background-color: #20b5e9;

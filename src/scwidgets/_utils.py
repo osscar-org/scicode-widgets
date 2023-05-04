@@ -21,3 +21,5 @@ class CodeDemoStatus(enum.Enum):
     CHECKING = 3
     CHECKED = 4
     UNCHECKED = 5
+    SELECTED = 6
+    UNSELECTED = 7

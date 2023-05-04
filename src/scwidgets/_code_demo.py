@@ -21,6 +21,7 @@ from ipywidgets import (
     VBox,
     Layout,
     Checkbox,
+    RadioButtons,
     Dropdown,
     Button,
     HTML,
@@ -28,6 +29,8 @@ from ipywidgets import (
     Textarea,
     Label,
     Image,
+    Widget,
+    GridBox
 )
 
 from ._answer import Answer
@@ -194,7 +197,15 @@ class CodeDemoBox(ipywidgets.Box):
     # for observe
     def set_status_out_of_date(self, change=None):
         self.status = CodeDemoStatus.OUT_OF_DATE
+    
+    # for observe
+    def set_status_selected(self,change=None):
+        self.status = CodeDemoStatus.SELECTED
 
+    # for observe
+    def set_status_unselected(self,change=None):
+        self.status = CodeDemoStatus.UNSELECTED
+        
     @property
     def status(self):
         return self._status if hasattr(self, "_status") else None
@@ -232,6 +243,12 @@ class CodeDemoBox(ipywidgets.Box):
                 self.remove_class("scwidget-box--out-of-date")
             else:
                 raise ValueError(f'CodeDemoStatus {status} is not supported by check_update {__self.__class__.__name__}.')
+        elif self._code_demo_functionality == "select":
+            self.remove_class('scwidget-box')
+            if status == CodeDemoStatus.SELECTED:
+                self.add_class("scwidget-box--selected")
+            elif status == CodeDemoStatus.UNSELECTED:
+                self.remove_class("scwidget-box--selected")
         elif not(isinstance(status, CodeDemoStatus)):
             raise ValueError(f"Status {status} is not a CodeDemoStatus.")
         self._status = status
@@ -1046,3 +1063,94 @@ class CodeChecker:
             out = student_code_wrapper(*x)
             nb_failed_checks += int(not (self.equality_function(y, out)))
         return nb_failed_checks
+    
+class MCQBox(GridBox, Answer):
+    value = traitlets.Dict({}, sync=True)
+    def __init__(self, 
+                 choices,
+                 layout=Layout()):
+        self._controls = {}
+        self.layout = layout
+        super().__init__()
+
+        for k,choice in enumerate(choices):
+            if isinstance(choice,str):
+                self._controls[str(k)] =  CodeDemoBox(code_demo_functionality="select")
+                self._controls[str(k)].children += (Checkbox(
+                            value=False,
+                            description=choice,
+                            style={"description_width": "initial"},
+                            layout=Layout(width='50%')
+                            ),)
+            elif isinstance(choice,Widget):
+                self._controls[str(k)] = CodeDemoBox(children=[ Checkbox(
+                            value=False,
+                            description="",
+                            style={"description_width": "initial"},
+                            layout=Layout(width="5%", min_width="0.5in")
+                            ),
+                            choice
+                            ],code_demo_functionality="select")
+            else:
+                raise ValueError("Unsupported parameter type")
+            self._controls[str(k)].set_status(CodeDemoStatus.UNSELECTED)
+        self.children = [control for control in self._controls.values()]
+        # links changes to the controls to the value dict
+        for k in self._controls:
+            self._controls[k].children[0].observe(self._parameter_handler(k), "value")
+            self.value[k] = self._controls[k].children[0].value  
+    
+    @property
+    def status(self):
+        return self._status if hasattr(self, "_status") else None
+
+    @status.setter
+    def status(self, status):
+        if status == CodeDemoStatus.UP_TO_DATE:
+            for control_id, control in self.controls.items():
+                control.disabled = False
+        elif status == CodeDemoStatus.UPDATING:
+            for control_id, control in self.controls.items():
+                control.disabled = True
+        elif status == CodeDemoStatus.OUT_OF_DATE:
+            for control_id, control in self.controls.items():
+                control.disabled = False
+        elif not(isinstance(status, CodeDemoStatus)):
+            raise ValueError(f"Status {status} is not a CodeDemoStatus.")
+        self._status = status
+
+    @property
+    def answer_value(self):
+        return json.dumps(self.value)
+
+    @answer_value.setter
+    def answer_value(self, new_answer_value):
+        new_values = json.loads(new_answer_value)
+        for k in new_values:
+            self._controls[k].children[0].value = new_values[k]
+
+    def set_status(self, status):
+        self.status = status
+
+    @property
+    def controls(self):
+        return self._controls
+    def show_answer_interface(self):
+        save_widget = HBox([VBox([HBox([self._save_button,self._load_button])])], layout=Layout(align_items="flex-end", width='95%')
+        )
+        self.children += (save_widget,self.save_output,)
+        stateful_behaviour = [control.children[0].observe(self.set_status_not_saved,"value") for control_id, control in self.controls.items()]
+        return save_widget
+    def _parameter_handler(self, k):
+        def _update_parameter(change):
+            # traitlets.Dict cannot track updates, only assignment
+            if change['new'] == True:
+                self._controls[k].set_status(CodeDemoStatus.SELECTED)
+            else:  
+                self._controls[k].set_status(CodeDemoStatus.UNSELECTED)
+            dict_copy = self.value.copy()
+            dict_copy[k] = self._controls[k].children[0].value
+            self.value = dict_copy
+
+        return _update_parameter
+

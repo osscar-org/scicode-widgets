@@ -12,7 +12,8 @@ from ._check_registry import (
 from ._code_demo import (
     CodeDemo,
     ParametersBox,
-    CodeChecker
+    CodeChecker,
+    MCQBox
 )
 from ._code_visualizer import (
     CodeVisualizer,
