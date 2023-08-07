@@ -45,7 +45,7 @@ def selenium_driver(notebook_service, selenium):
 
         run_element = [element for element in selenium.find_elements(By.CLASS_NAME, 'lm-MenuBar-item')
                 if element.text == "Run"][0]
-        WebDriverWait(selenium, 100).until(
+        WebDriverWait(selenium, 10).until(
             ec.element_to_be_clickable(run_element)
         )
         time.sleep(2)
@@ -164,4 +164,9 @@ def selenium_driver(notebook_service, selenium):
 #    selenium.find_element(By.ID, "notebook-container")
 #
 #    return selenium
-#
+
+
+@pytest.fixture
+def firefox_options(firefox_options):
+    firefox_options.add_argument("--headless")
+    return firefox_options

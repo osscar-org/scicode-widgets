@@ -17,15 +17,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: install required packages for tests
-      run: |
-        pip install .
-        pip install -r requirements-test.txt
-    - name: run firefox
-      run: firefox
+    - run: pip install tox
+
     - name: run Python tests
-      run: pytest --driver Firefox
+      run: tox -e tests
