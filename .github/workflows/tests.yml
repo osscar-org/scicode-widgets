@@ -25,6 +25,7 @@ jobs:
       run: |
         pip install .
         pip install -r requirements-test.txt
-
+    - name: run firefox
+      run: firefox
     - name: run Python tests
       run: pytest --driver Firefox
