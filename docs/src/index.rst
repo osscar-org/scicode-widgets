@@ -5,3 +5,4 @@ scicode-widgets
    :start-after: marker-package-description
 
 
+Some text
