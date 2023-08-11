@@ -27,7 +27,7 @@ def test_widgets(selenium_driver):
 
     :param selenium_driver: see conftest.py
     """
-    driver = selenium_driver("tests/notebooks/widget_cue_box.ipynb")
+    driver = selenium_driver("tests/notebooks/widgets.ipynb")
 
     # Each cell of the notebook, the cell number can be retrieved from the
     # attribute "data-windowed-list-index"
