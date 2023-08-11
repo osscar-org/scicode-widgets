@@ -14,21 +14,18 @@
 # ---
 
 # +
-from ipywidgets import Label
+from ipywidgets import Text
 
 import scwidgets
 from scwidgets import CueBox
 
+scwidgets.get_css_style()
 # -
 
-scwidgets.get_css_style()
+# Test 1:
+# -------
+# Check if CueBox shows cue when changed
 
-widget1 = Label("Text")
-cued_widget1 = CueBox(widget1)
-cued_widget1
-
-widget2 = Label("Text")
-cued_widget2 = CueBox(widget2)
-cued_widget2
-
-widget2.value = "Changed Text"
+text_input1 = Text("Text")
+cued_text_input1 = CueBox(text_input1, cued=False)
+cued_text_input1

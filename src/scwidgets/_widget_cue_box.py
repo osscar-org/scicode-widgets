@@ -19,9 +19,11 @@ class CueBox(Box):
         The widget to wrap the box around to give a visual cue, once :param
         traits_to_observe: has changed
         If None, then the :param widget_to_cue: is set to :param widget_to_observe:.
+    :param cued:
+        Specifies if it is cued on initialization
     :param css_syle:
-        - **initialization**: the css style of the box during initialization
-        - **on_trait_changed**: the css style that is added when :param
+        - **base**: the css style of the box during initialization
+        - **cue**: the css style that is added when :param
           traits_to_observe: in widget :param widget_to_observe: changes.
           It is supposed to change the style of the box such that the user has a visual
           cue that :param widget_to_cue: has changed.
@@ -34,6 +36,7 @@ class CueBox(Box):
         widget_to_observe: Widget,
         traits_to_observe: Union[str, List[str], Sentinel, None] = "value",
         widget_to_cue: Optional[Widget] = None,
+        cued: bool = True,
         css_style: Optional[dict] = None,
         *args,
         **kwargs,
@@ -63,6 +66,10 @@ class CueBox(Box):
         )
         self.add_class(self._css_style["base"])
 
+        self._cued = cued
+        if cued:
+            self.add_class(self._css_style["cue"])
+
     @property
     def widget_to_observe(self):
         return self._widget_to_observe
@@ -75,11 +82,20 @@ class CueBox(Box):
     def widget_to_cue(self):
         return self._widget_to_cue
 
-    def _on_traits_to_observe_changed(self, change: dict):
-        self.add_class(self._css_style["cue"])
+    @property
+    def cued(self):
+        return self._cued
 
-    def remove_cue(self):
-        self.remove_class(self._css_style["cue"])
+    @cued.setter
+    def cued(self, cued: bool):
+        if cued:
+            self.add_class(self._css_style["cue"])
+        else:
+            self.remove_class(self._css_style["cue"])
+        self._cued = cued
+
+    def _on_traits_to_observe_changed(self, change: dict):
+        self.cued = True
 
 
 class SaveCueBox(CueBox):
@@ -93,6 +109,8 @@ class SaveCueBox(CueBox):
     :param traits_to_observe:
         The trait from the :param widget_to_observe: to observe if changed.
         Specify `traitlets.All` to observe all traits.
+    :param cued:
+        Specifies if it is cued on initialization
     :param widget_to_cue:
         The widget to wrap the box around to give a visual cue, once :param
         traits_to_observe: has changed
@@ -106,6 +124,7 @@ class SaveCueBox(CueBox):
         widget_to_observe: Widget,
         traits_to_observe: Union[str, List[str], Sentinel] = "value",
         widget_to_cue: Optional[Widget] = None,
+        cued: bool = True,
         *args,
         **kwargs,
     ):
@@ -131,6 +150,8 @@ class CheckCueBox(CueBox):
         The widget to wrap the box around to give a visual cue, once :param
         traits_to_observe: has changed
         If None, then the :param widget_to_cue: is set to :param widget_to_observe:.
+    :param cued:
+        Specifies if it is cued on initialization
 
     Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Box`.
     """
@@ -140,6 +161,7 @@ class CheckCueBox(CueBox):
         widget_to_observe: Widget,
         traits_to_observe: Union[str, List[str], Sentinel] = "value",
         widget_to_cue: Optional[Widget] = None,
+        cued: bool = True,
         *args,
         **kwargs,
     ):
@@ -165,6 +187,8 @@ class UpdateCueBox(CueBox):
         The widget to wrap the box around to give a visual cue, once :param
         traits_to_observe: has changed
         If None, then the :param widget_to_cue: is set to :param widget_to_observe:.
+    :param cued:
+        Specifies if it is cued on initialization
 
     Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Box`.
     """
@@ -174,6 +198,7 @@ class UpdateCueBox(CueBox):
         widget_to_observe: Widget,
         traits_to_observe: Union[str, List[str], Sentinel] = "value",
         widget_to_cue: Optional[Widget] = None,
+        cued: bool = True,
         *args,
         **kwargs,
     ):

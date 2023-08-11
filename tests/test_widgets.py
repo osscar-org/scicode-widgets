@@ -1,6 +1,4 @@
-import pytest
 import requests
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 
@@ -16,7 +14,14 @@ def test_notebook_running(notebook_service):
     assert response.status_code == 200
 
 
-def test_widget_cue_box(selenium_driver):
+CUE_BOX_CLASS_NAME = (
+    "lm-Widget.lm-Panel.jupyter-widgets.widget-container" ".widget-box.scwidget-cue-box"
+)
+BUTTON_CLASS_NAME = "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
+TEXT_INPUT_CLASS_NAME = "widget-input"
+
+
+def test_widgets(selenium_driver):
     """
     Basic test checks if button with description "Text" exists
 
@@ -29,41 +34,17 @@ def test_widget_cue_box(selenium_driver):
     nb_cells = driver.find_elements(
         By.CLASS_NAME, "lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell"
     )
+    # Test 1:
+    # -------
+    # Check if CueBox shows cue when changed
 
-    # Checks if the labels widget with value "Text" exists in cell 2
-    widget1 = nb_cells[2].find_element(
-        By.CLASS_NAME, "lm-Widget.jupyter-widgets.widget-inline-hbox.widget-label"
-    )
-    assert widget1.text == "Text"
+    # Checks if the labels widget with value "Text" exists in cell 1
+    text_input = nb_cells[1].find_element(By.CLASS_NAME, TEXT_INPUT_CLASS_NAME)
+    assert text_input.get_attribute("value") == "Text"
+    # some input that changes the widget
+    cue_box_widget = nb_cells[1].find_element(By.CLASS_NAME, CUE_BOX_CLASS_NAME)
 
-    # Checks if the labels widget with unchanged value has the correct css style
-    nb_cells[2].find_element(
-        By.CLASS_NAME,
-        "lm-Widget.lm-Panel.jupyter-widgets.widget-container"
-        ".widget-box.scwidget-cue-box.scwidget-cue-box",
-    )
-    # we assume error is raised because the widget should not be cued
-    with pytest.raises(NoSuchElementException, match=r".*Unable to locate element.*"):
-        nb_cells[2].find_element(
-            By.CLASS_NAME,
-            "lm-Widget.lm-Panel.jupyter-widgets.widget-container"
-            ".widget-box.scwidget-cue-box.scwidget-cue-box--cue",
-        )
-
-    # Checks if the labels widget with value "Cahnged Text" exists in cell 3
-    widget2 = nb_cells[3].find_element(
-        By.CLASS_NAME, "lm-Widget.jupyter-widgets.widget-inline-hbox.widget-label"
-    )
-    assert widget2.text == "Changed Text"
-
-    # Checks if the labels widget with changed value has the correct css style
-    nb_cells[3].find_element(
-        By.CLASS_NAME,
-        "lm-Widget.lm-Panel.jupyter-widgets.widget-container.widget-box"
-        ".scwidget-cue-box.scwidget-cue-box",
-    )
-    nb_cells[3].find_element(
-        By.CLASS_NAME,
-        "lm-Widget.lm-Panel.jupyter-widgets.widget-container.widget-box"
-        ".scwidget-cue-box.scwidget-cue-box--cue",
-    )
+    # Check if cue is added once text input is changed
+    text_input.send_keys("a")
+    assert text_input.get_attribute("value") == "Texta"
+    assert "scwidget-cue-box--cue" in cue_box_widget.get_attribute("class")
