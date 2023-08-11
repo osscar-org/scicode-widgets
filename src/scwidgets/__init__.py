@@ -6,8 +6,9 @@ import os
 from IPython.core.display import HTML
 
 from ._widget_cue_box import CheckCueBox, CueBox, SaveCueBox, UpdateCueBox
+from ._widget_reset_cue_button import ResetCueButton
 
-__all__ = ["CheckCueBox", "CueBox", "SaveCueBox", "UpdateCueBox"]
+__all__ = ["CheckCueBox", "CueBox", "SaveCueBox", "UpdateCueBox", "ResetCueButton"]
 
 
 def get_css_style() -> HTML:
