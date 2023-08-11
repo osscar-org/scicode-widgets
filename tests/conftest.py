@@ -4,9 +4,9 @@ import time
 from urllib.parse import urljoin
 
 import pytest
+import selenium.webdriver.support.expected_conditions as ec
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
 
@@ -60,9 +60,7 @@ def selenium_driver(notebook_service, selenium):
             for element in selenium.find_elements(By.CLASS_NAME, "lm-MenuBar-item")
             if element.text == "Run"
         ][0]
-        WebDriverWait(selenium, 10).until(
-            expected_conditions.element_to_be_clickable(run_menu_item)
-        )
+        WebDriverWait(selenium, 10).until(ec.element_to_be_clickable(run_menu_item))
 
         # the actions run all cells of the notebook
         run_all_cells = ActionChains(selenium)
@@ -79,7 +77,7 @@ def selenium_driver(notebook_service, selenium):
 
         # wait until everything has been run
         WebDriverWait(selenium, 10).until(
-            expected_conditions.text_to_be_present_in_element_attribute(
+            ec.text_to_be_present_in_element_attribute(
                 (By.CLASS_NAME, "jp-Notebook-ExecutionIndicator"), "data-status", "idle"
             )
         )
