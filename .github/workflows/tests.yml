@@ -28,3 +28,11 @@ jobs:
 
     - name: run Python tests
       run: tox -e tests
+
+    - name: run Python tests for coverage
+      run: tox -e coverage
+    - uses: codecov/codecov-action@v3
+      with:
+        files: coverage.xml
+        verbose: true
+
