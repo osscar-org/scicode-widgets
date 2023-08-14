@@ -30,6 +30,7 @@ classifiers = [
 ]
 dependencies = [
   "ipywidgets>=8.0.0",
+  "numpy",
 ]
 dynamic = ["version"]
 
