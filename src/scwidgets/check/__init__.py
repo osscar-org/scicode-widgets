@@ -6,10 +6,13 @@ from ._asserts import (
     assert_type,
 )
 from ._check import Check, ChecksLog
+from ._widget_check_registry import CheckableWidget, CheckRegistry
 
 __all__ = [
     "Check",
     "ChecksLog",
+    "CheckRegistry",
+    "CheckableWidget",
     "assert_shape",
     "assert_numpy_allclose",
     "assert_type",

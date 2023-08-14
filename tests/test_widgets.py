@@ -33,6 +33,7 @@ def cue_box_class_name(cue_box_name: str, cued: bool):
 
 
 BUTTON_CLASS_NAME = "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
+OUTPUT_CLASS_NAME = "lm-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-output"
 TEXT_INPUT_CLASS_NAME = "widget-input"
 
 
@@ -132,3 +133,108 @@ def test_widgets(selenium_driver):
     assert failing_reset_cue_button.is_enabled()
     cued_widgets = nb_cell.find_elements(By.CLASS_NAME, CUED_CUE_BOX_CLASS_NAME)
     assert len(cued_widgets) == 2
+
+
+def test_widget_check_registry(selenium_driver):
+    """
+    Basic test checks if button with description "Text" exists
+
+    :param selenium_driver: see conftest.py
+    """
+    driver = selenium_driver("tests/notebooks/widget_check_registry.ipynb")
+
+    # Each cell of the notebook, the cell number can be retrieved from the
+    # attribute "data-windowed-list-index"
+    nb_cells = driver.find_elements(
+        By.CLASS_NAME, "lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell"
+    )
+
+    # Test 1:
+    # -------
+    # Check if CheckRegistry
+
+    def test_button_clicks(
+        nb_cell,
+        assert_msg_check_all_widgets: str,
+        assert_msg_set_all_references: str,
+        assert_msg_set_all_references_and_check: str,
+    ):
+        """
+        clicks the check_all_widgets button, asserts that :param
+        assert_msg_check_all_widgets: is in output.  clicks the set_all_references
+        button, asserts that :param assert_msg_set_all_references: is in output.  then
+        clicks again the check_all_widgets button, asserts that :param
+        assert_msg_check_all_widgets: is in output.
+
+        :param assert_msg_check_all_widgets:
+            output message after the button click on "Check all widgets"
+        :param assert_msg_set_all_references:
+            output message after the button click on "Check all widgets"
+        :param assert_msg_set_all_references_and_check:
+            output message after the button click on "Check all widgets"
+
+        """
+
+        buttons = nb_cell.find_elements(By.CLASS_NAME, BUTTON_CLASS_NAME)
+        set_all_references_button = buttons[0]
+        assert set_all_references_button.get_property("title") == "Set all references"
+        check_all_widgets_button = buttons[1]
+        assert check_all_widgets_button.get_property("title") == "Check all widgets"
+
+        WebDriverWait(driver, 5).until(
+            expected_conditions.element_to_be_clickable(check_all_widgets_button)
+        ).click()
+        output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        assert assert_msg_check_all_widgets in output.text
+
+        WebDriverWait(driver, 5).until(
+            expected_conditions.element_to_be_clickable(set_all_references_button)
+        ).click()
+        output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        assert assert_msg_set_all_references in output.text
+
+        WebDriverWait(driver, 5).until(
+            expected_conditions.element_to_be_clickable(check_all_widgets_button)
+        ).click()
+        output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        assert assert_msg_set_all_references_and_check in output.text
+
+    # Test 1.1 use_fingerprint=False, failing=False, buggy=False
+    test_button_clicks(
+        nb_cells[3],
+        "Widget 1 all checks were successful.",
+        "Successful set all references.",
+        "Widget 1 all checks were successful.",
+    )
+
+    # Test 1.2 use_fingerprint=True, failing=False, buggy=False
+    test_button_clicks(
+        nb_cells[4],
+        "Widget 1 all checks were successful.",
+        "Successful set all references.",
+        "Widget 1 all checks were successful.",
+    )
+
+    # Test 1.3 use_fingerprint=False, failing=False, buggy=False
+    test_button_clicks(
+        nb_cells[5],
+        "Widget 1 not all checks were successful",
+        "Successful set all references.",
+        "Widget 1 all checks were successful.",
+    )
+
+    # Test 1.4 use_fingerprint=False, failing=False, buggy=False
+    test_button_clicks(
+        nb_cells[6],
+        "Widget 1 not all checks were successful",
+        "Successful set all references.",
+        "Widget 1 all checks were successful.",
+    )
+
+    # Test 1.5 use_fingerprint=False, failing=False, buggy=True
+    test_button_clicks(
+        nb_cells[7],
+        "Widget 1 raised error",
+        "NameError: name 'bug' is not defined",
+        "Widget 1 raised error",
+    )
