@@ -5,6 +5,8 @@ import pytest
 
 from scwidgets.check import (
     Check,
+    CheckableWidget,
+    CheckRegistry,
     ChecksLog,
     assert_numpy_allclose,
     assert_numpy_floating_sub_dtype,
@@ -227,3 +229,140 @@ class TestCheck:
                 outputs_references=[(np.array([2]), "invalid")],
                 fingerprint=None,
             ).check_function()
+
+
+def mock_checkable_widget(check_registry):
+    class MockCheckableWidget(CheckableWidget):
+        def __init__(self, check_registry):
+            self.results = []
+            super().__init__(check_registry)
+
+        def compute_output_to_check(self):
+            pass
+
+        def handle_checks_result(self, result):
+            self.results.append(result)
+
+    return MockCheckableWidget(check_registry)
+
+
+class TestCheckRegistry:
+    @pytest.mark.parametrize(
+        "checks",
+        [
+            [
+                single_param_check(use_fingerprint=False, failing=False),
+                single_param_check(use_fingerprint=True, failing=False),
+            ],
+            [multi_param_check(use_fingerprint=False, failing=False)],
+            [single_param_check(use_fingerprint=True, failing=False)],
+            [multi_param_check(use_fingerprint=True, failing=False)],
+        ],
+    )
+    def test_successful_check_all_widgets(self, checks):
+        check_registry = CheckRegistry()
+        checkable_widget = mock_checkable_widget(check_registry)
+
+        for check in checks:
+            checkable_widget.compute_output_to_check = check.function_to_check
+            checkable_widget.add_check(
+                check.asserts,
+                check.inputs_parameters,
+                check.outputs_references,
+                check.fingerprint,
+            )
+
+        widgets_results = check_registry.check_all_widgets()
+        nb_conducted_asserts = 0
+        for result in widgets_results.values():
+            assert isinstance(result, ChecksLog)
+            assert result.successful
+            nb_conducted_asserts += len(result.assert_results)
+        assert nb_conducted_asserts == checkable_widget.nb_conducted_asserts
+
+        assert len(checkable_widget.results) == len(checks)
+        nb_conducted_asserts = 0
+        for result in checkable_widget.results:
+            assert isinstance(result, ChecksLog)
+            assert result.successful
+            nb_conducted_asserts += len(result.assert_results)
+        assert nb_conducted_asserts == checkable_widget.nb_conducted_asserts
+
+    @pytest.mark.parametrize(
+        "checks",
+        [
+            [
+                single_param_check(use_fingerprint=False, failing=True),
+                single_param_check(use_fingerprint=True, failing=True),
+            ],
+            [multi_param_check(use_fingerprint=False, failing=True)],
+            [single_param_check(use_fingerprint=True, failing=True)],
+            [multi_param_check(use_fingerprint=True, failing=True)],
+        ],
+    )
+    def test_compute_and_set_all_references(self, checks):
+        check_registry = CheckRegistry()
+        checkable_widget = mock_checkable_widget(check_registry)
+
+        for check in checks:
+            checkable_widget.compute_output_to_check = check.function_to_check
+            checkable_widget.add_check(
+                check.asserts,
+                check.inputs_parameters,
+                check.outputs_references,
+                check.fingerprint,
+            )
+        # sets all check outputs references to the correct reference
+        check_registry.compute_and_set_all_references()
+
+        widgets_results = check_registry.check_all_widgets()
+
+        nb_conducted_asserts = 0
+        for result in widgets_results.values():
+            assert isinstance(result, ChecksLog)
+            assert result.successful
+            nb_conducted_asserts += len(result.assert_results)
+        assert nb_conducted_asserts == checkable_widget.nb_conducted_asserts
+
+        nb_conducted_asserts = 0
+        assert len(checkable_widget.results) == len(checks)
+        for result in checkable_widget.results:
+            assert isinstance(result, ChecksLog)
+            assert result.successful
+            nb_conducted_asserts += len(result.assert_results)
+        assert nb_conducted_asserts == checkable_widget.nb_conducted_asserts
+
+    @pytest.mark.parametrize(
+        "checks",
+        [
+            [
+                single_param_check(use_fingerprint=False, failing=True),
+                single_param_check(use_fingerprint=True, failing=True),
+            ],
+            [multi_param_check(use_fingerprint=False, failing=True)],
+            [single_param_check(use_fingerprint=True, failing=True)],
+            [multi_param_check(use_fingerprint=True, failing=True)],
+        ],
+    )
+    def test_failing_check_all_widgets(self, checks):
+        check_registry = CheckRegistry()
+        checkable_widget = mock_checkable_widget(check_registry)
+
+        for check in checks:
+            checkable_widget.compute_output_to_check = check.function_to_check
+            checkable_widget.add_check(
+                check.asserts,
+                check.inputs_parameters,
+                check.outputs_references,
+                check.fingerprint,
+            )
+
+        widgets_results = check_registry.check_all_widgets()
+        for result in widgets_results.values():
+            assert isinstance(result, ChecksLog)
+            assert not (result.successful)
+
+        assert len(checkable_widget.results) == len(checks)
+        for result in checkable_widget.results:
+            assert isinstance(result, ChecksLog)
+            assert not (result.successful)
