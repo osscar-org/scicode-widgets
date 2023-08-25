@@ -94,8 +94,8 @@ def firefox_options(firefox_options):
     """
     Options that are passed to firefox when running `pytest --driver Firefox`
     """
-    # this option ensures that we can run on a machine without display
-    options = os.environ.get("SELENIUM_FIREFOX_DRIVER_OPTIONS")
-    if options is not None:
-        firefox_options.add_argument(options)
+    options = os.environ.get("SELENIUM_FIREFOX_DRIVER_ARGS", "")
+    if options != "":
+        for option in options.split(" "):
+            firefox_options.add_argument(option)
     return firefox_options
