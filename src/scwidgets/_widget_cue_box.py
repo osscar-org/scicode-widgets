@@ -132,7 +132,9 @@ class SaveCueBox(CueBox):
             "base": "scwidget-save-cue-box",
             "cue": "scwidget-save-cue-box--cue",
         }
-        super().__init__(widget_to_observe, traits_to_observe, widget_to_cue, css_style)
+        super().__init__(
+            widget_to_observe, traits_to_observe, widget_to_cue, cued, css_style
+        )
 
 
 class CheckCueBox(CueBox):
@@ -169,7 +171,9 @@ class CheckCueBox(CueBox):
             "base": "scwidget-check-cue-box",
             "cue": "scwidget-check-cue-box--cue",
         }
-        super().__init__(widget_to_observe, traits_to_observe, widget_to_cue, css_style)
+        super().__init__(
+            widget_to_observe, traits_to_observe, widget_to_cue, cued, css_style
+        )
 
 
 class UpdateCueBox(CueBox):
@@ -206,4 +210,6 @@ class UpdateCueBox(CueBox):
             "base": "scwidget-update-cue-box",
             "cue": "scwidget-update-cue-box--cue",
         }
-        super().__init__(widget_to_observe, traits_to_observe, widget_to_cue, css_style)
+        super().__init__(
+            widget_to_observe, traits_to_observe, widget_to_cue, cued, css_style
+        )

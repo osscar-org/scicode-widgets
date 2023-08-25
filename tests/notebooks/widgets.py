@@ -17,7 +17,7 @@
 from ipywidgets import Text, VBox
 
 import scwidgets
-from scwidgets import CueBox, ResetCueButton
+from scwidgets import CheckCueBox, CueBox, ResetCueButton, SaveCueBox, UpdateCueBox
 
 scwidgets.get_css_style()
 # -
@@ -26,9 +26,27 @@ scwidgets.get_css_style()
 # -------
 # Check if CueBox shows cue when changed
 
-text_input1 = Text("Text")
-cued_text_input1 = CueBox(text_input1, cued=False)
-cued_text_input1
+
+def test_1(CueBoxClass, cued):
+    text_input = Text("Text")
+    cued_text_input = CueBoxClass(text_input, cued=cued)
+    return cued_text_input
+
+
+# Test 1.1
+test_1(CueBox, True)
+
+# Test 1.2
+test_1(CueBox, False)
+
+# Test 1.3
+test_1(SaveCueBox, False)
+
+# Test 1.4
+test_1(CheckCueBox, False)
+
+# Test 1.5
+test_1(UpdateCueBox, False)
 
 # Test 2:
 # -------
