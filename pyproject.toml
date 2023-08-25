@@ -39,3 +39,6 @@ readme = {file = ["README.rst"]}
 
 [tool.setuptools.package-data]
 scwidgets = ["css/widgets.css"]
+
+[tool.isort]
+profile = "black"
