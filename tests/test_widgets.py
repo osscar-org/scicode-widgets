@@ -1,3 +1,5 @@
+import time
+
 import requests
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
@@ -26,8 +28,21 @@ CUED_CUE_BOX_CLASS_NAME = (
 )
 
 
+CODE_MIRROR_CLASS_NAME = "CodeMirror-code"
+
+
 def cue_box_class_name(cue_box_name: str, cued: bool):
     class_name = CUED_CUE_BOX_CLASS_NAME if cued else CUE_BOX_CLASS_NAME
+    if cue_box_name is None:
+        return class_name
+    return class_name.replace("cue-box", f"{cue_box_name}-cue-box")
+
+
+def cue_class_name(cue_box_name: str, cued: bool):
+    if cued:
+        class_name = "scwidget-cue-box--cue"
+    else:
+        class_name = "scwidget-cue-box"
     if cue_box_name is None:
         return class_name
     return class_name.replace("cue-box", f"{cue_box_name}-cue-box")
@@ -248,4 +263,95 @@ def test_widget_check_registry(selenium_driver):
         "Widget 1 raised error",
         "NameError: name 'bug' is not defined",
         "Widget 1 raised error",
+    )
+
+
+def test_widgets_code(selenium_driver):
+    """
+    Tests the widget of the module code
+
+    :param selenium_driver: see conftest.py
+    """
+    driver = selenium_driver("tests/notebooks/widget_code_demo.ipynb")
+
+    # Each cell of the notebook, the cell number can be retrieved from the
+    # attribute "data-windowed-list-index"
+    nb_cells = driver.find_elements(
+        By.CLASS_NAME, "lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell"
+    )
+    # Test 1:
+    # -------
+    WebDriverWait(driver, 5).until(
+        expected_conditions.text_to_be_present_in_element_attribute(
+            (By.CLASS_NAME, BUTTON_CLASS_NAME),
+            "title",
+            "Check Code",
+        )
+    )
+
+    def test_code_demo(nb_cell, expected_output_on_update, expected_output_on_check):
+        buttons = nb_cell.find_elements(By.CLASS_NAME, BUTTON_CLASS_NAME)
+        assert len(buttons) == 2
+        check_button = buttons[0]
+        assert check_button.text == "Check Code"
+        assert check_button.is_enabled()
+        update_button = buttons[1]
+        assert update_button.text == "Run Code"
+        assert update_button.is_enabled()
+
+        check_code_input = nb_cell.find_element(
+            By.CLASS_NAME, cue_box_class_name("check", False)
+        )
+        assert "def function_to_check" in check_code_input.text
+        assert cue_class_name("check", True) in check_code_input.get_attribute("class")
+
+        update_code_input = nb_cell.find_element(
+            By.CLASS_NAME, cue_box_class_name("update", False)
+        )
+        assert "def function_to_check" in update_code_input.text
+        assert cue_class_name("update", True) in update_code_input.get_attribute(
+            "class"
+        )
+
+        # test if click results in correct output and disabled buttons
+        update_button.click()
+        time.sleep(0.1)
+        assert not (
+            cue_class_name("update", True) in update_code_input.get_attribute("class")
+        )
+        assert update_button.is_enabled()
+
+        check_button.click()
+        time.sleep(0.1)
+        assert not (
+            cue_class_name("check", True) in check_code_input.get_attribute("class")
+        )
+        assert check_button.is_enabled()
+
+        # expected_conditions.text_to_be_present_in_element does not work for code input
+        code_input = nb_cell.find_elements(By.CLASS_NAME, "CodeMirror-lines")
+
+        code_input = nb_cell.find_elements(By.CLASS_NAME, CODE_MIRROR_CLASS_NAME)[2]
+        assert "return" in code_input.text
+        # Issue #22
+        #   sending keys to code widget does not work at the moment
+        #   once this works please add this code
+        # code_input.send_keys("a=5\n")
+        # time.sleep(0.1)
+        # assert (cue_class_name("check", True) in
+        #               check_code_input.get_attribute("class"))
+        # assert (cue_class_name("update", True) in
+        #                update_code_input.get_attribute("class"))
+        # assert check_button.is_enabled()
+        # assert check_button.is_enabled()
+
+    # Test 1.1
+    test_code_demo(nb_cells[3], "Output", "All checks were successful")
+    # Test 1.2
+    test_code_demo(nb_cells[4], "Output", "Some checks failed")
+    # Test 1.3
+    test_code_demo(
+        nb_cells[5],
+        "NameError: name 'bug' is not defined",
+        "NameError: name 'bug' is not defined",
     )
