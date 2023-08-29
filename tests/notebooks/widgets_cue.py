@@ -17,7 +17,7 @@
 from ipywidgets import Text, VBox
 
 import scwidgets
-from scwidgets import CheckCueBox, CueBox, ResetCueButton, SaveCueBox, UpdateCueBox
+from scwidgets.cue import CheckCueBox, CueBox, ResetCueButton, SaveCueBox, UpdateCueBox
 
 scwidgets.get_css_style()
 # -
