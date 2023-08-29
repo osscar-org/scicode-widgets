@@ -20,16 +20,16 @@ import sys
 import scwidgets
 from scwidgets.check import CheckRegistry
 
-sys.path.insert(0, os.path.abspath(".."))
-from test_check import mock_checkable_widget  # noqa: E402
-from test_check import single_param_check  # noqa: E402
+sys.path.insert(0, os.path.abspath("../.."))
+from tests.test_check import mock_checkable_widget  # noqa: E402
+from tests.test_check import single_param_check  # noqa: E402
 
 # -
 
 scwidgets.get_css_style()
 
 
-def test_check_registry(use_fingerprint, failing, buggy):
+def create_check_registry(use_fingerprint, failing, buggy):
     check_registry = CheckRegistry()
     checkable_widget = mock_checkable_widget(check_registry)
 
@@ -52,16 +52,16 @@ def test_check_registry(use_fingerprint, failing, buggy):
 # Test if CheckRegistry shows correct output
 
 # Test 1.1
-test_check_registry(use_fingerprint=False, failing=False, buggy=False)
+create_check_registry(use_fingerprint=False, failing=False, buggy=False)
 
 # Test 1.2
-test_check_registry(use_fingerprint=True, failing=False, buggy=False)
+create_check_registry(use_fingerprint=True, failing=False, buggy=False)
 
 # Test 1.3
-test_check_registry(use_fingerprint=False, failing=True, buggy=False)
+create_check_registry(use_fingerprint=False, failing=True, buggy=False)
 
 # Test 1.4
-test_check_registry(use_fingerprint=True, failing=True, buggy=False)
+create_check_registry(use_fingerprint=True, failing=True, buggy=False)
 
 # Test 1.5
-test_check_registry(use_fingerprint=False, failing=False, buggy=True)
+create_check_registry(use_fingerprint=False, failing=False, buggy=True)
