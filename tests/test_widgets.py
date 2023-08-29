@@ -37,13 +37,13 @@ OUTPUT_CLASS_NAME = "lm-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-outp
 TEXT_INPUT_CLASS_NAME = "widget-input"
 
 
-def test_widgets(selenium_driver):
+def test_widgets_cue(selenium_driver):
     """
     Basic test checks if button with description "Text" exists
 
     :param selenium_driver: see conftest.py
     """
-    driver = selenium_driver("tests/notebooks/widgets.ipynb")
+    driver = selenium_driver("tests/notebooks/widgets_cue.ipynb")
 
     # Each cell of the notebook, the cell number can be retrieved from the
     # attribute "data-windowed-list-index"
