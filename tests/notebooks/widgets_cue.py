@@ -27,26 +27,26 @@ scwidgets.get_css_style()
 # Check if CueBox shows cue when changed
 
 
-def test_1(CueBoxClass, cued):
+def create_cue_box(CueBoxClass, cued):
     text_input = Text("Text")
     cued_text_input = CueBoxClass(text_input, cued=cued)
     return cued_text_input
 
 
 # Test 1.1
-test_1(CueBox, True)
+create_cue_box(CueBox, True)
 
 # Test 1.2
-test_1(CueBox, False)
+create_cue_box(CueBox, False)
 
 # Test 1.3
-test_1(SaveCueBox, False)
+create_cue_box(SaveCueBox, False)
 
 # Test 1.4
-test_1(CheckCueBox, False)
+create_cue_box(CheckCueBox, False)
 
 # Test 1.5
-test_1(UpdateCueBox, False)
+create_cue_box(UpdateCueBox, False)
 
 # Test 2:
 # -------
