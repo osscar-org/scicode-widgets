@@ -4,7 +4,7 @@ import time
 from urllib.parse import urljoin
 
 import pytest
-from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
@@ -56,28 +56,56 @@ def selenium_driver(notebook_service, selenium):
         window_height = 600
         selenium.set_window_size(window_width, window_height)
 
-        # wait until menu item "Run" is available
-        run_menu_item = [
-            element
-            for element in selenium.find_elements(By.CLASS_NAME, "lm-MenuBar-item")
-            if element.text == "Run"
-        ][0]
-        WebDriverWait(selenium, 10).until(
-            expected_conditions.element_to_be_clickable(run_menu_item)
-        )
+        # the code below imitates this code which cannot find the button
+        # I think it is because the button is hidden by another element
+        # WebDriverWait(driver, 5).until(
+        #    expected_conditions.text_to_be_present_in_element_attribute(
+        #        (By.CLASS_NAME, "jp-ToolbarButtonComponent.jp-mod-minimal.jp-Button"),
+        #        "title",
+        #        "Restart the kernel and run all cells"
+        #    )
+        # )
+        restart_kernel_button = None
+        waiting_time = 10
+        start = time.time()
+        while restart_kernel_button is None and time.time() - start < waiting_time:
+            # does not work for older notebook versions
+            buttons = selenium.find_elements(
+                By.CLASS_NAME, "jp-ToolbarButtonComponent.jp-mod-minimal.jp-Button"
+            )
+            for button in buttons:
+                try:
+                    title = button.get_attribute("title")
+                    if title == "Restart the kernel and run all cells":
+                        restart_kernel_button = button
+                except StaleElementReferenceException:
+                    # element is not ready, go sleep
+                    continue
+            time.sleep(0.1)
+        if restart_kernel_button is None:
+            raise ValueError('"Restart the kernel and run all cells" button not found.')
+        restart_kernel_button.click()
 
-        # the actions run all cells of the notebook
-        run_all_cells = ActionChains(selenium)
-        # waits till notebook fully loaded because clickable is not enough
-        run_all_cells.pause(5)
-        # moves the cursor to the "Run" menu item
-        run_all_cells.move_to_element(run_menu_item)
-        run_all_cells.click()
-        run_all_cells.pause(2)  # waits till submenu opens
-        # moves the cursor to the "Run All Cells" submenu item
-        run_all_cells.move_by_offset(0, 235.0)
-        run_all_cells.click()
-        run_all_cells.perform()
+        # the code below imitates this code which cannot find the button
+        # I think it is because the button is hidden by another element
+        # WebDriverWait(driver, 5).until(
+        #    expected_conditions.text_to_be_present_in_element(
+        #        (By.CLASS_NAME, "jp-Dialog-buttonLabel"),
+        #        "Restart"
+        #    )
+        # )
+        restart_button = None
+        waiting_time = 10
+        start = time.time()
+        while restart_button is None and time.time() - start < waiting_time:
+            buttons = selenium.find_elements(By.CLASS_NAME, "jp-Dialog-buttonLabel")
+            for button in buttons:
+                if button.text == "Restart":
+                    restart_button = button
+            time.sleep(0.1)
+        if restart_button is None:
+            raise ValueError('"Restart" button not found.')
+        restart_button.click()
 
         # wait until everything has been run
         WebDriverWait(selenium, 10).until(
