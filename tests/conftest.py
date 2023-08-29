@@ -33,6 +33,8 @@ def notebook_service():
     yield url, token
 
     # teardown juypter notebook
+    os.system(f"jupyter notebook stop {port}")
+    time.sleep(2)
     os.system(f"kill {jupyter_process.pid}")
 
 
