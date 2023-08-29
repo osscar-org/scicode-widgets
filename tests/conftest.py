@@ -50,8 +50,8 @@ def selenium_driver(notebook_service, selenium):
         url_with_token = urljoin(url, f"tree/{nb_path}?token={token}")
         selenium.get(f"{url_with_token}")
         selenium.implicitly_wait(10)
-        window_width = 800
-        window_height = 600
+        window_width = 1280
+        window_height = 1024
         selenium.set_window_size(window_width, window_height)
 
         # wait until menu item "Run" is available
