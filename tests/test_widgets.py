@@ -56,14 +56,24 @@ def test_widgets(selenium_driver):
 
     # Checks if the labels widget with value "Text" exists in cell 1
     def test_cue_box_cued(nb_cell, cue_box_name, cued_on_init):
+        # we wait till cue boxs have been already loaded
+        WebDriverWait(driver, 5).until(
+            expected_conditions.text_to_be_present_in_element_attribute(
+                (By.CLASS_NAME, cue_box_class_name(cue_box_name, False)),
+                "class",
+                cue_box_class_name(cue_box_name, False).replace(".", " "),
+            )
+        )
+        # we select the specific one in the nb_cell
         cue_box_widget = nb_cell.find_element(
             By.CLASS_NAME, cue_box_class_name(cue_box_name, False)
         )
+
         # because cued widgets can be found by the base class name (noncued)
         # we check here that the class string is strictly equal
-        assert cue_box_class_name(
-            cue_box_name, cued_on_init
-        ) == cue_box_widget.get_attribute("class").replace(" ", ".")
+        assert cue_box_class_name(cue_box_name, cued_on_init).replace(
+            ".", " "
+        ) == cue_box_widget.get_attribute("class")
 
         text_input = nb_cell.find_element(By.CLASS_NAME, TEXT_INPUT_CLASS_NAME)
         assert text_input.get_attribute("value") == "Text"
@@ -72,9 +82,9 @@ def test_widgets(selenium_driver):
         # Check if cue is added once text input is changed
         text_input.send_keys("a")
         assert text_input.get_attribute("value") == "Texta"
-        assert cue_box_class_name(cue_box_name, True) == cue_box_widget.get_attribute(
-            "class"
-        ).replace(" ", ".")
+        assert cue_box_class_name(cue_box_name, True).replace(
+            ".", " "
+        ) == cue_box_widget.get_attribute("class")
 
     # Test 1.1
     test_cue_box_cued(nb_cells[2], None, True)
