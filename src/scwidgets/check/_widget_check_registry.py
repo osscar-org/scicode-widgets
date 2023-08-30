@@ -19,9 +19,10 @@ class CheckableWidget:
         the check registry that registers the checks for this widget
     """
 
-    def __init__(self, check_registry: CheckRegistry):
+    def __init__(self, check_registry: Optional[CheckRegistry]):
         self._check_registry = check_registry
-        self._check_registry.register_widget(self)
+        if self._check_registry is not None:
+            self._check_registry.register_widget(self)
 
     def compute_output_to_check(
         self, *input_args: Check.FunInParamT
@@ -48,7 +49,7 @@ class CheckableWidget:
             Callable[[Check.FunOutParamsT], Check.FingerprintT]
         ] = None,
     ):
-        if not (hasattr(self, "_check_registry")) or self._check_registry is None:
+        if self._check_registry is None:
             raise ValueError(
                 "No check registry given on initialization, no checks can be added"
             )
@@ -58,10 +59,27 @@ class CheckableWidget:
         )
 
     def compute_and_set_references(self):
+        if self._check_registry is None:
+            raise ValueError(
+                "No check registry given on initialization, "
+                "compute_and_set_references cannot be used"
+            )
+
         self._check_registry.compute_and_set_references(self)
+
+    def check(self) -> Union[ChecksLog, Exception]:
+        if self._check_registry is None:
+            raise ValueError(
+                "No check registry given on initialization, " "check cannot be used"
+            )
+        return self._check_registry.check_widget(self)
 
     @property
     def checks(self):
+        if self._check_registry is None:
+            raise ValueError(
+                "No check registry given on initialization, " "no checks to access"
+            )
         return self._check_registry._checks[self]
 
     @property
@@ -70,6 +88,10 @@ class CheckableWidget:
 
     @property
     def nb_conducted_asserts(self):
+        if self._check_registry is None:
+            raise ValueError(
+                "No check registry given on initialization, " "no checks to access"
+            )
         return self._check_registry.nb_conducted_asserts(self)
 
 
@@ -172,7 +194,7 @@ class CheckRegistry(VBox):
         for widget in self._checks.keys():
             self.compute_and_set_references(widget)
 
-    def check_widget(self, widget: Widget) -> ChecksLog:
+    def check_widget(self, widget: Widget) -> Union[ChecksLog, Exception]:
         results = ChecksLog()
         try:
             for check in self._checks[widget]:
@@ -181,7 +203,7 @@ class CheckRegistry(VBox):
                 widget.handle_checks_result(result)
         except Exception as exception:
             widget.handle_checks_result(exception)
-            raise exception
+            return exception
         return results
 
     def check_all_widgets(

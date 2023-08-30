@@ -31,19 +31,11 @@ scwidgets.get_css_style()
 
 def create_check_registry(use_fingerprint, failing, buggy):
     check_registry = CheckRegistry()
-    checkable_widget = mock_checkable_widget(check_registry)
 
     check = single_param_check(
         use_fingerprint=use_fingerprint, failing=failing, buggy=buggy
     )
-    checkable_widget.compute_output_to_check = check.function_to_check
-
-    checkable_widget.add_check(
-        check.asserts,
-        check.inputs_parameters,
-        check.outputs_references,
-        check.fingerprint,
-    )
+    _ = mock_checkable_widget(check_registry, check.function_to_check, [check])
     return check_registry
 
 
