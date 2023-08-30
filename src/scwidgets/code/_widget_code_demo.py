@@ -26,7 +26,7 @@ class CodeDemo(VBox, CheckableWidget):
 
     def __init__(
         self,
-        code: Union[CodeInput, types.FunctionType],  # TODO support of FunctionType
+        code: Union[CodeInput, types.FunctionType],
         check_registry: Optional[CheckRegistry] = None,
         parameters: Optional[Dict[str, Check.FunInParamT]] = None,
         *args,
