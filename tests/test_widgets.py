@@ -211,6 +211,7 @@ def test_widget_check_registry(selenium_driver):
         WebDriverWait(driver, 5).until(
             expected_conditions.element_to_be_clickable(check_all_widgets_button)
         ).click()
+        time.sleep(0.1)
         outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
         assert (
             sum(
@@ -225,6 +226,7 @@ def test_widget_check_registry(selenium_driver):
         WebDriverWait(driver, 5).until(
             expected_conditions.element_to_be_clickable(set_all_references_button)
         ).click()
+        time.sleep(0.1)
         outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
         assert (
             sum(
@@ -239,6 +241,7 @@ def test_widget_check_registry(selenium_driver):
         WebDriverWait(driver, 5).until(
             expected_conditions.element_to_be_clickable(check_all_widgets_button)
         ).click()
+        time.sleep(0.1)
         outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
         assert (
             sum(
