@@ -388,3 +388,8 @@ def test_widgets_code(selenium_driver):
         ["SomeText", "NameError: name 'bug' is not defined"],
         ["NameError: name 'bug' is not defined"],
     )
+    # TODO Test 2
+    # test only update, no check
+
+    # TODO Test 3
+    # test only checks, no run

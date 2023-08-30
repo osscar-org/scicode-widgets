@@ -91,9 +91,9 @@ class CodeDemo(VBox, CheckableWidget):
         if self._check_button is None and self._update_button is None:
             self._buttons_panel = HBox([])
         elif self._check_button is None:
-            self._buttons_panel = HBox([self._update_button])
+            self._buttons_panel = HBox([self._cue_update_button])
         elif self._update_button is None:
-            self._buttons_panel = HBox([self._check_button])
+            self._buttons_panel = HBox([self._cue_check_button])
         else:
             self._buttons_panel = HBox(
                 [self._cue_check_button, self._cue_update_button]
