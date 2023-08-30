@@ -107,6 +107,7 @@ class CodeDemo(VBox, CheckableWidget):
         return deepcopy(self._parameters)
 
     def _on_click_update_action(self) -> bool:
+        self._output.clear_output()
         try:
             if self._parameters is None:
                 raise ValueError(
@@ -114,29 +115,30 @@ class CodeDemo(VBox, CheckableWidget):
                     "this is an invalid state and must be a bug in the initalization "
                     "of the widget."
                 )
-            result = self.run_code(**self._parameters)
-            self._output_result(["Output:", str(result)])
+            self._on_action_run_code(**self._parameters)
             return True
         except Exception as e:
-            self._output_result([e])
+            self._output_results([e])
             return True
 
     def _on_click_check_action(self) -> bool:
+        self._output.clear_output()
         try:
-            result = self.check()
+            self.check()
         except Exception as e:
-            result = e
-        self.handle_checks_result(result)
+            with self._output:
+                if python_version() >= "3.11":
+                    e.add_note("This is most likely not related to your code input.")
+                raise e
         return True
 
     def compute_output_to_check(self, *args, **kwargs) -> Check.FunOutParamsT:
         return self.run_code(*args, **kwargs)
 
     def handle_checks_result(self, result: Union[ChecksLog, Exception]):
-        self._output_result([result])
+        self._output_results([result])
 
-    def _output_result(self, results: List[Union[str, ChecksLog, Exception]]):
-        self._output.clear_output()
+    def _output_results(self, results: List[Union[str, ChecksLog, Exception]]):
         with self._output:
             for result in results:
                 if isinstance(result, Exception):
@@ -149,6 +151,22 @@ class CodeDemo(VBox, CheckableWidget):
                         print(result.message())
                 else:
                     print(result)
+
+    def _on_action_run_code(self, *args, **kwargs):
+        # runs code and displays output
+        with self._output:
+            try:
+                result = self._code.run(*args, **kwargs)
+                print("Output:")
+                print(result)
+            except CodeValidationError as e:
+                raise e
+            except Exception as e:
+                # we give the student the additional information that this is most
+                # likely not because of his code
+                if python_version() >= "3.11":
+                    e.add_note("This is most likely not related to your code input.")
+                raise e
 
     def run_code(self, *args, **kwargs) -> Check.FunOutParamsT:
         try:
