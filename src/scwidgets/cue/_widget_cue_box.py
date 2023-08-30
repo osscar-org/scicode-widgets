@@ -8,10 +8,11 @@ class CueBox(VBox):
     """
     A box around the widget :param widget_to_cue: that adds a visual cue defined in the
     :param css_style: when the trait :param traits_to_observe: in the widget :param
-    widget_to_observe: changes.
+    widget_to_observe: changes. If the :param widget_to_observe: is a list then for each
+    each widget is observed.
 
     :param widget_to_observe:
-        The widget to observa if the :param traits_to_observe: has changed.
+        The widget to observe if the :param traits_to_observe: has changed.
     :param traits_to_observe:
         The trait from the :param widget_to_observe: to observe if changed.
         Specify `traitlets.All` to observe all traits.
@@ -33,18 +34,30 @@ class CueBox(VBox):
 
     def __init__(
         self,
-        widget_to_observe: Widget,
-        traits_to_observe: Union[str, List[str], Sentinel, None] = "value",
+        widget_to_observe: Union[List[Widget], Widget],
+        traits_to_observe: Union[str, List[str], List[List[str]], Sentinel] = "value",
         widget_to_cue: Optional[Widget] = None,
         cued: bool = True,
         css_style: Optional[dict] = None,
         *args,
         **kwargs,
     ):
+        if widget_to_cue is None and isinstance(widget_to_observe, list):
+            raise ValueError(
+                "When widget_to_observe is a list, widget_to_cue must be"
+                " given, since it is ambiguous which widget to cue."
+            )
+        if isinstance(widget_to_observe, list) and isinstance(traits_to_observe, list):
+            if len(widget_to_observe) != len(traits_to_observe):
+                raise ValueError(
+                    "When widget_to_observe and traits_to_observe are "
+                    "lists, they must have the same length"
+                )
+
         self._widget_to_observe = widget_to_observe
         self._traits_to_observe = traits_to_observe
 
-        if widget_to_cue is None:
+        if widget_to_cue is None and not (isinstance(self._widget_to_observe, list)):
             self._widget_to_cue = widget_to_observe
         else:
             self._widget_to_cue = widget_to_cue
@@ -60,10 +73,21 @@ class CueBox(VBox):
             self._css_style = css_style
 
         super().__init__([self._widget_to_cue], *args, **kwargs)
+        if isinstance(self._widget_to_observe, list):
+            for i, widget in enumerate(self._widget_to_observe):
+                if isinstance(self._traits_to_observe, list):
+                    widget.observe(
+                        self._on_traits_to_observe_changed, self._traits_to_observe[i]
+                    )
+                else:
+                    widget.observe(
+                        self._on_traits_to_observe_changed, self._traits_to_observe
+                    )
+        else:
+            self._widget_to_observe.observe(
+                self._on_traits_to_observe_changed, traits_to_observe
+            )
 
-        self._widget_to_observe.observe(
-            self._on_traits_to_observe_changed, traits_to_observe
-        )
         self.add_class(self._css_style["base"])
 
         self._cued = cued
@@ -105,7 +129,7 @@ class SaveCueBox(CueBox):
     widget_to_observe: changes.
 
     :param widget_to_observe:
-        The widget to observa if the :param traits_to_observe: has changed.
+        The widget to observe if the :param traits_to_observe: has changed.
     :param traits_to_observe:
         The trait from the :param widget_to_observe: to observe if changed.
         Specify `traitlets.All` to observe all traits.
@@ -144,7 +168,7 @@ class CheckCueBox(CueBox):
     widget_to_observe: changes.
 
     :param widget_to_observe:
-        The widget to observa if the :param traits_to_observe: has changed.
+        The widget to observe if the :param traits_to_observe: has changed.
     :param traits_to_observe:
         The trait from the :param widget_to_observe: to observe if changed.
         Specify `traitlets.All` to observe all traits.
@@ -183,7 +207,7 @@ class UpdateCueBox(CueBox):
     widget_to_observe: changes.
 
     :param widget_to_observe:
-        The widget to observa if the :param traits_to_observe: has changed.
+        The widget to observe if the :param traits_to_observe: has changed.
     :param traits_to_observe:
         The trait from the :param widget_to_observe: to observe if changed.
         Specify `traitlets.All` to observe all traits.
