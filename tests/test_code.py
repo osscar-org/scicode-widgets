@@ -1,6 +1,7 @@
 from typing import List
 
 import pytest
+from ipywidgets import fixed
 from widget_code_input.utils import CodeValidationError
 
 from scwidgets.check import Check, CheckRegistry, ChecksLog
@@ -55,10 +56,14 @@ def get_code_demo(checks: List[Check]):
     # Important:
     # we take the the function_to_check from the first check as code input
     code_input = CodeInput(checks[0].function_to_check)
+    # we convert the arguments to fixed one
+    parameters = {
+        key: fixed(value) for key, value in checks[0].inputs_parameters[0].items()
+    }
     code_demo = CodeDemo(
         code=code_input,
         check_registry=CheckRegistry(),
-        parameters=checks[0].inputs_parameters[0],
+        parameters=parameters,
     )
     for check in checks:
         code_demo.add_check(
