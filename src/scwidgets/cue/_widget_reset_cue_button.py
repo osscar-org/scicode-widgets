@@ -55,7 +55,7 @@ class ResetCueButton(Button):
             )
             self.disabled = not (self._cue_boxes[0].cued)
 
-        self.on_click(self._reset_on_successful_action)
+        self.on_click(self._on_click_reset_on_successful_action)
 
     @property
     def cue_boxes(self):
@@ -100,7 +100,7 @@ class ResetCueButton(Button):
     def disable_on_successful_action(self, disable_on_successful_action: bool):
         self._disable_on_successful_action = disable_on_successful_action
 
-    def _reset_on_successful_action(self, button: Button):
+    def _on_click_reset_on_successful_action(self, button: Button):
         success = self._action()
         if success:
             for cue_box in self._cue_boxes:
