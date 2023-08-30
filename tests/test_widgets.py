@@ -317,50 +317,78 @@ def test_widgets_code(selenium_driver):
     def test_code_demo(
         nb_cell, expected_texts_on_update: List[str], expected_texts_on_check: List[str]
     ):
-        buttons = nb_cell.find_elements(By.CLASS_NAME, BUTTON_CLASS_NAME)
-        assert len(buttons) == 2
-        check_button = buttons[0]
-        assert check_button.text == "Check Code"
-        assert check_button.is_enabled()
-        update_button = buttons[1]
-        assert update_button.text == "Run Code"
-        assert update_button.is_enabled()
-
-        check_code_input = nb_cell.find_element(
+        ########################################################
+        # asserts for correct initialization of check elements #
+        ########################################################
+        check_elements = nb_cell.find_elements(
             By.CLASS_NAME, cue_box_class_name("check", False)
         )
+        assert len(check_elements) == 2
+        check_code_input = check_elements[0]
         assert "def function_to_check" in check_code_input.text
         assert cue_class_name("check", True) in check_code_input.get_attribute("class")
 
-        update_code_input = nb_cell.find_element(
+        check_button = check_elements[1]
+        assert check_button.text == "Check Code"
+        assert check_button.is_enabled()
+        assert cue_class_name("check", True) in check_button.get_attribute("class")
+
+        #########################################################
+        # asserts for correct initialization of update elements #
+        #########################################################
+        update_elements = nb_cell.find_elements(
             By.CLASS_NAME, cue_box_class_name("update", False)
         )
+        assert len(update_elements) == 3
+        update_code_input = update_elements[0]
         assert "def function_to_check" in update_code_input.text
         assert cue_class_name("update", True) in update_code_input.get_attribute(
             "class"
         )
+        parameter_panel = update_elements[1]
+        # in these tests it should not be contain inything
+        assert parameter_panel.size["height"] == 0
 
-        # test if click results in correct output and disabled buttons
-        update_button.click()
-        time.sleep(0.1)
-        assert not (
-            cue_class_name("update", True) in update_code_input.get_attribute("class")
-        )
+        update_button = update_elements[2]
+        assert update_button.text == "Run Code"
         assert update_button.is_enabled()
-        outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
-        for text in expected_texts_on_update:
-            assert sum([output.text.count(text) for output in outputs]) == 1
+        assert cue_class_name("update", True) in update_button.get_attribute("class")
 
+        #################################################
+        # asserts for behavior on click of check button #
+        #################################################
         check_button.click()
         time.sleep(0.1)
         assert not (
             cue_class_name("check", True) in check_code_input.get_attribute("class")
+        )
+        assert not (
+            cue_class_name("check", True) in check_button.get_attribute("class")
         )
         assert check_button.is_enabled()
         outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
         for text in expected_texts_on_check:
             assert sum([output.text.count(text) for output in outputs]) == 1
 
+        ##################################################
+        # asserts for behavior on click of update button #
+        ##################################################
+        update_button.click()
+        time.sleep(0.1)
+        assert not (
+            cue_class_name("update", True) in update_code_input.get_attribute("class")
+        )
+        assert not (
+            cue_class_name("update", True) in update_button.get_attribute("class")
+        )
+        assert update_button.is_enabled()
+        outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        for text in expected_texts_on_update:
+            assert sum([output.text.count(text) for output in outputs]) == 1
+
+        #####################################
+        # asserts on reaction on text ipnut #
+        #####################################
         # expected_conditions.text_to_be_present_in_element does not work for code input
         code_input = nb_cell.find_elements(By.CLASS_NAME, "CodeMirror-lines")
 
@@ -388,6 +416,9 @@ def test_widgets_code(selenium_driver):
         ["SomeText", "NameError: name 'bug' is not defined"],
         ["NameError: name 'bug' is not defined"],
     )
+    # TODO Test 1.4
+    # parameter panel
+
     # TODO Test 2
     # test only update, no check
 

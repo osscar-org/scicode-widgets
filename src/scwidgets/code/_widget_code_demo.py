@@ -89,8 +89,10 @@ class CodeDemo(VBox, CheckableWidget):
             )
 
             # set up parameter panel
-            interactive_widget = interactive(self._code.function, **self._parameters)
-            self._parameter_panel = VBox(list(interactive_widget.children[:-1]))
+            self._interactive_widget = interactive(
+                self._code.function, **self._parameters
+            )
+            self._parameter_panel = VBox(list(self._interactive_widget.children[:-1]))
             self._cue_parameter_panel = UpdateCueBox(
                 list(self._parameter_panel.children), "value", self._parameter_panel
             )
@@ -126,10 +128,7 @@ class CodeDemo(VBox, CheckableWidget):
 
     @property
     def interactive_parameters(self) -> Dict[str, Check.FunInParamT]:
-        return {
-            parameter.description: parameter.value
-            for parameter in self._parameter_panel.children
-        }
+        return self._interactive_widget.kwargs
 
     def _on_click_update_action(self) -> bool:
         self._output.clear_output()
