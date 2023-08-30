@@ -231,7 +231,7 @@ class TestCheck:
             ).check_function()
 
 
-def mock_checkable_widget(check_registry):
+def mock_checkable_widget(check_registry, compute_output_to_check, checks=None):
     class MockCheckableWidget(CheckableWidget):
         def __init__(self, check_registry):
             self.results = []
@@ -243,7 +243,19 @@ def mock_checkable_widget(check_registry):
         def handle_checks_result(self, result):
             self.results.append(result)
 
-    return MockCheckableWidget(check_registry)
+    checkable_widget = MockCheckableWidget(check_registry)
+    checkable_widget.compute_output_to_check = compute_output_to_check
+    if checks is None:
+        checks = []
+    for check in checks:
+        checkable_widget.compute_output_to_check = check.function_to_check
+        checkable_widget.add_check(
+            check.asserts,
+            check.inputs_parameters,
+            check.outputs_references,
+            check.fingerprint,
+        )
+    return checkable_widget
 
 
 class TestCheckRegistry:
@@ -261,16 +273,9 @@ class TestCheckRegistry:
     )
     def test_successful_check_all_widgets(self, checks):
         check_registry = CheckRegistry()
-        checkable_widget = mock_checkable_widget(check_registry)
-
-        for check in checks:
-            checkable_widget.compute_output_to_check = check.function_to_check
-            checkable_widget.add_check(
-                check.asserts,
-                check.inputs_parameters,
-                check.outputs_references,
-                check.fingerprint,
-            )
+        checkable_widget = mock_checkable_widget(
+            check_registry, checks[0].function_to_check, checks
+        )
 
         widgets_results = check_registry.check_all_widgets()
         nb_conducted_asserts = 0
@@ -302,16 +307,10 @@ class TestCheckRegistry:
     )
     def test_compute_and_set_all_references(self, checks):
         check_registry = CheckRegistry()
-        checkable_widget = mock_checkable_widget(check_registry)
+        checkable_widget = mock_checkable_widget(
+            check_registry, checks[0].function_to_check, checks
+        )
 
-        for check in checks:
-            checkable_widget.compute_output_to_check = check.function_to_check
-            checkable_widget.add_check(
-                check.asserts,
-                check.inputs_parameters,
-                check.outputs_references,
-                check.fingerprint,
-            )
         # sets all check outputs references to the correct reference
         check_registry.compute_and_set_all_references()
 
@@ -346,16 +345,9 @@ class TestCheckRegistry:
     )
     def test_failing_check_all_widgets(self, checks):
         check_registry = CheckRegistry()
-        checkable_widget = mock_checkable_widget(check_registry)
-
-        for check in checks:
-            checkable_widget.compute_output_to_check = check.function_to_check
-            checkable_widget.add_check(
-                check.asserts,
-                check.inputs_parameters,
-                check.outputs_references,
-                check.fingerprint,
-            )
+        checkable_widget = mock_checkable_widget(
+            check_registry, checks[0].function_to_check, checks
+        )
 
         widgets_results = check_registry.check_all_widgets()
         for result in widgets_results.values():
