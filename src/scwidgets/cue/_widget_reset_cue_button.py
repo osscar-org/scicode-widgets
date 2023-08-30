@@ -33,15 +33,6 @@ class ResetCueButton(Button):
         if not (isinstance(cue_boxes, list)):
             cue_boxes = [cue_boxes]
 
-        # we check if all cue boxes have the same widget they observe
-        for cue_box in cue_boxes:
-            assert (
-                cue_boxes[0].widget_to_observe == cue_box.widget_to_observe
-            ), "All CueBox's in `cue_boxes` must have same `widget_to_observe`"
-            assert (
-                cue_boxes[0].traits_to_observe == cue_box.traits_to_observe
-            ), "All CueBox's in `cue_boxes` must have same `traits_to_observe`"
-
         self._cue_boxes = cue_boxes
         self._action = action
         self._disable_on_successful_action = disable_on_successful_action
@@ -63,14 +54,6 @@ class ResetCueButton(Button):
 
     @cue_boxes.setter
     def cue_boxes(self, cue_boxes: Union[CueBox, List[CueBox]]):
-        for cue_box in cue_boxes:
-            assert (
-                cue_boxes[0].widget_to_observe == cue_box.widget_to_observe
-            ), "All CueBox's in `cue_boxes` must have same `widget_to_observe`"
-            assert (
-                cue_boxes[0].traits_to_observe == cue_box.traits_to_observe
-            ), "All CueBox's in `cue_boxes` must have same `traits_to_observe`"
-
         if len(self._cue_boxes) > 0:
             self._cue_boxes[0].widget_to_observe.unobserve(
                 self._on_cue_boxes_traits_to_observe_changed,
