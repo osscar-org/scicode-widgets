@@ -1,6 +1,7 @@
 import inspect
 import re
-from typing import Callable
+import types
+from typing import Callable, Optional
 
 from widget_code_input import WidgetCodeInput
 
@@ -14,12 +15,12 @@ class CodeInput(WidgetCodeInput):
 
     def __init__(
         self,
-        function=None,
-        function_name=None,
-        function_parameters=None,
-        docstring=None,
-        function_body=None,
-        code_theme="north",
+        function: Optional[types.FunctionType] = None,
+        function_name: Optional[str] = None,
+        function_parameters: Optional[str] = None,
+        docstring: Optional[str] = None,
+        function_body: Optional[str] = None,
+        code_theme: str = "north",
     ):
         if function is not None:
             function_name = (
@@ -49,7 +50,7 @@ class CodeInput(WidgetCodeInput):
         return self.get_function_object()(*args, **kwargs)
 
     @staticmethod
-    def get_code(func: Callable):
+    def get_code(func: Callable) -> str:
         source_lines, _ = inspect.getsourcelines(func)
         for line in source_lines:
             if "lambda" in line:
