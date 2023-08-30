@@ -151,11 +151,16 @@ class TestCodeDemo:
                 [single_param_check(use_fingerprint=False, failing=False, buggy=False)]
             ),
             get_code_demo([multi_param_check(use_fingerprint=False, failing=False)]),
+            get_code_demo(
+                [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
+                include_params=True,
+                tunable_params=True,
+            ),
         ],
     )
     def test_run_code(self, code_demo):
-        output = code_demo.run_code(**code_demo.checks[0].inputs_parameters[0])
-        assert output == code_demo.checks[0].outputs_references[0]
+        output = code_demo.run_code(**code_demo.interactive_parameters)
+        assert np.allclose((output,), code_demo.checks[0].outputs_references[0])
 
     @pytest.mark.parametrize(
         "code_demo",
@@ -170,4 +175,4 @@ class TestCodeDemo:
             CodeValidationError,
             match="NameError in code input: name 'bug' is not defined.*",
         ):
-            code_demo.run_code(**code_demo.checks[0].inputs_parameters[0])
+            code_demo.run_code(**code_demo.interactive_parameters)

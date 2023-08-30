@@ -84,17 +84,21 @@ class CodeDemo(VBox, CheckableWidget):
                 cued=True,
                 layout=Layout(width="98%", height="auto"),
             )
-            self._cue_update_button = UpdateCueBox(
-                self._code, "function_body", self._update_button, cued=True
-            )
 
             # set up parameter panel
             self._interactive_widget = interactive(
                 self._code.function, **self._parameters
             )
             self._parameter_panel = VBox(list(self._interactive_widget.children[:-1]))
+            parameter_childrens = list(self._parameter_panel.children)
             self._cue_parameter_panel = UpdateCueBox(
-                list(self._parameter_panel.children), "value", self._parameter_panel
+                parameter_childrens, "value", self._parameter_panel
+            )
+            self._cue_update_button = UpdateCueBox(
+                [self._code] + parameter_childrens,
+                ["function_body"] + ["value"] * len(parameter_childrens),
+                self._update_button,
+                cued=True,
             )
 
             self._update_button.cue_boxes = [

@@ -61,12 +61,12 @@ run_code_demo(
 )
 
 # Test 1.4
-# run_code_demo(
-#    [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
-#    include_checks=True,
-#    include_params=True,
-#    tunable_params=True,
-# )
+run_code_demo(
+    [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
+    include_checks=True,
+    include_params=True,
+    tunable_params=True,
+)
 
 
 # Test 2:
