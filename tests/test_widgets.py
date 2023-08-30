@@ -17,11 +17,12 @@ def test_notebook_running(notebook_service):
 
 
 CUE_BOX_CLASS_NAME = (
-    "lm-Widget.lm-Panel.jupyter-widgets.widget-container" ".widget-box.scwidget-cue-box"
+    "lm-Widget.lm-Panel.jupyter-widgets.widget-container"
+    ".widget-box.widget-vbox.scwidget-cue-box"
 )
 CUED_CUE_BOX_CLASS_NAME = (
     "lm-Widget.lm-Panel.jupyter-widgets.widget-container"
-    ".widget-box.scwidget-cue-box.scwidget-cue-box--cue"
+    ".widget-box.widget-vbox.scwidget-cue-box.scwidget-cue-box--cue"
 )
 
 
