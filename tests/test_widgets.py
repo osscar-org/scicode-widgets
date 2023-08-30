@@ -3,6 +3,7 @@ from typing import List
 
 import requests
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -361,6 +362,10 @@ def test_widgets_code(selenium_driver):
             # in these tests it should not be contain inything
             if not (tunable_params):
                 assert parameter_panel.size["height"] == 0
+            else:
+                assert cue_class_name("update", True) in parameter_panel.get_attribute(
+                    "class"
+                )
 
             update_button = update_elements[2]
             assert update_button.text == "Run Code"
@@ -374,7 +379,7 @@ def test_widgets_code(selenium_driver):
         #################################################
         if include_checks:
             check_button.click()
-            time.sleep(0.1)
+            time.sleep(0.2)
             assert not (
                 cue_class_name("check", True) in check_code_input.get_attribute("class")
             )
@@ -391,7 +396,7 @@ def test_widgets_code(selenium_driver):
         ##################################################
         if include_params:
             update_button.click()
-            time.sleep(0.1)
+            time.sleep(0.2)
             assert not (
                 cue_class_name("update", True)
                 in update_code_input.get_attribute("class")
@@ -400,6 +405,11 @@ def test_widgets_code(selenium_driver):
                 cue_class_name("update", True) in update_button.get_attribute("class")
             )
             assert update_button.is_enabled()
+            if tunable_params:
+                assert not (
+                    cue_class_name("update", True)
+                    in parameter_panel.get_attribute("class")
+                )
             outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
             for text in expected_texts_on_update:
                 assert sum([output.text.count(text) for output in outputs]) == 1
@@ -423,6 +433,21 @@ def test_widgets_code(selenium_driver):
         #                update_code_input.get_attribute("class"))
         # assert check_button.is_enabled()
         # assert check_button.is_enabled()
+
+        if tunable_params:
+            slider_input_box = nb_cell.find_element(By.CLASS_NAME, "widget-readout")
+            slider_input_box.send_keys(Keys.BACKSPACE)
+            slider_input_box.send_keys(Keys.BACKSPACE)
+            slider_input_box.send_keys(2)
+            slider_input_box.send_keys(Keys.ENTER)
+            time.sleep(0.2)
+
+            assert cue_class_name("update", True) in parameter_panel.get_attribute(
+                "class"
+            )
+            assert cue_class_name("update", True) in update_button.get_attribute(
+                "class"
+            )
 
     # Test 1.1
     test_code_demo(
@@ -454,14 +479,14 @@ def test_widgets_code(selenium_driver):
         tunable_params=False,
     )
     # Test 1.4
-    # test_code_demo(
-    #    nb_cells[6],
-    #    ["SomeText", "Output"],
-    #    ["All checks were successful"],
-    #    include_checks=True,
-    #    include_params=True,
-    #    tunable_params=True,
-    # )
+    test_code_demo(
+        nb_cells[6],
+        ["SomeText", "Output"],
+        ["All checks were successful"],
+        include_checks=True,
+        include_params=True,
+        tunable_params=True,
+    )
 
     # Test 2:
     # -------
