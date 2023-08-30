@@ -1,5 +1,6 @@
 from typing import List
 
+import numpy as np
 import pytest
 from ipywidgets import fixed
 from widget_code_input.utils import CodeValidationError
@@ -52,26 +53,41 @@ class TestCodeInput:
             CodeInput.get_code(lambda x: x)
 
 
-def get_code_demo(checks: List[Check]):
+def get_code_demo(
+    checks: List[Check], include_checks=True, include_params=True, tunable_params=False
+):
     # Important:
     # we take the the function_to_check from the first check as code input
     code_input = CodeInput(checks[0].function_to_check)
-    # we convert the arguments to fixed one
-    parameters = {
-        key: fixed(value) for key, value in checks[0].inputs_parameters[0].items()
-    }
+    if tunable_params:
+        # convert single value arrays to tuples
+        for value in checks[0].inputs_parameters[0].values():
+            assert (
+                np.prod(value.shape) == 1
+            ), "conversion to tuple does not work properly for multidim array"
+        parameters = {
+            key: value.reshape(-1)[0]
+            for key, value in checks[0].inputs_parameters[0].items()
+        }
+    else:
+        # we convert the arguments to fixed one
+        parameters = {
+            key: fixed(value) for key, value in checks[0].inputs_parameters[0].items()
+        }
     code_demo = CodeDemo(
         code=code_input,
-        check_registry=CheckRegistry(),
-        parameters=parameters,
+        check_registry=CheckRegistry() if include_checks is True else None,
+        parameters=parameters if include_params is True else None,
     )
-    for check in checks:
-        code_demo.add_check(
-            check.asserts,
-            check.inputs_parameters,
-            check.outputs_references,
-            check.fingerprint,
-        )
+
+    if include_checks is True:
+        for check in checks:
+            code_demo.add_check(
+                check.asserts,
+                check.inputs_parameters,
+                check.outputs_references,
+                check.fingerprint,
+            )
     return code_demo
 
 
