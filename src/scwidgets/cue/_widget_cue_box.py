@@ -1,10 +1,10 @@
 from typing import List, Optional, Union
 
-from ipywidgets import Box, Widget
+from ipywidgets import VBox, Widget
 from traitlets.utils.sentinel import Sentinel
 
 
-class CueBox(Box):
+class CueBox(VBox):
     """
     A box around the widget :param widget_to_cue: that adds a visual cue defined in the
     :param css_style: when the trait :param traits_to_observe: in the widget :param
