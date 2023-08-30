@@ -46,6 +46,10 @@ class CodeInput(WidgetCodeInput):
             function_name, function_parameters, docstring, function_body, code_theme
         )
 
+    @property
+    def function(self) -> types.FunctionType:
+        return self.get_function_object()
+
     def run(self, *args, **kwargs) -> Check.FunOutParamsT:
         return self.get_function_object()(*args, **kwargs)
 

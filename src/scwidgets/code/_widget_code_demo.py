@@ -1,9 +1,8 @@
 import types
-from copy import deepcopy
 from platform import python_version
 from typing import Dict, List, Optional, Union
 
-from ipywidgets import HBox, Layout, Output, VBox
+from ipywidgets import HBox, Layout, Output, VBox, interactive
 from widget_code_input.utils import CodeValidationError
 
 from ..check import Check, CheckableWidget, CheckRegistry, ChecksLog
@@ -68,7 +67,9 @@ class CodeDemo(VBox, CheckableWidget):
         if self._parameters is None:
             self._update_button = None
             self._cue_update_button = None
+            self._parameter_panel = VBox([])
         else:
+            # set up update button and cueing
             self._update_button = ResetCueButton(
                 [],
                 self._on_click_update_action,
@@ -86,7 +87,19 @@ class CodeDemo(VBox, CheckableWidget):
             self._cue_update_button = UpdateCueBox(
                 self._code, "function_body", self._update_button, cued=True
             )
-            self._update_button.cue_boxes = [self._cue_code, self._cue_update_button]
+
+            # set up parameter panel
+            interactive_widget = interactive(self._code.function, **self._parameters)
+            self._parameter_panel = VBox(list(interactive_widget.children[:-1]))
+            self._cue_parameter_panel = UpdateCueBox(
+                list(self._parameter_panel.children), "value", self._parameter_panel
+            )
+
+            self._update_button.cue_boxes = [
+                self._cue_code,
+                self._cue_update_button,
+                self._cue_parameter_panel,
+            ]
 
         if self._check_button is None and self._update_button is None:
             self._buttons_panel = HBox([])
@@ -98,24 +111,30 @@ class CodeDemo(VBox, CheckableWidget):
             self._buttons_panel = HBox(
                 [self._cue_check_button, self._cue_update_button]
             )
+
         VBox.__init__(
-            self, [self._cue_code, self._buttons_panel, self._output], *args, **kwargs
+            self,
+            [
+                self._cue_code,
+                self._cue_parameter_panel,
+                self._buttons_panel,
+                self._output,
+            ],
+            *args,
+            **kwargs,
         )
 
     @property
-    def parameters(self):
-        return deepcopy(self._parameters)
+    def interactive_parameters(self) -> Dict[str, Check.FunInParamT]:
+        return {
+            parameter.description: parameter.value
+            for parameter in self._parameter_panel.children
+        }
 
     def _on_click_update_action(self) -> bool:
         self._output.clear_output()
         try:
-            if self._parameters is None:
-                raise ValueError(
-                    "parameters is None but update action has been invoked, "
-                    "this is an invalid state and must be a bug in the initalization "
-                    "of the widget."
-                )
-            self._on_action_run_code(**self._parameters)
+            self._on_action_run_code(**self.interactive_parameters)
             return True
         except Exception as e:
             self._output_results([e])
