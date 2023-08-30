@@ -62,12 +62,19 @@ def single_param_check(use_fingerprint=False, failing=False, buggy=False):
     if buggy:
 
         def function_to_check(parameter):
+            print("SomeText")
+            # these comments are important so SomeText is not printed in the error log,
+            # so we can assume that it occurs only once
+            #
+            #
+            #
             bug  # noqa : F821
             return parameter * 2
 
     else:
 
         def function_to_check(parameter):
+            print("SomeText")
             return parameter * 2
 
     inputs_parameters = [

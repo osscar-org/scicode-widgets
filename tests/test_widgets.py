@@ -1,4 +1,5 @@
 import time
+from typing import List
 
 import requests
 from selenium.webdriver.common.by import By
@@ -181,22 +182,22 @@ def test_widget_check_registry(selenium_driver):
 
     def test_button_clicks(
         nb_cell,
-        assert_msg_check_all_widgets: str,
-        assert_msg_set_all_references: str,
-        assert_msg_set_all_references_and_check: str,
+        expected_text_on_check_all_widgets: str,
+        expected_text_on_set_all_references: str,
+        expected_text_on_set_all_references_and_check: str,
     ):
         """
         clicks the check_all_widgets button, asserts that :param
-        assert_msg_check_all_widgets: is in output.  clicks the set_all_references
-        button, asserts that :param assert_msg_set_all_references: is in output.  then
-        clicks again the check_all_widgets button, asserts that :param
-        assert_msg_check_all_widgets: is in output.
+        expected_text_on_check_all_widgets: is in output.  clicks the set_all_references
+        button, asserts that :param expected_text_on_set_all_references: is in output.
+        then clicks again the check_all_widgets button, asserts that :param
+        expected_text_on_check_all_widgets: is in output.
 
-        :param assert_msg_check_all_widgets:
+        :param expected_text_on_check_all_widgets:
             output message after the button click on "Check all widgets"
-        :param assert_msg_set_all_references:
+        :param expected_text_on_set_all_references:
             output message after the button click on "Check all widgets"
-        :param assert_msg_set_all_references_and_check:
+        :param expected_text_on_set_all_references_and_check:
             output message after the button click on "Check all widgets"
 
         """
@@ -210,20 +211,44 @@ def test_widget_check_registry(selenium_driver):
         WebDriverWait(driver, 5).until(
             expected_conditions.element_to_be_clickable(check_all_widgets_button)
         ).click()
-        output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
-        assert assert_msg_check_all_widgets in output.text
+        outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        assert (
+            sum(
+                [
+                    output.text.count(expected_text_on_check_all_widgets)
+                    for output in outputs
+                ]
+            )
+            == 1
+        )
 
         WebDriverWait(driver, 5).until(
             expected_conditions.element_to_be_clickable(set_all_references_button)
         ).click()
-        output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
-        assert assert_msg_set_all_references in output.text
+        outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        assert (
+            sum(
+                [
+                    output.text.count(expected_text_on_set_all_references)
+                    for output in outputs
+                ]
+            )
+            == 1
+        )
 
         WebDriverWait(driver, 5).until(
             expected_conditions.element_to_be_clickable(check_all_widgets_button)
         ).click()
-        output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
-        assert assert_msg_set_all_references_and_check in output.text
+        outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        assert (
+            sum(
+                [
+                    output.text.count(expected_text_on_set_all_references_and_check)
+                    for output in outputs
+                ]
+            )
+            == 1
+        )
 
     # Test 1.1 use_fingerprint=False, failing=False, buggy=False
     test_button_clicks(
@@ -289,7 +314,9 @@ def test_widgets_code(selenium_driver):
         )
     )
 
-    def test_code_demo(nb_cell, expected_output_on_update, expected_output_on_check):
+    def test_code_demo(
+        nb_cell, expected_texts_on_update: List[str], expected_texts_on_check: List[str]
+    ):
         buttons = nb_cell.find_elements(By.CLASS_NAME, BUTTON_CLASS_NAME)
         assert len(buttons) == 2
         check_button = buttons[0]
@@ -320,6 +347,9 @@ def test_widgets_code(selenium_driver):
             cue_class_name("update", True) in update_code_input.get_attribute("class")
         )
         assert update_button.is_enabled()
+        outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        for text in expected_texts_on_update:
+            assert sum([output.text.count(text) for output in outputs]) == 1
 
         check_button.click()
         time.sleep(0.1)
@@ -327,6 +357,9 @@ def test_widgets_code(selenium_driver):
             cue_class_name("check", True) in check_code_input.get_attribute("class")
         )
         assert check_button.is_enabled()
+        outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        for text in expected_texts_on_check:
+            assert sum([output.text.count(text) for output in outputs]) == 1
 
         # expected_conditions.text_to_be_present_in_element does not work for code input
         code_input = nb_cell.find_elements(By.CLASS_NAME, "CodeMirror-lines")
@@ -346,12 +379,12 @@ def test_widgets_code(selenium_driver):
         # assert check_button.is_enabled()
 
     # Test 1.1
-    test_code_demo(nb_cells[3], "Output", "All checks were successful")
+    test_code_demo(nb_cells[3], ["SomeText", "Output"], ["All checks were successful"])
     # Test 1.2
-    test_code_demo(nb_cells[4], "Output", "Some checks failed")
+    test_code_demo(nb_cells[4], ["SomeText", "Output"], ["Some checks failed"])
     # Test 1.3
     test_code_demo(
         nb_cells[5],
-        "NameError: name 'bug' is not defined",
-        "NameError: name 'bug' is not defined",
+        ["SomeText", "NameError: name 'bug' is not defined"],
+        ["NameError: name 'bug' is not defined"],
     )
