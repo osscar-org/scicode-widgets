@@ -18,7 +18,7 @@ def get_css_style() -> HTML:
         style_txt = file.read()
 
     return HTML(
-        "HTML with scicode-widget css style sheet."
+        "HTML with scicode-widget css style sheet. "
         "Please keep this cell output alive."
         "<style>" + style_txt + "</style>"
     )
