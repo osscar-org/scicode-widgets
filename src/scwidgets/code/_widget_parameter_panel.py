@@ -18,8 +18,7 @@ class ParameterPanel(VBox):
 
     def __init__(
         self,
-        parameters: Dict[str, Union[Check.FunInParamT, Widget]],
-        **kwargs,
+        **parameters: Dict[str, Union[Check.FunInParamT, Widget]],
     ):
         if "_option" in parameters.keys():
             raise ValueError(
