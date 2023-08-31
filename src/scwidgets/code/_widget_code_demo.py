@@ -2,7 +2,7 @@ import types
 from platform import python_version
 from typing import Dict, List, Optional, Union
 
-from ipywidgets import HBox, Layout, Output, VBox, interactive
+from ipywidgets import HBox, Layout, Output, VBox, Widget, interactive
 from widget_code_input.utils import CodeValidationError
 
 from ..check import Check, CheckableWidget, CheckRegistry, ChecksLog
@@ -21,13 +21,18 @@ class CodeDemo(VBox, CheckableWidget):
 
     :param check_registry:
         a check registry that is used to register checks
+
+    :param parameters:
+        Can be any input that is allowed as keyword arguments in ipywidgets.interactive
+        for the parameters. _options and other widget layout parameter are controlled
+        by CodeDemo.
     """
 
     def __init__(
         self,
         code: Union[CodeInput, types.FunctionType],
         check_registry: Optional[CheckRegistry] = None,
-        parameters: Optional[Dict[str, Check.FunInParamT]] = None,
+        parameters: Optional[Dict[str, Union[Check.FunInParamT, Widget]]] = None,
         *args,
         **kwargs,
     ):
@@ -70,6 +75,7 @@ class CodeDemo(VBox, CheckableWidget):
             self._parameter_panel = VBox([])
         else:
             # set up update button and cueing
+            # -------------------------------
             self._update_button = ResetCueButton(
                 [],
                 self._on_click_update_action,
@@ -86,17 +92,39 @@ class CodeDemo(VBox, CheckableWidget):
             )
 
             # set up parameter panel
-            self._interactive_widget = interactive(
-                self._code.function, **self._parameters
+            # ----------------------
+            if "_option" in self._parameters.keys():
+                raise ValueError(
+                    "Found interactive argument `_option` in paramaters, but "
+                    "CodeDemo controls this parameter to ensure correct initialization."
+                )
+
+            compatibility_result = self._code.compatible_with_signature(
+                list(self._parameters.keys())
             )
-            self._parameter_panel = VBox(list(self._interactive_widget.children[:-1]))
-            parameter_childrens = list(self._parameter_panel.children)
+            if compatibility_result != "":
+                raise ValueError(compatibility_result)
+
+            # we use a dummy function because interactive executes it once on init
+            # and the actual function might be expensive to compute
+            def dummy_function(**kwargs):
+                pass
+
+            self._interactive_widget = interactive(dummy_function, **self._parameters)
+            assert isinstance(self._interactive_widget.children[-1], Output), (
+                "Assumed that interactive returns an output as last child. "
+                "Parameter will be wrongly initialized if this is not True."
+            )
+            parameter_widgets = list(self._interactive_widget.children[:-1])
+            self._parameter_panel = VBox(parameter_widgets)
+            for widget in parameter_widgets:
+                widget.unobserve_all()
             self._cue_parameter_panel = UpdateCueBox(
-                parameter_childrens, "value", self._parameter_panel
+                parameter_widgets, "value", self._parameter_panel
             )
             self._cue_update_button = UpdateCueBox(
-                [self._code] + parameter_childrens,
-                ["function_body"] + ["value"] * len(parameter_childrens),
+                [self._code] + parameter_widgets,
+                ["function_body"] + ["value"] * len(parameter_widgets),
                 self._update_button,
                 cued=True,
             )

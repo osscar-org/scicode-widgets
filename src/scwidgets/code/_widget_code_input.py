@@ -1,7 +1,7 @@
 import inspect
 import re
 import types
-from typing import Callable, Optional
+from typing import Callable, List, Optional
 
 from widget_code_input import WidgetCodeInput
 
@@ -48,7 +48,30 @@ class CodeInput(WidgetCodeInput):
 
     @property
     def function(self) -> types.FunctionType:
-        return self.get_function_object()
+        """
+        Returns the unwrapped function object
+        """
+        return inspect.unwrap(self.get_function_object())
+
+    def compatible_with_signature(self, parameters: List[str]) -> str:
+        """
+        This function checks if the arguments are compatible with the function signature
+        and returns a nonempty message if this is not the case explaining what the issue
+        """
+        if "**" in self.function_parameters:
+            # function has keyword arguments so it is compatible
+            return ""
+        for parameter_name in inspect.signature(self.function).parameters.keys():
+            if not (parameter_name in parameters):
+                return (
+                    f"The input parameter {parameter_name} is not compatible with "
+                    "the function code."
+                )
+        return ""
+
+    @property
+    def function_parameters_name(self) -> List[str]:
+        return self.function_parameters.replace(",", "").split(" ")
 
     def run(self, *args, **kwargs) -> Check.FunOutParamsT:
         return self.get_function_object()(*args, **kwargs)
