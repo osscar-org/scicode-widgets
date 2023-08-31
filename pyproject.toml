@@ -11,14 +11,13 @@ build-backend = "setuptools.build_meta"
 name = "scwidgets"
 description = "ipywidgets for the creation of interactive code demos and educational notebooks"
 readme = "README.rst"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = {text = "BSD-3-Clause"}
 classifiers = [
     "Intended Audience :: Science/Research",
     "Operating System :: POSIX",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
