@@ -40,6 +40,10 @@ class TestCodeInput:
         def x():
             return 5
         return x()
+
+    @staticmethod
+    def mock_function_6(x: List[int]) -> List[int]:
+        return x
     # fmt: on
 
     def test_get_code(self):
@@ -54,6 +58,7 @@ class TestCodeInput:
             CodeInput.get_code(self.mock_function_5)
             == "def x():\n    return 5\nreturn x()\n"
         )
+        assert CodeInput.get_code(self.mock_function_6) == "return x\n"
         with pytest.raises(
             ValueError,
             match=r"Did not find any def definition. .*",
