@@ -38,7 +38,30 @@ class CheckableWidget:
         """
         raise NotImplementedError("handle_checks_result has not been implemented")
 
-    def add_check(
+    def add_check(self, *args, **kwargs):
+        # simple dispatch logic
+        if len(args) + len(kwargs) == 1:
+            self._add_check_from_check(*args, **kwargs)
+        else:
+            self._add_check_from_check_parameters(*args, **kwargs)
+
+    def _add_check_from_check(self, checks: Union[List[Check], Check]):
+        if self._check_registry is None:
+            raise ValueError(
+                "No check registry given on initialization, no checks can be added"
+            )
+        if isinstance(checks, Check):
+            checks = [checks]
+        for check in checks:
+            self._check_registry.add_check(
+                self,
+                check.asserts,
+                check.inputs_parameters,
+                check.outputs_references,
+                check.fingerprint,
+            )
+
+    def _add_check_from_check_parameters(
         self,
         asserts: Union[List[Check.AssertFunT], Check.AssertFunT],
         inputs_parameters: Union[List[dict], dict],
