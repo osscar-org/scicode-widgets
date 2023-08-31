@@ -1,7 +1,7 @@
 import inspect
 import re
 import types
-from typing import Callable, List, Optional
+from typing import List, Optional
 
 from widget_code_input import WidgetCodeInput
 
@@ -77,16 +77,29 @@ class CodeInput(WidgetCodeInput):
         return self.get_function_object()(*args, **kwargs)
 
     @staticmethod
-    def get_code(func: Callable) -> str:
+    def get_code(func: types.FunctionType) -> str:
         source_lines, _ = inspect.getsourcelines(func)
-        for line in source_lines:
-            if "lambda" in line:
-                raise ValueError("Lambda functions are not supported.")
 
-        source = "".join(source_lines)
+        found_def = False
+        def_index = 0
+        for i, line in enumerate(source_lines):
+            if "def" in line:
+                found_def = True
+                def_index = i
+                break
+        if not (found_def):
+            raise ValueError(
+                "Did not find any def definition. Only functions with a "
+                "defition are supported"
+            )
 
         # Remove function definition
-        source = re.sub(r"^\s*def\s+[^\(]*\(.*\):.*?[;\n]", "", source)
+        line = re.sub(r"^\s*def\s+[^\(]*\(.*\):\n?", "", line)
+        source_lines[def_index] = line
+        # Remove any potential wrappers
+        source_lines = source_lines[i:]
+
+        source = "".join(source_lines)
         # Remove docstrings
         source = re.sub(
             r"((.*?)\'\'\'(.*?)\'\'\'.*?[;\n]|(.*?)\"\"\"(.*?)\"\"\"(.*?)[;\n])",

@@ -12,6 +12,7 @@ from .test_check import multi_param_check, single_param_check
 
 
 class TestCodeInput:
+    # fmt: off
     @staticmethod
     def mock_function_1(x, y):
         """
@@ -29,14 +30,17 @@ class TestCodeInput:
         return x
 
     @staticmethod
-    def mock_function_3(x):
-        """This returns identity"""
-        return x
+    def mock_function_3(x): return x
 
     @staticmethod
-    def mock_function_4(x):
-        """This returns identity"""
-        return x
+    def mock_function_4(x): """This returns identity"""; return x  # noqa: E702
+
+    @staticmethod
+    def mock_function_5(x):
+        def x():
+            return 5
+        return x()
+    # fmt: on
 
     def test_get_code(self):
         assert (
@@ -45,10 +49,14 @@ class TestCodeInput:
         )
         assert CodeInput.get_code(self.mock_function_2) == "return x\n"
         assert CodeInput.get_code(self.mock_function_3) == "return x\n"
-        assert CodeInput.get_code(self.mock_function_4) == "return x\n"
+        assert CodeInput.get_code(self.mock_function_4) == "return x  # noqa: E702\n"
+        assert (
+            CodeInput.get_code(self.mock_function_5)
+            == "def x():\n    return 5\nreturn x()\n"
+        )
         with pytest.raises(
             ValueError,
-            match=r"Lambda functions are not supported.",
+            match=r"Did not find any def definition. .*",
         ):
             CodeInput.get_code(lambda x: x)
 
