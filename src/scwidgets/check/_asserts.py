@@ -137,8 +137,8 @@ def assert_type(
     for i in parameter_indices:
         if not (isinstance(output_parameters[i], type(output_references[i]))):
             return (
-                f"Expected type {type(output_references)} "
-                f"but got {type(output_parameters)}."
+                f"Expected type {type(output_references[i])} "
+                f"but got {type(output_parameters[i])}."
             )
     return ""
 
