@@ -169,6 +169,7 @@ class CodeDemo(VBox, CheckableWidget):
         return self.run_code(*args, **kwargs)
 
     def handle_checks_result(self, result: Union[ChecksLog, Exception]):
+        self._output.clear_output()
         self._output_results([result])
 
     def _output_results(self, results: List[Union[str, ChecksLog, Exception]]):
