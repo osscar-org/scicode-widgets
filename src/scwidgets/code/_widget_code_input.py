@@ -94,7 +94,7 @@ class CodeInput(WidgetCodeInput):
             )
 
         # Remove function definition
-        line = re.sub(r"^\s*def\s+[^\(]*\(.*\):\n?", "", line)
+        line = re.sub(r"^\s*def\s+[^\(]*\(.*\)(.*?):\n?", "", line)
         source_lines[def_index] = line
         # Remove any potential wrappers
         source_lines = source_lines[i:]
