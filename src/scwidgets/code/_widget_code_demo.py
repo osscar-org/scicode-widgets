@@ -2,12 +2,13 @@ import types
 from platform import python_version
 from typing import Dict, List, Optional, Union
 
-from ipywidgets import HBox, Layout, Output, VBox, Widget, interactive
+from ipywidgets import HBox, Layout, Output, VBox, Widget
 from widget_code_input.utils import CodeValidationError
 
 from ..check import Check, CheckableWidget, CheckRegistry, ChecksLog
 from ..cue import CheckCueBox, ResetCueButton, UpdateCueBox
 from ._widget_code_input import CodeInput
+from ._widget_parameter_panel import ParameterPanel
 
 
 class CodeDemo(VBox, CheckableWidget):
@@ -74,6 +75,12 @@ class CodeDemo(VBox, CheckableWidget):
             self._cue_update_button = None
             self._parameter_panel = VBox([])
         else:
+            compatibility_result = self._code.compatible_with_signature(
+                list(self._parameters.keys())
+            )
+            if compatibility_result != "":
+                raise ValueError(compatibility_result)
+
             # set up update button and cueing
             # -------------------------------
             self._update_button = ResetCueButton(
@@ -93,38 +100,14 @@ class CodeDemo(VBox, CheckableWidget):
 
             # set up parameter panel
             # ----------------------
-            if "_option" in self._parameters.keys():
-                raise ValueError(
-                    "Found interactive argument `_option` in paramaters, but "
-                    "CodeDemo controls this parameter to ensure correct initialization."
-                )
-
-            compatibility_result = self._code.compatible_with_signature(
-                list(self._parameters.keys())
-            )
-            if compatibility_result != "":
-                raise ValueError(compatibility_result)
-
-            # we use a dummy function because interactive executes it once on init
-            # and the actual function might be expensive to compute
-            def dummy_function(**kwargs):
-                pass
-
-            self._interactive_widget = interactive(dummy_function, **self._parameters)
-            assert isinstance(self._interactive_widget.children[-1], Output), (
-                "Assumed that interactive returns an output as last child. "
-                "Parameter will be wrongly initialized if this is not True."
-            )
-            parameter_widgets = list(self._interactive_widget.children[:-1])
-            self._parameter_panel = VBox(parameter_widgets)
-            for widget in parameter_widgets:
-                widget.unobserve_all()
+            self._parameter_panel = ParameterPanel(self._parameters)
             self._cue_parameter_panel = UpdateCueBox(
-                parameter_widgets, "value", self._parameter_panel
+                self._parameter_panel.parameters_widget, "value", self._parameter_panel
             )
             self._cue_update_button = UpdateCueBox(
-                [self._code] + parameter_widgets,
-                ["function_body"] + ["value"] * len(parameter_widgets),
+                [self._code] + self._parameter_panel.parameters_widget,
+                ["function_body"]
+                + ["value"] * len(self._parameter_panel.parameters_widget),
                 self._update_button,
                 cued=True,
             )
@@ -159,13 +142,13 @@ class CodeDemo(VBox, CheckableWidget):
         )
 
     @property
-    def interactive_parameters(self) -> Dict[str, Check.FunInParamT]:
-        return self._interactive_widget.kwargs
+    def panel_parameters(self) -> Dict[str, Check.FunInParamT]:
+        return self._parameter_panel.parameters
 
     def _on_click_update_action(self) -> bool:
         self._output.clear_output()
         try:
-            self._on_action_run_code(**self.interactive_parameters)
+            self._on_action_run_code(**self.panel_parameters)
             return True
         except Exception as e:
             self._output_results([e])
