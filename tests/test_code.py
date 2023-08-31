@@ -167,7 +167,7 @@ class TestCodeDemo:
         ],
     )
     def test_run_code(self, code_demo):
-        output = code_demo.run_code(**code_demo.interactive_parameters)
+        output = code_demo.run_code(**code_demo.panel_parameters)
         assert np.allclose((output,), code_demo.checks[0].outputs_references[0])
 
     @pytest.mark.parametrize(
@@ -183,4 +183,4 @@ class TestCodeDemo:
             CodeValidationError,
             match="NameError in code input: name 'bug' is not defined.*",
         ):
-            code_demo.run_code(**code_demo.interactive_parameters)
+            code_demo.run_code(**code_demo.panel_parameters)
