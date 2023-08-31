@@ -100,7 +100,7 @@ class CodeDemo(VBox, CheckableWidget):
 
             # set up parameter panel
             # ----------------------
-            self._parameter_panel = ParameterPanel(self._parameters)
+            self._parameter_panel = ParameterPanel(**self._parameters)
             self._cue_parameter_panel = UpdateCueBox(
                 self._parameter_panel.parameters_widget, "value", self._parameter_panel
             )
