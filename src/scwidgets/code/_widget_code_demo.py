@@ -142,7 +142,7 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
         elif not (isinstance(cue_outputs, list)):
             cue_outputs = [cue_outputs]
 
-        CheckableWidget.__init__(self, check_registry)
+        CheckableWidget.__init__(self, check_registry, answer_key)
         AnswerWidget.__init__(self, answer_registry, answer_key)
 
         self._code = code
@@ -564,9 +564,12 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
                 raise result
             elif isinstance(result, ChecksLog):
                 if result.successful:
-                    Printer.print_success_message("Check was successful.")
+                    Printer.print_success_message("Check was successful")
+                    Printer.print_success_message("--------------------")
+                    print(result.message())
                 else:
-                    Printer.print_error_message("Check failed:")
+                    Printer.print_error_message("Check failed")
+                    Printer.print_error_message("------------")
                     print(result.message())
             else:
                 print(result)

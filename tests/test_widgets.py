@@ -934,33 +934,33 @@ def test_widget_check_registry(selenium_driver):
     # Test 1.1 use_fingerprint=False, failing=False, buggy=False
     test_button_clicks(
         nb_cells[3],
-        "Widget 1 all checks were successful.",
-        "Successfully set all references.",
-        "Widget 1 all checks were successful.",
+        "Widget 1 all checks were successful",
+        "Successfully set all references",
+        "Widget 1 all checks were successful",
     )
 
     # Test 1.2 use_fingerprint=True, failing=False, buggy=False
     test_button_clicks(
         nb_cells[4],
-        "Widget 1 all checks were successful.",
-        "Successfully set all references.",
-        "Widget 1 all checks were successful.",
+        "Widget 1 all checks were successful",
+        "Successfully set all references",
+        "Widget 1 all checks were successful",
     )
 
     # Test 1.3 use_fingerprint=False, failing=False, buggy=False
     test_button_clicks(
         nb_cells[5],
         "Widget 1 not all checks were successful",
-        "Successfully set all references.",
-        "Widget 1 all checks were successful.",
+        "Successfully set all references",
+        "Widget 1 all checks were successful",
     )
 
     # Test 1.4 use_fingerprint=False, failing=False, buggy=False
     test_button_clicks(
         nb_cells[6],
         "Widget 1 not all checks were successful",
-        "Successfully set all references.",
-        "Widget 1 all checks were successful.",
+        "Successfully set all references",
+        "Widget 1 all checks were successful",
     )
 
     # Test 1.5 use_fingerprint=False, failing=False, buggy=True

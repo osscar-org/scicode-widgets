@@ -4,9 +4,23 @@ from __future__ import annotations
 
 import functools
 import inspect
+import re
+import sys
 import types
 from copy import deepcopy
+from platform import python_version
+from types import TracebackType
 from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
+
+import IPython.core.ultratb
+
+from .._utils import Printer
+
+ExecutionInfo = Tuple[
+    Union[None, type],  # BaseException type
+    Union[None, BaseException],
+    Union[None, TracebackType],
+]
 
 
 class Check:
@@ -35,6 +49,14 @@ class Check:
     :param fingerprint:
         A one-way function that takes as input the output parameters of function :param
         function_to_check: and obscures the :param output_references:.
+    :param suppress_fingerprint_asserts:
+        Specifies if the assert messages that use the fingerprint function output for
+        tests are surpressed. The message might be confusing to a student as the output
+        is converted by the fingerprint function.
+    :param stop_on_assert_error_raised:
+        Specifies if running the asserts is stopped as soon as an error is raised in an
+        assert. If a lot of asserts are specified the printing of a lot of error
+        tracebacks might make debugging harder.
     """
 
     FunInParamT = TypeVar("FunInParamT", bound=Any)
@@ -56,6 +78,8 @@ class Check:
         fingerprint: Optional[
             Callable[[Check.FunOutParamsT], Check.FingerprintT]
         ] = None,
+        suppress_fingerprint_asserts: bool = True,
+        stop_on_assert_error_raised: bool = True,
     ):
         self._function_to_check = function_to_check
         self._asserts = []
@@ -102,6 +126,8 @@ class Check:
         self._inputs_parameters = inputs_parameters
         self._outputs_references = outputs_references
         self._fingerprint = fingerprint
+        self._suppress_fingerprint_asserts = suppress_fingerprint_asserts
+        self._stop_on_assert_error_raised = stop_on_assert_error_raised
 
     @property
     def function_to_check(self):
@@ -180,11 +206,28 @@ class Check:
                 output = (output,)
 
             for assert_f in self._univariate_asserts:
-                assert_result = assert_f(output)
+                try:
+                    assert_result = assert_f(output)
+                except Exception:
+                    excution_info = sys.exc_info()
+                    check_result.append(excution_info, assert_f, input_parameters)
+                    if self._stop_on_assert_error_raised:
+                        return check_result
                 check_result.append(assert_result, assert_f, input_parameters)
 
             if self._fingerprint is not None:
-                output = self._fingerprint(*output)
+                try:
+                    output = self._fingerprint(*output)
+                except Exception as exception:
+                    if python_version() >= "3.11":
+                        exception.add_note(
+                            "An error was raised in fingerprint function, "
+                            " most likely because your output type is wrong."
+                        )
+                    excution_info = sys.exc_info()
+                    check_result.append(excution_info, assert_f, input_parameters)
+                    return check_result
+
                 if not (isinstance(output, tuple)):
                     output = (output,)
 
@@ -199,10 +242,24 @@ class Check:
                     f"{len(self._outputs_references[i])}]."  # type: ignore[index]
                 )
 
-                assert_result = assert_f(
-                    output, self._outputs_references[i]  # type: ignore[index, call-arg]
+                try:
+                    assert_result = assert_f(
+                        output,
+                        self._outputs_references[i],  # type: ignore[index, call-arg]
+                    )
+                except Exception:
+                    excution_info = sys.exc_info()
+                    check_result.append(excution_info, assert_f, input_parameters)
+                    if self._stop_on_assert_error_raised:
+                        return check_result
+                check_result.append(
+                    assert_result,
+                    assert_f,
+                    input_parameters,
+                    self._suppress_fingerprint_asserts
+                    and self._fingerprint is not None,
                 )
-                check_result.append(assert_result, assert_f, input_parameters)
+
         return check_result
 
 
@@ -211,34 +268,105 @@ class ChecksLog:
         self._assert_results = []
         self._assert_names = []
         self._inputs_parameters = []
+        self._suppress_assert_messages = []
 
     def append(
         self,
-        assert_result: str,
+        assert_result: Union[str, AssertResult, ExecutionInfo],
         assert_f: Optional[Check.AssertFunT] = None,
         input_parameters: Optional[dict] = None,
+        suppress_assert_message: Optional[bool] = False,
     ):
         self._assert_results.append(assert_result)
-        self._assert_names.append(self._get_name_from_assert(assert_f))
+        if isinstance(assert_result, AssertResult):
+            self._assert_names.append(assert_result.assert_name)
+        else:
+            self._assert_names.append(self._get_name_from_assert(assert_f))
+
         self._inputs_parameters.append(input_parameters)
+        self._suppress_assert_messages.append(suppress_assert_message)
 
     def extend(self, check_results: ChecksLog):
         self._assert_results.extend(check_results._assert_results)
         self._assert_names.extend(check_results._assert_names)
         self._inputs_parameters.extend(check_results._inputs_parameters)
+        self._suppress_assert_messages.extend(check_results._suppress_assert_messages)
 
     @property
     def successful(self):
-        return len([result for result in self._assert_results if result != ""]) == 0
+        return (
+            len(
+                [
+                    result
+                    for result in self._assert_results
+                    if (isinstance(result, str) and result != "")
+                    or (isinstance(result, AssertResult) and not (result.successful))
+                ]
+            )
+            == 0
+        )
 
     def message(self) -> str:
-        messages = [
-            f"Test failed for input:\n"
-            f"  {self._inputs_parameters[i]}\n"
-            f"  {self._assert_names[i]} failed: {result}\n"
-            for i, result in enumerate(self._assert_results)
-            if result != ""
-        ]
+        messages = []
+        for i, result in enumerate(self._assert_results):
+            if (isinstance(result, str) and result == "") or (
+                isinstance(result, AssertResult) and result.successful
+            ):
+                message = Printer.color_assert_success(
+                    f"{self._assert_names[i]} passed",
+                )
+            else:
+                message = Printer.color_assert_failed(
+                    f"{self._assert_names[i]} failed",
+                )
+                if len(self._inputs_parameters[i]) > 0:
+                    message += Printer.color_error_message(" for input\n")
+                elif (isinstance(result, tuple) and len(result) == 3) or not (
+                    self._suppress_assert_messages[i]
+                ):
+                    message += Printer.color_error_message("\n")
+
+                message += "\n".join(
+                    [
+                        f"  {Printer.color_info_message(param_name)}:  {param_value!r}"
+                        for param_name, param_value in self._inputs_parameters[
+                            i
+                        ].items()
+                    ]
+                )
+
+                if isinstance(result, tuple) and len(result) == 3:
+                    if len(self._inputs_parameters[i]) > 0:
+                        message += "\n"
+                    tb = IPython.core.ultratb.VerboseTB()
+                    message = Printer.color_assert_failed(
+                        f"{self._assert_names[i]} failed\n"
+                    )
+                    assert_result = tb.text(*result)
+                    assert_result = re.sub(
+                        r"(^)",
+                        r"\1" + f"{Printer.color_assert_failed('|')} ",
+                        assert_result,
+                        flags=re.M,
+                    )
+                    message += assert_result
+                elif not (self._suppress_assert_messages[i]):
+                    if len(self._inputs_parameters[i]) > 0:
+                        message += "\n"
+                    if hasattr(result, "message"):
+                        assert_result = f"{result.message()}"
+                    else:
+                        assert_result = f"{Printer.color_assert_failed(result)}"
+                    # adds "| " to the beginning of each line
+                    assert_result = re.sub(
+                        r"(^)",
+                        r"\1" + f"{Printer.color_assert_failed('|')} ",
+                        assert_result,
+                        flags=re.M,
+                    )
+                    message += f"{assert_result}"
+            messages.append(message)
+
         return "\n".join(messages)
 
     def _get_name_from_assert(self, assert_f: Any) -> str:
@@ -260,3 +388,74 @@ class ChecksLog:
     @property
     def inputs_parameters(self):
         return deepcopy(self._inputs_parameters)
+
+
+class AssertResult:
+    """
+    :param assert_name:
+        TODO
+    :param parameter_indices:
+        TODO
+    TODO...
+    """
+
+    def __init__(
+        self,
+        assert_name: str,
+        parameter_indices: Union[int, List[int]],
+        parameter_values: Union[Any, List[Any]],
+        messages: Union[str, List[str]],
+    ):
+        self._assert_name = assert_name
+
+        # we do not include parameter_values in the check because it can be a list
+        # by type definition
+        if isinstance(parameter_indices, list) or isinstance(messages, list):
+            if (
+                not (isinstance(parameter_indices, list))
+                or not (isinstance(parameter_values, list))
+                or not (isinstance(messages, list))
+            ):
+                raise ValueError(
+                    "If one of the inputs parameter_indices, paramater_values or "
+                    "messages is a list, then all must be lists of the same size."
+                )
+            elif len(parameter_indices) != len(parameter_values) or len(
+                parameter_indices
+            ) != len(messages):
+                raise ValueError(
+                    "If one of the inputs parameter_indices, paramater_values or "
+                    "messages is a list, then all must be lists of the same size, "
+                    "but got len(parameter_indices), len(parameter_values), "
+                    f"len(messages) [{len(parameter_indices)}, "
+                    f"{len(parameter_values)}, {len(messages)}]"
+                )
+        if not (isinstance(parameter_indices, list)):
+            parameter_indices = [parameter_indices]
+        self._parameter_indices = parameter_indices
+
+        if not (isinstance(parameter_values, list)):
+            parameter_values = [parameter_values]
+        self._parameter_values = parameter_values
+
+        if not (isinstance(messages, list)):
+            messages = [messages]
+        self._messages = messages
+
+    def message(self) -> str:
+        message = ""
+        for i in range(len(self._parameter_indices)):
+            message += (
+                Printer.color_assert_failed(f"output {self._parameter_indices[i]}: ")
+                + Printer.color_assert_failed(f"{self._parameter_values[i]}\n")
+                + Printer.color_assert_failed(self._messages[i])
+            )
+        return message
+
+    @property
+    def assert_name(self) -> str:
+        return self._assert_name
+
+    @property
+    def successful(self):
+        return len(self._parameter_indices) == 0
