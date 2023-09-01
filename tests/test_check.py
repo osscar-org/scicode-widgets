@@ -19,7 +19,7 @@ def test_assert_shape():
     output_parameters = (np.array([1, 2, 3]),)
     output_references = (np.array([1, 2, 3]),)
     result = assert_shape(output_parameters, output_references)
-    assert result == ""
+    assert result.successful
 
 
 def test_assert_invalid_parameters_to_check():
@@ -33,29 +33,28 @@ def test_assert_numpy_allclose():
     output_parameters = (np.array([1.0, 2.0]),)
     output_references = (np.array([1.1, 2.2]),)
     result = assert_numpy_allclose(output_parameters, output_references)
-    assert "Output parameter 0 is not close to reference" in result
+    assert "Output is not close to reference" in result.message()
 
 
 def test_assert_type():
     output_parameters = (42,)
     output_references = (42,)
     result = assert_type(output_parameters, output_references)
-    assert result == ""
+    assert result.successful
 
 
 def test_assert_numpy_floating_sub_dtype():
     output_parameters = (np.array([1.0, 2.0]),)
     result = assert_numpy_floating_sub_dtype(output_parameters)
-    assert result == ""
+    assert result.successful
 
 
 def test_assert_invalid_output_parameter_dtype():
     output_parameters = (np.array([1, 2]),)
     result = assert_numpy_floating_sub_dtype(output_parameters)
-    assert result == (
-        "Output parameter 0 expected to be sub dtype numpy.floating "
-        "but got numpy.int64."
-    )
+    assert (
+        "Output expected to be sub dtype numpy.floating " "but got numpy.int64."
+    ) in result.message()
 
 
 def single_param_check(use_fingerprint=False, failing=False, buggy=False):

@@ -18,12 +18,17 @@ class CheckableWidget:
 
     :param check_registry:
         the check registry that registers the checks for this widget
+
+    :param name:
+        Optional name of the widget that is shown in the messages of the checks
     """
 
-    def __init__(self, check_registry: Optional[CheckRegistry]):
+    def __init__(
+        self, check_registry: Optional[CheckRegistry], name: Optional[str] = None
+    ):
         self._check_registry = check_registry
         if self._check_registry is not None:
-            self._check_registry.register_widget(self)
+            self._check_registry.register_widget(self, name)
 
     def compute_output_to_check(
         self, *input_args: Check.FunInParamT
@@ -72,6 +77,7 @@ class CheckableWidget:
         fingerprint: Optional[
             Callable[[Check.FunOutParamsT], Check.FingerprintT]
         ] = None,
+        suppress_fingerprint_asserts: bool = True,
     ):
         if self._check_registry is None:
             raise ValueError(
@@ -79,7 +85,12 @@ class CheckableWidget:
             )
 
         self._check_registry.add_check(
-            self, asserts, inputs_parameters, outputs_references, fingerprint
+            self,
+            asserts,
+            inputs_parameters,
+            outputs_references,
+            fingerprint,
+            suppress_fingerprint_asserts,
         )
 
     def compute_and_set_references(self):
@@ -186,6 +197,7 @@ class CheckRegistry(VBox):
         fingerprint: Optional[
             Callable[[Check.FunOutParamsT], Check.FingerprintT]
         ] = None,
+        suppress_fingerprint_asserts: bool = True,
     ):
         if not (issubclass(type(widget), CheckableWidget)):
             raise ValueError("Argument widget must be subclass of CheckableWidget")
@@ -199,6 +211,7 @@ class CheckRegistry(VBox):
             inputs_parameters,
             outputs_references,
             fingerprint,
+            suppress_fingerprint_asserts,
         )
         self._checks[widget].append(check)
 
@@ -265,19 +278,26 @@ class CheckRegistry(VBox):
                 with self._output:
                     if isinstance(widget_results, Exception):
                         Printer.print_error_message(
-                            f"Widget {self._names[widget]} " f"raised error:"
+                            Printer.format_title_message(
+                                f"Widget {self._names[widget]} " f"raised error:"
+                            )
                         )
                         raise widget_results
                     elif isinstance(widget_results, ChecksLog):
                         if widget_results.successful:
                             Printer.print_success_message(
-                                f"Widget {self._names[widget]} all checks "
-                                f"were successful."
+                                Printer.format_title_message(
+                                    f"Widget {self._names[widget]} all checks "
+                                    f"were successful"
+                                )
                             )
+                            print(widget_results.message())
                         else:
                             Printer.print_error_message(
-                                f"Widget {self._names[widget]} not all checks were "
-                                "successful:"
+                                Printer.format_title_message(
+                                    f"Widget {self._names[widget]} not all checks were "
+                                    "successful:"
+                                )
                             )
                             print(widget_results.message())
                     else:

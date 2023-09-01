@@ -5,12 +5,13 @@ from ._asserts import (
     assert_shape,
     assert_type,
 )
-from ._check import Check, ChecksLog
+from ._check import AssertResult, Check, ChecksLog
 from ._widget_check_registry import CheckableWidget, CheckRegistry
 
 __all__ = [
     "Check",
     "ChecksLog",
+    "AssertResult",
     "CheckRegistry",
     "CheckableWidget",
     "assert_shape",
