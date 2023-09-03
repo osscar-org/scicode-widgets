@@ -42,3 +42,16 @@
   border-left-color: #e95420;
 }
 
+/* scwidgets default reset cue button */
+
+.scwidget-reset-cue-button {
+    border :  3px solid;
+    border-color: #f4f2f0;
+    background-color: #f4f2f0;
+    height: auto;
+}
+
+.scwidget-reset-cue-button--cue {
+    background-color: #545352;
+    border-color: #545352;
+}

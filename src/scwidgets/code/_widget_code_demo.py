@@ -68,7 +68,7 @@ class CodeDemo(VBox, CheckableWidget):
                 cued=True,
                 layout=Layout(width="98%", height="auto"),
             )
-            self._check_button.cue_boxes = [self._cue_code, self._cue_check_button]
+            self._check_button.cue_widgets = [self._cue_code, self._cue_check_button]
 
         if self._parameters is None:
             self._update_button = None
@@ -102,7 +102,9 @@ class CodeDemo(VBox, CheckableWidget):
             # ----------------------
             self._parameter_panel = ParameterPanel(**self._parameters)
             self._cue_parameter_panel = UpdateCueBox(
-                self._parameter_panel.parameters_widget, "value", self._parameter_panel
+                self._parameter_panel.parameters_widget,
+                ["value"] * len(self._parameter_panel.parameters_widget),
+                self._parameter_panel,
             )
             self._cue_update_button = UpdateCueBox(
                 [self._code] + self._parameter_panel.parameters_widget,
@@ -112,7 +114,7 @@ class CodeDemo(VBox, CheckableWidget):
                 cued=True,
             )
 
-            self._update_button.cue_boxes = [
+            self._update_button.cue_widgets = [
                 self._cue_code,
                 self._cue_update_button,
                 self._cue_parameter_panel,
@@ -152,7 +154,7 @@ class CodeDemo(VBox, CheckableWidget):
             return True
         except Exception as e:
             self._output_results([e])
-            return True
+            return False
 
     def _on_click_check_action(self) -> bool:
         self._output.clear_output()

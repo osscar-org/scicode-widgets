@@ -52,28 +52,56 @@ create_cue_box(UpdateCueBox, False)
 # -------
 # Check if successful action ResetCueButton resets cue and failing action does not
 
-# +
-text_input2 = Text("Text")
+
+def create_reset_cue_button(
+    disable_on_successful_action: bool, failing_action: bool, error_in_action: bool
+):
+    text_input = Text("Text")
+
+    unused_text_input = Text("Unused")
+
+    def action():
+        if error_in_action:
+            raise ValueError("Error")
+        return not (failing_action)
+
+    reset_cue_button = ResetCueButton(
+        [],
+        action,
+        description="Reset Cue",
+        disable_on_successful_action=disable_on_successful_action,
+    )
+    cue_text_input = CueBox(text_input, "value", cued=False)
+    cue_reset_cue_button = CueBox(text_input, "value", reset_cue_button, cued=False)
+    cue_unused_text_input = CueBox(unused_text_input, "value", cued=False)
+
+    # by setting it to a different widget we test if unobserve behavior works
+    reset_cue_button.cue_widgets = [cue_unused_text_input]
+    reset_cue_button.cue_widgets = [cue_text_input, cue_reset_cue_button]
+    return VBox([cue_text_input, cue_unused_text_input, cue_reset_cue_button])
 
 
-def action_success():
-    return True
-
-
-def action_fail():
-    return False
-
-
-reset_cue_button = ResetCueButton([], action_success, description="Reset Cue")
-failing_reset_cue_button = ResetCueButton(
-    [], action_fail, description="Failing Reset Cue"
+# Test 2.1
+create_reset_cue_button(
+    disable_on_successful_action=True, failing_action=False, error_in_action=False
 )
-cue_reset_cue_button = CueBox(text_input2, "value", reset_cue_button, cued=False)
-cue_failing_reset_cue_button = CueBox(
-    text_input2, "value", failing_reset_cue_button, cued=False
+
+# Test 2.2
+create_reset_cue_button(
+    disable_on_successful_action=True, failing_action=True, error_in_action=False
 )
-cue1_text_input2 = CueBox(text_input2, cued=False)
-cue2_text_input2 = CueBox(text_input2, "value", cue1_text_input2, cued=False)
-reset_cue_button.cue_boxes = [cue_reset_cue_button, cue1_text_input2]
-failing_reset_cue_button.cue_boxes = [cue_failing_reset_cue_button, cue2_text_input2]
-VBox([cue2_text_input2, cue_reset_cue_button, cue_failing_reset_cue_button])
+
+# Test 2.3
+create_reset_cue_button(
+    disable_on_successful_action=False, failing_action=False, error_in_action=False
+)
+
+# Test 2.4
+create_reset_cue_button(
+    disable_on_successful_action=False, failing_action=True, error_in_action=False
+)
+
+# Test 2.5
+create_reset_cue_button(
+    disable_on_successful_action=True, failing_action=False, error_in_action=True
+)
