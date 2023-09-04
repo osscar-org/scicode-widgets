@@ -1,4 +1,5 @@
 import types
+from copy import deepcopy
 from platform import python_version
 from typing import Dict, List, Optional, Union
 
@@ -27,6 +28,10 @@ class CodeDemo(VBox, CheckableWidget):
         Can be any input that is allowed as keyword arguments in ipywidgets.interactive
         for the parameters. _options and other widget layout parameter are controlled
         by CodeDemo.
+
+    :param update_mode:
+        determines how the parameters are refreshed on change
+
     """
 
     def __init__(
@@ -34,9 +39,18 @@ class CodeDemo(VBox, CheckableWidget):
         code: Union[CodeInput, types.FunctionType],
         check_registry: Optional[CheckRegistry] = None,
         parameters: Optional[Dict[str, Union[Check.FunInParamT, Widget]]] = None,
+        update_mode: str = "release",
         *args,
         **kwargs,
     ):
+        allowed_update_modes = ["manual", "continuous", "release"]
+        if update_mode not in allowed_update_modes:
+            raise ValueError(
+                f"Got update mode {update_mode!r} but only "
+                f"{allowed_update_modes} are allowed."
+            )
+        self._update_mode = update_mode
+
         if isinstance(code, types.FunctionType):
             code = CodeInput(function=code)
 
@@ -44,7 +58,7 @@ class CodeDemo(VBox, CheckableWidget):
 
         self._code = code
         self._output = Output()
-        self._parameters = parameters
+        self._parameters = deepcopy(parameters)
         self._cue_code = self._code
 
         if self._check_registry is None:
@@ -56,8 +70,13 @@ class CodeDemo(VBox, CheckableWidget):
             self._check_button = CheckResetCueButton(
                 [self._cue_code],
                 self._on_click_check_action,
+                disable_on_successful_action=kwargs.pop(
+                    "disable_check_button_on_successful_action", False
+                ),
+                disable_during_action=kwargs.pop(
+                    "disable_check_button_during_action", True
+                ),
                 description="Check Code",
-                disable_on_successful_action=False,
                 button_tooltip="Check the correctness of your code",
             )
 
@@ -83,17 +102,55 @@ class CodeDemo(VBox, CheckableWidget):
 
             # set up parameter panel
             # ----------------------
+
             self._parameter_panel = ParameterPanel(**self._parameters)
-            self._cue_parameter_panel = UpdateCueBox(
-                self._parameter_panel.parameters_widget,
-                ["value"] * len(self._parameter_panel.parameters_widget),
-                self._parameter_panel,
-            )
+            if self._update_mode == "continuous":
+                self._parameter_panel.set_parameters_widget_attr(
+                    "continuous_update", True
+                )
+            elif self._update_mode == "release":
+                self._parameter_panel.set_parameters_widget_attr(
+                    "continuous_update", False
+                )
+
+            if self._update_mode in ["continuous", "release"]:
+                self._parameter_panel.observe_parameters(
+                    self._on_trait_parameters_changed, "value"
+                )
+                # the button only cues on cue_code change
+                widgets_to_observe = [self._code]
+                traits_to_observe = ["function_body"]
+                # assume when continuous that the function is fast
+                # and that disabling causes flicker
+                disable_during_action = False
+
+                self._cue_parameter_panel = UpdateCueBox(
+                    [],
+                    [],
+                    self._parameter_panel,
+                )
+            else:
+                widgets_to_observe = None
+                traits_to_observe = None
+                disable_during_action = True
+
+                self._cue_parameter_panel = UpdateCueBox(
+                    self._parameter_panel.parameters_widget,
+                    self._parameter_panel.parameters_trait,
+                    self._parameter_panel,
+                )
 
             self._update_button = UpdateResetCueButton(
-                [self._cue_code, self._cue_parameter_panel],
+                [self._cue_code, self._cue_parameter_panel],  # type: ignore[arg-type]
                 self._on_click_update_action,
-                disable_on_successful_action=False,
+                disable_on_successful_action=kwargs.pop(
+                    "disable_update_button_on_successful_action", False
+                ),
+                disable_during_action=kwargs.pop(
+                    "disable_update_button_during_action", disable_during_action
+                ),
+                widgets_to_observe=widgets_to_observe,
+                traits_to_observe=traits_to_observe,
                 description="Run Code",
                 button_tooltip="Runs the code with the specified parameters",
             )
@@ -123,14 +180,17 @@ class CodeDemo(VBox, CheckableWidget):
     def panel_parameters(self) -> Dict[str, Check.FunInParamT]:
         return self._parameter_panel.parameters
 
-    def _on_click_update_action(self) -> bool:
-        self._output.clear_output()
-        try:
-            self._on_action_run_code(**self.panel_parameters)
-            return True
-        except Exception as e:
-            self._output_results([e])
-            return False
+    def _on_trait_parameters_changed(self, change: dict):
+        if self._update_button is None:
+            self._output.clear_output()
+            error = ValueError(
+                "Invalid state: _on_trait_parameters_changed was "
+                "invoked but no update button was defined"
+            )
+            with self._output:
+                raise error
+            raise error
+        self._update_button.click()
 
     def _on_click_check_action(self) -> bool:
         self._output.clear_output()
@@ -164,21 +224,26 @@ class CodeDemo(VBox, CheckableWidget):
                 else:
                     print(result)
 
-    def _on_action_run_code(self, *args, **kwargs):
+    def _on_click_update_action(self) -> bool:
+        self._output.clear_output()
+        raised_error = False
         # runs code and displays output
         with self._output:
             try:
-                result = self._code.run(*args, **kwargs)
+                result = self._code.run(**self.panel_parameters)
                 print("Output:")
                 print(result)
             except CodeValidationError as e:
+                raised_error = True
                 raise e
             except Exception as e:
+                raised_error = True
                 # we give the student the additional information that this is most
                 # likely not because of his code
                 if python_version() >= "3.11":
                     e.add_note("This is most likely not related to your code input.")
                 raise e
+        return not (raised_error)
 
     def run_code(self, *args, **kwargs) -> Check.FunOutParamsT:
         try:

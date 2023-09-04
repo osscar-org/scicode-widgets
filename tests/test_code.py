@@ -67,7 +67,11 @@ class TestCodeInput:
 
 
 def get_code_demo(
-    checks: List[Check], include_checks=True, include_params=True, tunable_params=False
+    checks: List[Check],
+    include_checks=True,
+    include_params=True,
+    tunable_params=False,
+    update_mode="manual",
 ):
     # Important:
     # we take the the function_to_check from the first check as code input
@@ -91,6 +95,7 @@ def get_code_demo(
         code=code_input,
         check_registry=CheckRegistry() if include_checks is True else None,
         parameters=parameters if include_params is True else None,
+        update_mode=update_mode,
     )
 
     if include_checks is True:

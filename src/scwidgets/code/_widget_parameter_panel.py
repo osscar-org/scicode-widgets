@@ -1,6 +1,7 @@
-from typing import Dict, List, Union
+from typing import Callable, Dict, List, Union
 
 from ipywidgets import Output, VBox, Widget, interactive
+from traitlets.utils.sentinel import Sentinel
 
 from ..check import Check
 
@@ -14,6 +15,7 @@ class ParameterPanel(VBox):
         Can be any input that is allowed as keyword arguments in ipywidgets.interactive
         for the parameters. _options and other widget layout parameter are controlled
         by CodeDemo.
+
     """
 
     def __init__(
@@ -44,5 +46,33 @@ class ParameterPanel(VBox):
         return self._parameters_widget
 
     @property
-    def parameters(self):
+    def parameters_trait(self) -> List[str]:
+        return ["value"] * len(self._parameters_widget)
+
+    @property
+    def parameters(self) -> dict:
         return self._interactive_widget.kwargs
+
+    def observe_parameters(
+        self,
+        handler: Callable[[dict], None],
+        trait_name: Union[str, Sentinel, List[str]],
+        notification_type: Union[None, str, Sentinel] = "change",
+    ):
+        """ """
+        for widget in self._parameters_widget:
+            widget.observe(handler, trait_name, notification_type)
+
+    def unobserve_parameters(
+        self,
+        handler: Callable[[dict], None],
+        trait_name: Union[str, Sentinel, List[str]],
+        notification_type: Union[None, str, Sentinel] = "change",
+    ):
+        for widget in self._parameters_widget:
+            widget.unobserve(handler, trait_name, notification_type)
+
+    def set_parameters_widget_attr(self, name: str, value):
+        for widget in self._parameters_widget:
+            if hasattr(widget, name):
+                setattr(widget, name, value)

@@ -28,8 +28,10 @@ from tests.test_code import get_code_demo  # noqa: E402
 scwidgets.get_css_style()
 
 
-def run_code_demo(checks, include_checks, include_params, tunable_params):
-    return get_code_demo(checks, include_checks, include_params, tunable_params)
+def run_code_demo(checks, include_checks, include_params, tunable_params, update_mode):
+    return get_code_demo(
+        checks, include_checks, include_params, tunable_params, update_mode
+    )
 
 
 # Test 1:
@@ -42,6 +44,7 @@ run_code_demo(
     include_checks=True,
     include_params=True,
     tunable_params=False,
+    update_mode="manual",
 )
 
 # Test 1.2
@@ -50,6 +53,7 @@ run_code_demo(
     include_checks=True,
     include_params=True,
     tunable_params=False,
+    update_mode="manual",
 )
 
 # Test 1.3
@@ -58,6 +62,7 @@ run_code_demo(
     include_checks=True,
     include_params=True,
     tunable_params=False,
+    update_mode="manual",
 )
 
 # Test 1.4
@@ -66,6 +71,25 @@ run_code_demo(
     include_checks=True,
     include_params=True,
     tunable_params=True,
+    update_mode="manual",
+)
+
+# Test 1.5
+run_code_demo(
+    [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
+    include_checks=True,
+    include_params=True,
+    tunable_params=True,
+    update_mode="continuous",
+)
+
+# Test 1.6
+run_code_demo(
+    [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
+    include_checks=True,
+    include_params=True,
+    tunable_params=True,
+    update_mode="release",
 )
 
 
