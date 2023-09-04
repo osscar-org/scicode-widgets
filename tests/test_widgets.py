@@ -588,6 +588,10 @@ def test_widgets_code(selenium_driver):
         # assert check_button.is_enabled()
 
         if tunable_params:
+            outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+            assert len(outputs) == 1
+            before_parameter_change_text = outputs[0].text
+
             slider_input_box = nb_cell.find_element(By.CLASS_NAME, "widget-readout")
             slider_input_box.send_keys(Keys.BACKSPACE)
             slider_input_box.send_keys(Keys.BACKSPACE)
@@ -601,6 +605,13 @@ def test_widgets_code(selenium_driver):
             assert scwidget_reset_cue_button_class_name(
                 "update", True
             ) in update_button.get_attribute("class")
+
+            # Check if output has changed after update
+            update_button.click()
+            outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+            assert len(outputs) == 1
+            after_parameter_change_text = outputs[0].text
+            assert before_parameter_change_text != after_parameter_change_text
 
     # Test 1.1
     test_code_demo(
