@@ -37,8 +37,6 @@ class ParameterPanel(VBox):
             "Parameter will be wrongly initialized if this is not True."
         )
         self._parameters_widget = list(self._interactive_widget.children[:-1])
-        for widget in self._parameters_widget:
-            widget.unobserve_all()
         super().__init__(self._parameters_widget)
 
     @property
