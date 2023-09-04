@@ -465,6 +465,7 @@ def test_widgets_code(selenium_driver):
         include_checks=True,
         include_params=True,
         tunable_params=False,
+        update_mode="manual",
     ):
         ########################################################
         # asserts for correct initialization of check elements #
@@ -599,15 +600,22 @@ def test_widgets_code(selenium_driver):
             slider_input_box.send_keys(Keys.ENTER)
             time.sleep(0.2)
 
+            # if update mode manual, then cue box should be seen
             assert scwidget_cue_box_class_name(
-                "update", True
+                "update", (update_mode == "manual")
             ) in parameter_panel.get_attribute("class")
             assert scwidget_reset_cue_button_class_name(
-                "update", True
+                "update", (update_mode == "manual")
             ) in update_button.get_attribute("class")
 
-            # Check if output has changed after update
-            update_button.click()
+            if update_mode == "manual":
+                # Check if output has changed only after click when manual
+                outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+                assert len(outputs) == 1
+                after_parameter_change_text = outputs[0].text
+                assert before_parameter_change_text == after_parameter_change_text
+                update_button.click()
+
             outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
             assert len(outputs) == 1
             after_parameter_change_text = outputs[0].text
@@ -621,6 +629,7 @@ def test_widgets_code(selenium_driver):
         include_checks=True,
         include_params=True,
         tunable_params=False,
+        update_mode="manual",
     )
 
     # Test 1.2
@@ -631,6 +640,7 @@ def test_widgets_code(selenium_driver):
         include_checks=True,
         include_params=True,
         tunable_params=False,
+        update_mode="manual",
     )
 
     # Test 1.3
@@ -641,6 +651,7 @@ def test_widgets_code(selenium_driver):
         include_checks=True,
         include_params=True,
         tunable_params=False,
+        update_mode="manual",
     )
     # Test 1.4
     test_code_demo(
@@ -650,6 +661,29 @@ def test_widgets_code(selenium_driver):
         include_checks=True,
         include_params=True,
         tunable_params=True,
+        update_mode="manual",
+    )
+
+    # Test 1.5
+    test_code_demo(
+        nb_cells[7],
+        ["SomeText", "Output"],
+        ["All checks were successful"],
+        include_checks=True,
+        include_params=True,
+        tunable_params=True,
+        update_mode="continuous",
+    )
+
+    # Test 1.6
+    test_code_demo(
+        nb_cells[8],
+        ["SomeText", "Output"],
+        ["All checks were successful"],
+        include_checks=True,
+        include_params=True,
+        tunable_params=True,
+        update_mode="release",
     )
 
     # Test 2:
