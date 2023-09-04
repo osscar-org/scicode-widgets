@@ -30,21 +30,21 @@ CUED_CUE_BOX_CLASS_NAME = (
 )
 
 
-def cue_box_class_name(cue_box_name: str, cued: bool):
+def cue_box_class_name(cue_type: str, cued: bool):
     class_name = CUED_CUE_BOX_CLASS_NAME if cued else CUE_BOX_CLASS_NAME
-    if cue_box_name is None:
+    if cue_type is None:
         return class_name
-    return class_name.replace("cue-box", f"{cue_box_name}-cue-box")
+    return class_name.replace("cue-box", f"{cue_type}-cue-box")
 
 
-def scwidget_cue_box_class_name(cue_box_name: str, cued: bool):
+def scwidget_cue_box_class_name(cue_type: str, cued: bool):
     if cued:
         class_name = "scwidget-cue-box--cue"
     else:
         class_name = "scwidget-cue-box"
-    if cue_box_name is None:
+    if cue_type is None:
         return class_name
-    return class_name.replace("cue-box", f"{cue_box_name}-cue-box")
+    return class_name.replace("cue-box", f"{cue_type}-cue-box")
 
 
 RESET_CUE_BUTTON_CLASS_NAME = (
@@ -55,6 +55,25 @@ CUED_RESET_CUE_BUTTON_CLASS_NAME = (
     "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
     ".scwidget-reset-cue-button.scwidget-reset-cue-button--cue"
 )
+
+
+def reset_cue_button_class_name(cue_type: str, cued: bool):
+    class_name = (
+        CUED_RESET_CUE_BUTTON_CLASS_NAME if cued else RESET_CUE_BUTTON_CLASS_NAME
+    )
+    if cue_type is None:
+        return class_name
+    return class_name.replace("reset-cue-button", f"{cue_type}-reset-cue-button")
+
+
+def scwidget_reset_cue_button_class_name(cue_type: str, cued: bool):
+    if cued:
+        class_name = "scwidget-reset-cue-button--cue"
+    else:
+        class_name = "scwidget-reset-cue-button"
+    if cue_type is None:
+        return class_name
+    return class_name.replace("reset-cue-button", f"{cue_type}-reset-cue-button")
 
 
 BUTTON_CLASS_NAME = "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
@@ -450,20 +469,24 @@ def test_widgets_code(selenium_driver):
         # asserts for correct initialization of check elements #
         ########################################################
         if include_checks:
-            check_elements = nb_cell.find_elements(
+            check_boxes = nb_cell.find_elements(
                 By.CLASS_NAME, cue_box_class_name("check", False)
             )
-            assert len(check_elements) == 2
-            check_code_input = check_elements[0]
+            check_buttons = nb_cell.find_elements(
+                By.CLASS_NAME, reset_cue_button_class_name("check", False)
+            )
+            assert len(check_boxes) == 1
+            assert len(check_buttons) == 1
+            check_code_input = check_boxes[0]
             assert "def function_to_check" in check_code_input.text
             assert scwidget_cue_box_class_name(
                 "check", True
             ) in check_code_input.get_attribute("class")
 
-            check_button = check_elements[1]
+            check_button = check_buttons[0]
             assert check_button.text == "Check Code"
             assert check_button.is_enabled()
-            assert scwidget_cue_box_class_name(
+            assert scwidget_reset_cue_button_class_name(
                 "check", True
             ) in check_button.get_attribute("class")
 
@@ -471,16 +494,16 @@ def test_widgets_code(selenium_driver):
         # asserts for correct initialization of update elements #
         #########################################################
         if include_params:
-            update_elements = nb_cell.find_elements(
+            update_boxes = nb_cell.find_elements(
                 By.CLASS_NAME, cue_box_class_name("update", False)
             )
-            assert len(update_elements) == 3
-            update_code_input = update_elements[0]
+            assert len(update_boxes) == 2
+            update_code_input = update_boxes[0]
             assert "def function_to_check" in update_code_input.text
             assert scwidget_cue_box_class_name(
                 "update", True
             ) in update_code_input.get_attribute("class")
-            parameter_panel = update_elements[1]
+            parameter_panel = update_boxes[1]
             # in these tests it should not be contain inything
             if not (tunable_params):
                 assert parameter_panel.size["height"] == 0
@@ -489,10 +512,14 @@ def test_widgets_code(selenium_driver):
                     "update", True
                 ) in parameter_panel.get_attribute("class")
 
-            update_button = update_elements[2]
+            update_buttons = nb_cell.find_elements(
+                By.CLASS_NAME, reset_cue_button_class_name("update", False)
+            )
+            assert len(update_buttons) == 1
+            update_button = update_buttons[0]
             assert update_button.text == "Run Code"
             assert update_button.is_enabled()
-            assert scwidget_cue_box_class_name(
+            assert scwidget_reset_cue_button_class_name(
                 "update", True
             ) in update_button.get_attribute("class")
 
@@ -507,7 +534,7 @@ def test_widgets_code(selenium_driver):
                 in check_code_input.get_attribute("class")
             )
             assert not (
-                scwidget_cue_box_class_name("check", True)
+                scwidget_reset_cue_button_class_name("check", True)
                 in check_button.get_attribute("class")
             )
             assert check_button.is_enabled()
@@ -526,7 +553,7 @@ def test_widgets_code(selenium_driver):
                 in update_code_input.get_attribute("class")
             )
             assert not (
-                scwidget_cue_box_class_name("update", True)
+                scwidget_reset_cue_button_class_name("update", True)
                 in update_button.get_attribute("class")
             )
             assert update_button.is_enabled()
@@ -570,7 +597,7 @@ def test_widgets_code(selenium_driver):
             assert scwidget_cue_box_class_name(
                 "update", True
             ) in parameter_panel.get_attribute("class")
-            assert scwidget_cue_box_class_name(
+            assert scwidget_reset_cue_button_class_name(
                 "update", True
             ) in update_button.get_attribute("class")
 
