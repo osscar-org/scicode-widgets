@@ -76,8 +76,8 @@ def create_reset_cue_button(
     cue_unused_text_input = CueBox(unused_text_input, "value", cued=False)
 
     # by setting it to a different widget we test if unobserve behavior works
-    reset_cue_button.cue_widgets = [cue_unused_text_input]
-    reset_cue_button.cue_widgets = [cue_text_input, cue_reset_cue_button]
+    reset_cue_button.set_cue_widgets([cue_unused_text_input])
+    reset_cue_button.set_cue_widgets([cue_text_input, cue_reset_cue_button])
     return VBox([cue_text_input, cue_unused_text_input, cue_reset_cue_button])
 
 
