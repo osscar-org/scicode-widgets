@@ -1,7 +1,8 @@
 /* scwidgets default cue box */
 
 .scwidget-cue-box {
-  border-left : 0px solid;
+  border-left : 5px solid;
+  border-left-color: transparent;
 }
 
 .scwidget-cue-box--cue {
@@ -12,7 +13,8 @@
 /* scwidgets save cue box */
 
 .scwidget-save-cue-box {
-  border-left : 0px solid;
+  border-left : 5px solid;
+  border-left-color: transparent;
 }
 
 .scwidget-save-cue-box--cue {
@@ -23,7 +25,8 @@
 /* scwidgets check cue box */
 
 .scwidget-check-cue-box {
-  border-left : 0px solid;
+  border-left : 5px solid;
+  border-left-color: transparent;
 }
 
 .scwidget-check-cue-box--cue {
@@ -34,7 +37,8 @@
 /* scwidgets update cue box */
 
 .scwidget-update-cue-box {
-  border-left : 0px solid;
+  border-left : 5px solid;
+  border-left-color: transparent;
 }
 
 .scwidget-update-cue-box--cue {
