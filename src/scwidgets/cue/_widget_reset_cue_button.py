@@ -1,6 +1,7 @@
 from typing import Callable, Dict, List, Optional, Union
 
-from ipywidgets import Button
+from ipywidgets import Button, Widget
+from traitlets.utils.sentinel import Sentinel
 
 from ._widget_cue import CueWidget
 
@@ -19,12 +20,24 @@ class ResetCueButton(Button, CueWidget):
         was successful, if False nothing happens.
     :param disable_on_successful_action:
         Specifies if the button should be disabled on a successful action
+    :param disable_during_action:
+        Specifies if the button should be disabled during the action
     :param css_syle:
         - **base**: the css style of the box during initialization
         - **cue**: the css style that is added when :param
           traits_to_observe: in widget :param widget_to_observe: changes.
           It is supposed to change the style of the box such that the user has a visual
           cue that :param widget_to_cue: has changed.
+    :param widgets_to_observe:
+        The widget to observe if the :param traits_to_observe: has changed. If ``None``
+        then widgets from :param cue_widgets: are taken.
+    :param traits_to_observe:
+        The trait from the :param widgets_to_observe: to observe if changed.
+        Specify `traitlets.All` to observe all traits. If ``None`` then traits
+        from :param cue_widgets: are taken.
+    :param cued:
+        Specifies if it is cued on initialization. If ``None`` then the button is
+        cued when :param cue_widgets: is cued.
 
     Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Button`.
     """
@@ -34,16 +47,16 @@ class ResetCueButton(Button, CueWidget):
         cue_widgets: Union[CueWidget, List[CueWidget]],
         action: Callable[[], bool],
         disable_on_successful_action: bool = True,
+        disable_during_action: bool = True,
         css_style: Optional[Dict[str, str]] = None,
+        widgets_to_observe: Union[None, List[Widget], Widget] = None,
+        traits_to_observe: Union[
+            None, str, Sentinel, List[Union[str, Sentinel, List[str]]]
+        ] = None,
+        cued: Union[None, bool] = None,
         *args,
         **kwargs,
     ):
-        if "cued" in kwargs.keys():
-            raise ValueError(
-                "ResetCueButton determines cueing from cue_widgets,"
-                ' "cued" cannot be given as argument'
-            )
-
         if css_style is None:
             css_style = {
                 "base": "scwidget-reset-cue-button",
@@ -59,18 +72,24 @@ class ResetCueButton(Button, CueWidget):
 
         self._action = action
         self._disable_on_successful_action = disable_on_successful_action
+        self._disable_during_action = disable_during_action
 
         self._css_style = css_style
 
         Button.__init__(self, *args, **kwargs)
 
-        widgets_to_observe = []
-        traits_to_observe = []
-        for cue_widget in cue_widgets:
-            widgets_to_observe.extend(cue_widget.widgets_to_observe)
-            traits_to_observe.extend(cue_widget.traits_to_observe)
-        CueWidget.__init__(self, widgets_to_observe, traits_to_observe)
-        self.cued = any([cue_widget.cued for cue_widget in cue_widgets])
+        if widgets_to_observe is None:
+            widgets_to_observe = []
+            for cue_widget in cue_widgets:
+                widgets_to_observe.extend(cue_widget.widgets_to_observe)
+        if traits_to_observe is None:
+            traits_to_observe = []
+            for cue_widget in cue_widgets:
+                traits_to_observe.extend(cue_widget.traits_to_observe)
+        if cued is None:
+            cued = any([cue_widget.cued for cue_widget in cue_widgets])
+
+        CueWidget.__init__(self, widgets_to_observe, traits_to_observe, cued)
         self._cue_widgets = cue_widgets
 
         self.on_click(self._on_click)
@@ -81,9 +100,20 @@ class ResetCueButton(Button, CueWidget):
     def cue_widgets(self) -> List[CueWidget]:
         return self._cue_widgets
 
-    @cue_widgets.setter
-    def cue_widgets(self, cue_widgets: List[CueWidget]):
-        self.unobserve_widgets()
+    def set_cue_widgets(
+        self, cue_widgets: List[CueWidget], overwrite_cue_observes: bool = True
+    ):
+        """
+        :param cue_widgets:
+           List of cue boxes the button resets on successuful click
+           We assert that all boxes observe the same traits of the same widget
+
+        :param overwrite_observes:
+            specifies if observes related to cueing of button should be overwritten by
+            the widgets ant traits of the :param cue_widgets:
+        """
+        if overwrite_cue_observes:
+            self.unobserve_widgets()
 
         # set new cue widgets
         widgets_to_observe = []
@@ -91,8 +121,9 @@ class ResetCueButton(Button, CueWidget):
         for cue_widget in cue_widgets:
             widgets_to_observe.extend(cue_widget.widgets_to_observe)
             traits_to_observe.extend(cue_widget.traits_to_observe)
-        CueWidget.__init__(self, widgets_to_observe, traits_to_observe)
-        self.cued = any([cue_widget.cued for cue_widget in cue_widgets])
+        if overwrite_cue_observes:
+            CueWidget.__init__(self, widgets_to_observe, traits_to_observe)
+            self.cued = any([cue_widget.cued for cue_widget in cue_widgets])
         self._cue_widgets = cue_widgets
 
     @property
@@ -125,7 +156,7 @@ class ResetCueButton(Button, CueWidget):
         self._disable_on_successful_action = disable_on_successful_action
 
     def _on_click(self, button: Button):
-        self.disabled = True
+        self.disabled = self._disable_during_action
         success = False
         try:
             success = self._action()
@@ -152,6 +183,18 @@ class SaveResetCueButton(ResetCueButton):
         was successful, if False nothing happens.
     :param disable_on_successful_action:
         Specifies if the button should be disabled on a successful action
+    :param disable_during_action:
+        Specifies if the button should be disabled during the action
+    :param widgets_to_observe:
+        The widget to observe if the :param traits_to_observe: has changed. If ``None``
+        then widgets from :param cue_widgets: are taken.
+    :param traits_to_observe:
+        The trait from the :param widgets_to_observe: to observe if changed.
+        Specify `traitlets.All` to observe all traits. If ``None`` then traits
+        from :param cue_widgets: are taken.
+    :param cued:
+        Specifies if it is cued on initialization. If ``None`` then the button is
+        cued when :param cue_widgets: is cued.
 
     Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Button`.
     """
@@ -161,6 +204,12 @@ class SaveResetCueButton(ResetCueButton):
         cue_widgets: Union[CueWidget, List[CueWidget]],
         action: Callable[[], bool],
         disable_on_successful_action: bool = True,
+        disable_during_action: bool = True,
+        widgets_to_observe: Union[None, List[Widget], Widget] = None,
+        traits_to_observe: Union[
+            None, str, Sentinel, List[Union[str, Sentinel, List[str]]]
+        ] = None,
+        cued: Union[None, bool] = None,
         *args,
         **kwargs,
     ):
@@ -172,7 +221,11 @@ class SaveResetCueButton(ResetCueButton):
             cue_widgets,
             action,
             disable_on_successful_action,
+            disable_during_action,
             css_style,
+            widgets_to_observe,
+            traits_to_observe,
+            cued,
             *args,
             **kwargs,
         )
@@ -192,6 +245,18 @@ class CheckResetCueButton(ResetCueButton):
         was successful, if False nothing happens.
     :param disable_on_successful_action:
         Specifies if the button should be disabled on a successful action
+    :param disable_during_action:
+        Specifies if the button should be disabled during the action
+    :param widgets_to_observe:
+        The widget to observe if the :param traits_to_observe: has changed. If ``None``
+        then widgets from :param cue_widgets: are taken.
+    :param traits_to_observe:
+        The trait from the :param widgets_to_observe: to observe if changed.
+        Specify `traitlets.All` to observe all traits. If ``None`` then traits
+        from :param cue_widgets: are taken.
+    :param cued:
+        Specifies if it is cued on initialization. If ``None`` then the button is
+        cued when :param cue_widgets: is cued.
 
     Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Button`.
     """
@@ -201,6 +266,12 @@ class CheckResetCueButton(ResetCueButton):
         cue_widgets: Union[CueWidget, List[CueWidget]],
         action: Callable[[], bool],
         disable_on_successful_action: bool = True,
+        disable_during_action: bool = True,
+        widgets_to_observe: Union[None, List[Widget], Widget] = None,
+        traits_to_observe: Union[
+            None, str, Sentinel, List[Union[str, Sentinel, List[str]]]
+        ] = None,
+        cued: Union[None, bool] = None,
         *args,
         **kwargs,
     ):
@@ -212,7 +283,11 @@ class CheckResetCueButton(ResetCueButton):
             cue_widgets,
             action,
             disable_on_successful_action,
+            disable_during_action,
             css_style,
+            widgets_to_observe,
+            traits_to_observe,
+            cued,
             *args,
             **kwargs,
         )
@@ -232,6 +307,18 @@ class UpdateResetCueButton(ResetCueButton):
         was successful, if False nothing happens.
     :param disable_on_successful_action:
         Specifies if the button should be disabled on a successful action
+    :param disable_during_action:
+        Specifies if the button should be disabled during the action
+    :param widgets_to_observe:
+        The widget to observe if the :param traits_to_observe: has changed. If ``None``
+        then widgets from :param cue_widgets: are taken.
+    :param traits_to_observe:
+        The trait from the :param widgets_to_observe: to observe if changed.
+        Specify `traitlets.All` to observe all traits. If ``None`` then traits
+        from :param cue_widgets: are taken.
+    :param cued:
+        Specifies if it is cued on initialization. If ``None`` then the button is
+        cued when :param cue_widgets: is cued.
 
     Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Button`.
     """
@@ -241,6 +328,12 @@ class UpdateResetCueButton(ResetCueButton):
         cue_widgets: Union[CueWidget, List[CueWidget]],
         action: Callable[[], bool],
         disable_on_successful_action: bool = True,
+        disable_during_action: bool = True,
+        widgets_to_observe: Union[None, List[Widget], Widget] = None,
+        traits_to_observe: Union[
+            None, str, Sentinel, List[Union[str, Sentinel, List[str]]]
+        ] = None,
+        cued: Union[None, bool] = None,
         *args,
         **kwargs,
     ):
@@ -252,7 +345,11 @@ class UpdateResetCueButton(ResetCueButton):
             cue_widgets,
             action,
             disable_on_successful_action,
+            disable_during_action,
             css_style,
+            widgets_to_observe,
+            traits_to_observe,
+            cued,
             *args,
             **kwargs,
         )
