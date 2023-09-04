@@ -19,6 +19,12 @@ class ResetCueButton(Button, CueWidget):
         was successful, if False nothing happens.
     :param disable_on_successful_action:
         Specifies if the button should be disabled on a successful action
+    :param css_syle:
+        - **base**: the css style of the box during initialization
+        - **cue**: the css style that is added when :param
+          traits_to_observe: in widget :param widget_to_observe: changes.
+          It is supposed to change the style of the box such that the user has a visual
+          cue that :param widget_to_cue: has changed.
 
     Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Button`.
     """
@@ -130,3 +136,123 @@ class ResetCueButton(Button, CueWidget):
                 cue_box.cued = False
             self.cued = False
             self.disabled = success and self._disable_on_successful_action
+
+
+class SaveResetCueButton(ResetCueButton):
+    """
+    A button that resets the cueing of the :param cue_widgets: on a successful action.
+
+    :param cue_widgets:
+       List of cue boxes the button resets on successuful click
+       We assert that all boxes observe the same traits of the same widget
+    :param action:
+        A callable that returns a boolean that specifies if the action was successul.
+        If is called on a button click. The cues in :param cue_widgets:
+        are removed if it
+        was successful, if False nothing happens.
+    :param disable_on_successful_action:
+        Specifies if the button should be disabled on a successful action
+
+    Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Button`.
+    """
+
+    def __init__(
+        self,
+        cue_widgets: Union[CueWidget, List[CueWidget]],
+        action: Callable[[], bool],
+        disable_on_successful_action: bool = True,
+        *args,
+        **kwargs,
+    ):
+        css_style = {
+            "base": "scwidget-save-reset-cue-button",
+            "cue": "scwidget-save-reset-cue-button--cue",
+        }
+        super().__init__(
+            cue_widgets,
+            action,
+            disable_on_successful_action,
+            css_style,
+            *args,
+            **kwargs,
+        )
+
+
+class CheckResetCueButton(ResetCueButton):
+    """
+    A button that resets the cueing of the :param cue_widgets: on a successful action.
+
+    :param cue_widgets:
+       List of cue boxes the button resets on successuful click
+       We assert that all boxes observe the same traits of the same widget
+    :param action:
+        A callable that returns a boolean that specifies if the action was successul.
+        If is called on a button click. The cues in :param cue_widgets:
+        are removed if it
+        was successful, if False nothing happens.
+    :param disable_on_successful_action:
+        Specifies if the button should be disabled on a successful action
+
+    Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Button`.
+    """
+
+    def __init__(
+        self,
+        cue_widgets: Union[CueWidget, List[CueWidget]],
+        action: Callable[[], bool],
+        disable_on_successful_action: bool = True,
+        *args,
+        **kwargs,
+    ):
+        css_style = {
+            "base": "scwidget-check-reset-cue-button",
+            "cue": "scwidget-check-reset-cue-button--cue",
+        }
+        super().__init__(
+            cue_widgets,
+            action,
+            disable_on_successful_action,
+            css_style,
+            *args,
+            **kwargs,
+        )
+
+
+class UpdateResetCueButton(ResetCueButton):
+    """
+    A button that resets the cueing of the :param cue_widgets: on a successful action.
+
+    :param cue_widgets:
+       List of cue boxes the button resets on successuful click
+       We assert that all boxes observe the same traits of the same widget
+    :param action:
+        A callable that returns a boolean that specifies if the action was successul.
+        If is called on a button click. The cues in :param cue_widgets:
+        are removed if it
+        was successful, if False nothing happens.
+    :param disable_on_successful_action:
+        Specifies if the button should be disabled on a successful action
+
+    Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Button`.
+    """
+
+    def __init__(
+        self,
+        cue_widgets: Union[CueWidget, List[CueWidget]],
+        action: Callable[[], bool],
+        disable_on_successful_action: bool = True,
+        *args,
+        **kwargs,
+    ):
+        css_style = {
+            "base": "scwidget-update-reset-cue-button",
+            "cue": "scwidget-update-reset-cue-button--cue",
+        }
+        super().__init__(
+            cue_widgets,
+            action,
+            disable_on_successful_action,
+            css_style,
+            *args,
+            **kwargs,
+        )
