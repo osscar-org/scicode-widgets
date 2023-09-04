@@ -37,7 +37,7 @@ def cue_box_class_name(cue_box_name: str, cued: bool):
     return class_name.replace("cue-box", f"{cue_box_name}-cue-box")
 
 
-def cue_class_name(cue_box_name: str, cued: bool):
+def scwidget_cue_box_class_name(cue_box_name: str, cued: bool):
     if cued:
         class_name = "scwidget-cue-box--cue"
     else:
@@ -456,14 +456,16 @@ def test_widgets_code(selenium_driver):
             assert len(check_elements) == 2
             check_code_input = check_elements[0]
             assert "def function_to_check" in check_code_input.text
-            assert cue_class_name("check", True) in check_code_input.get_attribute(
-                "class"
-            )
+            assert scwidget_cue_box_class_name(
+                "check", True
+            ) in check_code_input.get_attribute("class")
 
             check_button = check_elements[1]
             assert check_button.text == "Check Code"
             assert check_button.is_enabled()
-            assert cue_class_name("check", True) in check_button.get_attribute("class")
+            assert scwidget_cue_box_class_name(
+                "check", True
+            ) in check_button.get_attribute("class")
 
         #########################################################
         # asserts for correct initialization of update elements #
@@ -475,24 +477,24 @@ def test_widgets_code(selenium_driver):
             assert len(update_elements) == 3
             update_code_input = update_elements[0]
             assert "def function_to_check" in update_code_input.text
-            assert cue_class_name("update", True) in update_code_input.get_attribute(
-                "class"
-            )
+            assert scwidget_cue_box_class_name(
+                "update", True
+            ) in update_code_input.get_attribute("class")
             parameter_panel = update_elements[1]
             # in these tests it should not be contain inything
             if not (tunable_params):
                 assert parameter_panel.size["height"] == 0
             else:
-                assert cue_class_name("update", True) in parameter_panel.get_attribute(
-                    "class"
-                )
+                assert scwidget_cue_box_class_name(
+                    "update", True
+                ) in parameter_panel.get_attribute("class")
 
             update_button = update_elements[2]
             assert update_button.text == "Run Code"
             assert update_button.is_enabled()
-            assert cue_class_name("update", True) in update_button.get_attribute(
-                "class"
-            )
+            assert scwidget_cue_box_class_name(
+                "update", True
+            ) in update_button.get_attribute("class")
 
         #################################################
         # asserts for behavior on click of check button #
@@ -501,10 +503,12 @@ def test_widgets_code(selenium_driver):
             check_button.click()
             time.sleep(0.2)
             assert not (
-                cue_class_name("check", True) in check_code_input.get_attribute("class")
+                scwidget_cue_box_class_name("check", True)
+                in check_code_input.get_attribute("class")
             )
             assert not (
-                cue_class_name("check", True) in check_button.get_attribute("class")
+                scwidget_cue_box_class_name("check", True)
+                in check_button.get_attribute("class")
             )
             assert check_button.is_enabled()
             outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
@@ -518,16 +522,17 @@ def test_widgets_code(selenium_driver):
             update_button.click()
             time.sleep(0.2)
             assert not (
-                cue_class_name("update", True)
+                scwidget_cue_box_class_name("update", True)
                 in update_code_input.get_attribute("class")
             )
             assert not (
-                cue_class_name("update", True) in update_button.get_attribute("class")
+                scwidget_cue_box_class_name("update", True)
+                in update_button.get_attribute("class")
             )
             assert update_button.is_enabled()
             if tunable_params:
                 assert not (
-                    cue_class_name("update", True)
+                    scwidget_cue_box_class_name("update", True)
                     in parameter_panel.get_attribute("class")
                 )
             outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
@@ -547,9 +552,9 @@ def test_widgets_code(selenium_driver):
         #   once this works please add this code
         # code_input.send_keys("a=5\n")
         # time.sleep(0.1)
-        # assert (cue_class_name("check", True) in
+        # assert (scwidget_cue_box_class_name("check", True) in
         #               check_code_input.get_attribute("class"))
-        # assert (cue_class_name("update", True) in
+        # assert (scwidget_cue_box_class_name("update", True) in
         #                update_code_input.get_attribute("class"))
         # assert check_button.is_enabled()
         # assert check_button.is_enabled()
@@ -562,12 +567,12 @@ def test_widgets_code(selenium_driver):
             slider_input_box.send_keys(Keys.ENTER)
             time.sleep(0.2)
 
-            assert cue_class_name("update", True) in parameter_panel.get_attribute(
-                "class"
-            )
-            assert cue_class_name("update", True) in update_button.get_attribute(
-                "class"
-            )
+            assert scwidget_cue_box_class_name(
+                "update", True
+            ) in parameter_panel.get_attribute("class")
+            assert scwidget_cue_box_class_name(
+                "update", True
+            ) in update_button.get_attribute("class")
 
     # Test 1.1
     test_code_demo(
