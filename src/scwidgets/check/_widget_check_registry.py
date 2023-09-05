@@ -243,13 +243,13 @@ class CheckRegistry(VBox):
         return messages
 
     def _on_click_set_all_references_button(self, change: dict):
-        self._output.clear_output()
+        self._output.clear_output(wait=True)
         with self._output:
             self.compute_and_set_all_references()
             print("Successful set all references.")
 
     def _on_click_check_all_widgets_button(self, change: dict):
-        self._output.clear_output()
+        self._output.clear_output(wait=True)
         widgets_results = self.check_all_widgets()
         for widget, widget_results in widgets_results.items():
             with self._output:

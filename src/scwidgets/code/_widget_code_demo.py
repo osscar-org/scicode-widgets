@@ -182,7 +182,7 @@ class CodeDemo(VBox, CheckableWidget):
 
     def _on_trait_parameters_changed(self, change: dict):
         if self._update_button is None:
-            self._output.clear_output()
+            self._output.clear_output(wait=True)
             error = ValueError(
                 "Invalid state: _on_trait_parameters_changed was "
                 "invoked but no update button was defined"
@@ -193,7 +193,7 @@ class CodeDemo(VBox, CheckableWidget):
         self._update_button.click()
 
     def _on_click_check_action(self) -> bool:
-        self._output.clear_output()
+        self._output.clear_output(wait=True)
         try:
             self.check()
         except Exception as e:
@@ -207,7 +207,7 @@ class CodeDemo(VBox, CheckableWidget):
         return self.run_code(*args, **kwargs)
 
     def handle_checks_result(self, result: Union[ChecksLog, Exception]):
-        self._output.clear_output()
+        self._output.clear_output(wait=True)
         self._output_results([result])
 
     def _output_results(self, results: List[Union[str, ChecksLog, Exception]]):
@@ -225,7 +225,7 @@ class CodeDemo(VBox, CheckableWidget):
                     print(result)
 
     def _on_click_update_action(self) -> bool:
-        self._output.clear_output()
+        self._output.clear_output(wait=True)
         raised_error = False
         # runs code and displays output
         with self._output:
