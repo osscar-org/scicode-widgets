@@ -126,6 +126,7 @@ def test_widgets_cue(selenium_driver):
 
         # Check if cue is added once text input is changed
         text_input.send_keys("a")
+        time.sleep(0.1)
         assert text_input.get_attribute("value") == "Texta"
         assert cue_box_class_name(cue_box_name, True).replace(
             ".", " "
