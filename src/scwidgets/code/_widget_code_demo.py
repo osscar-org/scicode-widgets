@@ -203,11 +203,14 @@ class CodeDemo(VBox, CheckableWidget):
                 raise e
         return True
 
+    def check(self) -> Union[ChecksLog, Exception]:
+        self._output.clear_output(wait=True)
+        return CheckableWidget.check(self)
+
     def compute_output_to_check(self, *args, **kwargs) -> Check.FunOutParamsT:
         return self.run_code(*args, **kwargs)
 
     def handle_checks_result(self, result: Union[ChecksLog, Exception]):
-        self._output.clear_output(wait=True)
         self._output_results([result])
 
     def _output_results(self, results: List[Union[str, ChecksLog, Exception]]):
@@ -217,9 +220,9 @@ class CodeDemo(VBox, CheckableWidget):
                     raise result
                 elif isinstance(result, ChecksLog):
                     if result.successful:
-                        print("All checks were successful.")
+                        print("Check was successful.")
                     else:
-                        print("Some checks failed:")
+                        print("Check failed:")
                         print(result.message())
                 else:
                     print(result)
