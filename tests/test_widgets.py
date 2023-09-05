@@ -625,7 +625,7 @@ def test_widgets_code(selenium_driver):
     test_code_demo(
         nb_cells[3],
         ["SomeText", "Output"],
-        ["All checks were successful"],
+        ["Check was successful"],
         include_checks=True,
         include_params=True,
         tunable_params=False,
@@ -636,7 +636,7 @@ def test_widgets_code(selenium_driver):
     test_code_demo(
         nb_cells[4],
         ["SomeText", "Output"],
-        ["Some checks failed"],
+        ["Check failed"],
         include_checks=True,
         include_params=True,
         tunable_params=False,
@@ -657,7 +657,7 @@ def test_widgets_code(selenium_driver):
     test_code_demo(
         nb_cells[6],
         ["SomeText", "Output"],
-        ["All checks were successful"],
+        ["Check was successful"],
         include_checks=True,
         include_params=True,
         tunable_params=True,
@@ -668,7 +668,7 @@ def test_widgets_code(selenium_driver):
     test_code_demo(
         nb_cells[7],
         ["SomeText", "Output"],
-        ["All checks were successful"],
+        ["Check was successful"],
         include_checks=True,
         include_params=True,
         tunable_params=True,
@@ -679,7 +679,7 @@ def test_widgets_code(selenium_driver):
     test_code_demo(
         nb_cells[8],
         ["SomeText", "Output"],
-        ["All checks were successful"],
+        ["Check was successful"],
         include_checks=True,
         include_params=True,
         tunable_params=True,
