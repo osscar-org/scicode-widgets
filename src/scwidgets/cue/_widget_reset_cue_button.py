@@ -112,9 +112,6 @@ class ResetCueButton(Button, CueWidget):
             specifies if observes related to cueing of button should be overwritten by
             the widgets ant traits of the :param cue_widgets:
         """
-        if overwrite_cue_observes:
-            self.unobserve_widgets()
-
         # set new cue widgets
         widgets_to_observe = []
         traits_to_observe = []
@@ -122,7 +119,7 @@ class ResetCueButton(Button, CueWidget):
             widgets_to_observe.extend(cue_widget.widgets_to_observe)
             traits_to_observe.extend(cue_widget.traits_to_observe)
         if overwrite_cue_observes:
-            CueWidget.__init__(self, widgets_to_observe, traits_to_observe)
+            self.set_widgets_to_observe(widgets_to_observe, traits_to_observe)
             self.cued = any([cue_widget.cued for cue_widget in cue_widgets])
         self._cue_widgets = cue_widgets
 

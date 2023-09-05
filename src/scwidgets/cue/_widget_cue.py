@@ -28,6 +28,25 @@ class CueWidget:
         *args,
         **kwargs,
     ):
+        self._widgets_to_observe: List[Widget] = []
+        self._traits_to_observe: List[Union[str, Sentinel, List[str]]] = []
+        self.set_widgets_to_observe(widgets_to_observe, traits_to_observe)
+
+        self.cued = cued
+
+    @property
+    def widgets_to_observe(self) -> List[Widget]:
+        return self._widgets_to_observe
+
+    def set_widgets_to_observe(
+        self,
+        widgets_to_observe: Union[List[Widget], Widget],
+        traits_to_observe: Union[
+            str, Sentinel, List[Union[str, Sentinel, List[str]]]
+        ] = "value",
+    ):
+        self.unobserve_widgets()
+
         if not (isinstance(widgets_to_observe, list)):
             widgets_to_observe = [widgets_to_observe]
             if isinstance(traits_to_observe, list):
@@ -55,12 +74,6 @@ class CueWidget:
         self._traits_to_observe = traits_to_observe
 
         self.observe_widgets()
-
-        self.cued = cued
-
-    @property
-    def widgets_to_observe(self) -> List[Widget]:
-        return self._widgets_to_observe
 
     @property
     def traits_to_observe(self) -> List[Union[str, List[str], Sentinel]]:
