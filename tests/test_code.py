@@ -7,6 +7,7 @@ from widget_code_input.utils import CodeValidationError
 
 from scwidgets.check import Check, CheckRegistry, ChecksLog
 from scwidgets.code import CodeDemo, CodeInput
+from scwidgets.cue import CueObject
 
 from .test_check import multi_param_check, single_param_check
 
@@ -91,10 +92,17 @@ def get_code_demo(
         parameters = {
             key: fixed(value) for key, value in checks[0].inputs_parameters[0].items()
         }
+
+    def update_print(code_demo: CodeDemo):
+        output = code_demo.run_code(**code_demo.panel_parameters)
+        code_demo.cue_outputs[0].display_object = f"Output:\n{output}"
+
     code_demo = CodeDemo(
         code=code_input,
         check_registry=CheckRegistry() if include_checks is True else None,
         parameters=parameters if include_params is True else None,
+        cue_outputs=[CueObject("Not initialized")],
+        update_func=update_print,
         update_mode=update_mode,
     )
 
