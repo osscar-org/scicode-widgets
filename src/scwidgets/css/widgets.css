@@ -101,3 +101,13 @@
     background-color: #e95420;
     border-color: #e95420;
 }
+
+/* scwidgets visualizer */
+
+.scwidget-cue-output {
+    opacity: 1.0;
+}
+
+.scwidget-cue-output--cue {
+    opacity: 0.4;
+}

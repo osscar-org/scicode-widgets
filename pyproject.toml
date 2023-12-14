@@ -31,6 +31,7 @@ dependencies = [
   "ipywidgets>=8.0.0",
   "numpy",
   "widget_code_input",
+  "matplotlib"
 ]
 dynamic = ["version"]
 

@@ -1,11 +1,36 @@
 import time
 from typing import List
 
+import numpy as np
+import pytest
 import requests
+from imageio.v3 import imread
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
+from skimage.metrics import structural_similarity
+from skimage.transform import resize
+
+
+def crop_const_color_borders(image: np.ndarray, const_color: int = 255):
+    if np.all(image == const_color):
+        return image[:0, :0, :0]
+
+    for i1 in range(len(image)):
+        if np.any(image[i1, :, :] != const_color):
+            break
+    for i2 in range(image.shape[0] - 1, -1, -1):
+        if np.any(image[i2, :, :] != const_color):
+            break
+    for j1 in range(len(image)):
+        if np.any(image[:, j1, :] != const_color):
+            break
+    for j2 in range(image.shape[1] - 1, -1, -1):
+        if np.any(image[:, j2, :] != const_color):
+            break
+    return image[i1:i2, j1:j2, :]
 
 
 def test_notebook_running(notebook_service):
@@ -80,6 +105,107 @@ BUTTON_CLASS_NAME = "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
 OUTPUT_CLASS_NAME = "lm-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-output"
 TEXT_INPUT_CLASS_NAME = "widget-input"
 CODE_MIRROR_CLASS_NAME = "CodeMirror-code"
+MATPLOTLIB_CANVAS_CLASS_NAME = "jupyter-widgets.jupyter-matplotlib-canvas-container"
+
+
+@pytest.mark.parametrize(
+    "nb_filename, mpl_backend",
+    [
+        ("tests/notebooks/widget_cue_figure-ipympl.ipynb", "ipympl"),
+        ("tests/notebooks/widget_cue_figure-inline.ipynb", "inline"),
+    ],
+)
+def test_widget_figure(selenium_driver, nb_filename, mpl_backend):
+    """
+    We separate the widget figure tests for different backends to different files
+    because a backend switch within a running notebook causes undefined behavior
+    of matplotlib (e.g. the figures are not anymore displayed when they should be)
+
+    :param selenium_driver: see conftest.py
+    """
+    # TODO for inline i need to get the image directly from the panel
+    driver = selenium_driver(nb_filename)
+
+    # Each cell of the notebook, the cell number can be retrieved from the
+    # attribute "data-windowed-list-index"
+    nb_cells = driver.find_elements(
+        By.CLASS_NAME, "lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell"
+    )
+
+    if "inline" == mpl_backend:
+        WebDriverWait(nb_cells[20], 5).until(
+            expected_conditions.visibility_of_all_elements_located(
+                (By.TAG_NAME, "img"),
+            )
+        )
+        matplotlib_canvases = driver.find_elements(By.TAG_NAME, "img")
+    elif "ipympl" == mpl_backend:
+        WebDriverWait(nb_cells[20], 5).until(
+            expected_conditions.visibility_of_all_elements_located(
+                (By.CLASS_NAME, MATPLOTLIB_CANVAS_CLASS_NAME),
+            )
+        )
+        driver.find_elements(By.CLASS_NAME, MATPLOTLIB_CANVAS_CLASS_NAME)
+        matplotlib_canvases = driver.find_elements(
+            By.CLASS_NAME, MATPLOTLIB_CANVAS_CLASS_NAME
+        )
+    else:
+        raise ValueError(f"matplotlib backend {mpl_backend!r} is not known.")
+    assert len(matplotlib_canvases) >= 5, (
+        "Not all matplotlib canvases have been correctly " "loaded."
+    )
+    assert len(matplotlib_canvases) == 5, (
+        "Test that plt.show() does not show any plot "
+        "failed. For each test there should be only "
+        "one plot."
+    )
+
+    def test_cue_figure(web_element: WebElement, ref_png_filename: str, rtol=5e-2):
+        # images can have different white border and slightly
+        # different shape so we cut the border of and resize them
+        image = imread(web_element.screenshot_as_png)
+        image = crop_const_color_borders(image)
+        ref_image = imread(ref_png_filename)
+        ref_image = crop_const_color_borders(ref_image)
+        # scale up
+        resized_image = resize(
+            image, ref_image.shape, cval=255, mode="constant", preserve_range=True
+        )
+        image = np.array(resized_image, dtype=ref_image.dtype)
+        ssim = structural_similarity(image, ref_image, channel_axis=2)
+        # structural similarity index returns a value in the range [0,1]
+        # so it atol is always rtol in this case
+        np.testing.assert_allclose(ssim, 1, atol=rtol, rtol=rtol, equal_nan=False)
+
+    time.sleep(0.2)
+    # Test 1.1
+    # inline does not show a plot
+    if mpl_backend == "inline":
+        # in inline mode no image is shown by the figure but somehow
+        # an image of the python logo is show, we ignore this case
+        pass
+    elif mpl_backend == "ipympl":
+        image = imread(matplotlib_canvases[0].screenshot_as_png)
+        assert crop_const_color_borders(image).shape == (0, 0, 0), "Image is not white"
+    # Test 1.2
+    test_cue_figure(
+        matplotlib_canvases[1], "tests/screenshots/widget_cue_figure/empty_axis.png"
+    )
+    # Test 1.3
+    test_cue_figure(
+        matplotlib_canvases[2],
+        "tests/screenshots/widget_cue_figure/update_figure_plot.png",
+    )
+    # Test 1.4
+    test_cue_figure(
+        matplotlib_canvases[3],
+        "tests/screenshots/widget_cue_figure/update_figure_set.png",
+    )
+    # Test 1.5
+    test_cue_figure(
+        matplotlib_canvases[4],
+        "tests/screenshots/widget_cue_figure/update_figure_plot.png",
+    )
 
 
 def test_widgets_cue(selenium_driver):
@@ -530,7 +656,7 @@ def test_widgets_code(selenium_driver):
         #################################################
         if include_checks:
             check_button.click()
-            time.sleep(0.2)
+            time.sleep(0.5)
             assert not (
                 scwidget_cue_box_class_name("check", True)
                 in check_code_input.get_attribute("class")
@@ -590,8 +716,8 @@ def test_widgets_code(selenium_driver):
 
         if tunable_params:
             outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
-            assert len(outputs) == 1
-            before_parameter_change_text = outputs[0].text
+            assert len(outputs) == 2
+            before_parameter_change_text = outputs[0].text + outputs[1].text
 
             slider_input_box = nb_cell.find_element(By.CLASS_NAME, "widget-readout")
             slider_input_box.send_keys(Keys.BACKSPACE)
@@ -611,14 +737,14 @@ def test_widgets_code(selenium_driver):
             if update_mode == "manual":
                 # Check if output has changed only after click when manual
                 outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
-                assert len(outputs) == 1
-                after_parameter_change_text = outputs[0].text
+                assert len(outputs) == 2
+                after_parameter_change_text = outputs[0].text + outputs[1].text
                 assert before_parameter_change_text == after_parameter_change_text
                 update_button.click()
 
             outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
-            assert len(outputs) == 1
-            after_parameter_change_text = outputs[0].text
+            assert len(outputs) == 2
+            after_parameter_change_text = outputs[0].text + outputs[1].text
             assert before_parameter_change_text != after_parameter_change_text
 
     # Test 1.1
