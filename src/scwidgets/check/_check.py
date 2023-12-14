@@ -16,17 +16,16 @@ class Check:
     outputs.
 
     :param function_to_check:
-        The code_obj must have a `compute_output_to_check` function that accepts each
-        input parameters in :params input parameters:
+        The function must that accepts each input parameters in :params
+        input_parameters:
     :param inputs_parameters:
         A dict or a list of dictionaries each containing the argument name and its value
         as (key, value) pair that is used as input for the function
-        `compute_output_to_check` of
-        :param code_obj:
+        :param function_to_check:
     :param outputs_references:
         A list or a list of lists each containing the expected output of the function
-        `compute_output_to_check` of :param code_obj: for the inputsin the :param
-        input_parameters:
+        :param function_to_check: of :param function_to_check: for the inputs in the
+        :param input_parameters:
     :param asserts:
         A list of assert functions. An assert function can the output parameters of
         :param function_to_check: to run assert. If output references has been set it
@@ -86,8 +85,8 @@ class Check:
                     f"arguments"
                 )
 
-        # We sadly cannot verify if the number of input argumets match because they can
-        # be hidden in **kwargs
+        # We cannot verify if the number of input argumets match because they can be
+        # hidden in **kwargs
         if isinstance(inputs_parameters, dict):
             inputs_parameters = [inputs_parameters]
 
