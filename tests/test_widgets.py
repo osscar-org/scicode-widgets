@@ -1,3 +1,5 @@
+import glob
+import os
 import time
 from typing import List
 
@@ -106,6 +108,277 @@ OUTPUT_CLASS_NAME = "lm-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-outp
 TEXT_INPUT_CLASS_NAME = "widget-input"
 CODE_MIRROR_CLASS_NAME = "CodeMirror-code"
 MATPLOTLIB_CANVAS_CLASS_NAME = "jupyter-widgets.jupyter-matplotlib-canvas-container"
+
+
+class TestAnswerWidgets:
+    prefix = "pytest"
+
+    def setup_method(self, method):
+        """setup any state tied to the execution of the given method in a
+        class.  setup_method is invoked for every test method of a class.
+        """
+        # in case the test stopped unexpectedly and the file still exists from last
+        # run
+        for filename in glob.glob(f"tests/notebooks/{self.prefix}-*.json"):
+            os.remove(filename)
+
+    def teardown_method(self, method):
+        """teardown any state that was previously setup with a setup_method
+        call.
+        """
+        for filename in glob.glob(f"tests/notebooks/{self.prefix}-*.json"):
+            os.remove(filename)
+
+    def test_widget_answer(self, selenium_driver):
+        """
+        Tests the save/loading mechanism of all widgets inheriting from AnswerWidget
+
+        :param selenium_driver: see conftest.py
+        """
+
+        driver = selenium_driver("tests/notebooks/widget_answers.ipynb")
+
+        # Each cell of the notebook, the cell number can be retrieved from the
+        # attribute "data-windowed-list-index"
+        nb_cells = driver.find_elements(
+            By.CLASS_NAME, "lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell"
+        )
+
+        # Test 1:
+        # -------
+        nb_cell = nb_cells[2]
+
+        answer_registry_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, BUTTON_CLASS_NAME
+        )
+        text_inputs = nb_cell.find_elements(By.CLASS_NAME, TEXT_INPUT_CLASS_NAME)
+
+        # text create file button
+        WebDriverWait(driver, 5).until(
+            expected_conditions.element_to_be_clickable(answer_registry_buttons[0])
+        )
+        assert len(answer_registry_buttons) == 1
+        create_file_button = answer_registry_buttons[0]
+        assert create_file_button.text == "Create file"
+        assert create_file_button.is_enabled()
+
+        assert len(text_inputs) == 1
+        text_input = text_inputs[0]
+        text_input.send_keys("test-answers")
+        # wait till typing finished
+        WebDriverWait(driver, 5).until(
+            expected_conditions.text_to_be_present_in_element_attribute(
+                (By.CLASS_NAME, TEXT_INPUT_CLASS_NAME),
+                "value",
+                "test-answers",
+            )
+        )
+        # wait till everything is sync with python kernel
+        time.sleep(0.1)
+        create_file_button.click()
+
+        output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        assert output.text == "File 'pytest-test-answers.json' created and loaded."
+
+        answer_registry_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, BUTTON_CLASS_NAME
+        )
+        assert len(answer_registry_buttons) == 4
+
+        choose_other_file_button = answer_registry_buttons[1]
+        save_all_answers_button = answer_registry_buttons[2]
+
+        # test save all answers button
+        # confirm
+        # wait till everything is sync with python kernel
+        time.sleep(0.1)
+        WebDriverWait(driver, 5).until(
+            expected_conditions.element_to_be_clickable(save_all_answers_button)
+        ).click()
+        # wait till old output is gone
+        WebDriverWait(driver, 5).until(
+            expected_conditions.invisibility_of_element_located(output)
+        )
+        output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        assert output.text == "Are you sure?"
+        answer_registry_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, BUTTON_CLASS_NAME
+        )
+        assert len(answer_registry_buttons) == 6
+        confirm_button = answer_registry_buttons[4]
+        WebDriverWait(driver, 5).until(
+            expected_conditions.element_to_be_clickable(confirm_button)
+        ).click()
+        # wait till old output is gone
+        WebDriverWait(driver, 5).until(
+            expected_conditions.invisibility_of_element_located(output)
+        )
+        output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        assert (
+            output.text == "All answers were saved in file 'pytest-test-answers.json'."
+        )
+        # cancel
+        # wait till everything is sync with python kernel
+        time.sleep(0.1)
+        WebDriverWait(driver, 5).until(
+            expected_conditions.element_to_be_clickable(save_all_answers_button)
+        ).click()
+        answer_registry_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, BUTTON_CLASS_NAME
+        )
+        assert len(answer_registry_buttons) == 6
+        cancel_button = answer_registry_buttons[5]
+        WebDriverWait(driver, 5).until(
+            expected_conditions.element_to_be_clickable(cancel_button)
+        ).click()
+
+        # text choose other file button
+        WebDriverWait(driver, 5).until(
+            expected_conditions.element_to_be_clickable(choose_other_file_button)
+        ).click()
+
+        # text load file button
+        answer_registry_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, BUTTON_CLASS_NAME
+        )
+        assert len(answer_registry_buttons) == 1
+        WebDriverWait(driver, 5).until(
+            expected_conditions.element_to_be_clickable(answer_registry_buttons[0])
+        ).click()
+        # wait till old output is gone
+        WebDriverWait(driver, 5).until(
+            expected_conditions.invisibility_of_element_located(output)
+        )
+        output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        assert output.text == "All answers loaded from file 'pytest-test-answers.json'."
+
+        # TODO test interaction of AnswerWidgets with AnswerRegistry
+
+        # Test 2:
+        # -------
+        # Test if Textarea shows correct output
+
+        nb_cell = nb_cells[3]
+
+        text_inputs = nb_cell.find_elements(By.CLASS_NAME, TEXT_INPUT_CLASS_NAME)
+        assert len(text_inputs) == 1
+        text_input = text_inputs[0]
+
+        answer_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, reset_cue_button_class_name("save", False)
+        )
+        assert len(answer_buttons) == 2
+        assert answer_buttons[0].text == "Save answer"
+        save_button = answer_buttons[0]
+        assert answer_buttons[1].text == "Load answer"
+        load_button = answer_buttons[1]
+
+        # tests save button
+        input_answer = "answer text"
+        text_input.send_keys(input_answer)
+        # wait till everything is sync with python kernel
+        time.sleep(0.1)
+        # wait for uncued box
+        nb_cell.find_element(By.CLASS_NAME, cue_box_class_name("save", True))
+        # check if there are two buttons are uncued
+        reset_cue_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, reset_cue_button_class_name("save", True)
+        )
+        assert len(reset_cue_buttons) == 2
+        assert text_input.get_attribute("value") == input_answer
+        #
+        WebDriverWait(driver, 1).until(
+            expected_conditions.element_to_be_clickable(save_button)
+        ).click()
+        # wait for uncued box
+        nb_cell.find_element(By.CLASS_NAME, cue_box_class_name("save", False))
+        # check if there are two buttons are uncued
+        reset_cue_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, reset_cue_button_class_name("save", False)
+        )
+        assert len(reset_cue_buttons) == 2
+        assert text_input.get_attribute("value") == input_answer
+        output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        assert (
+            output.text == "Answer has been saved in file 'pytest-test-answers.json'."
+        )
+
+        # tests load button
+        text_input.send_keys(" update")
+        # wait till everything is sync with python kernel
+        time.sleep(0.1)
+        # wait for cued box
+        reset_cue_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, reset_cue_button_class_name("save", True)
+        )
+        # check if there are two buttons are cued
+        reset_cue_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, reset_cue_button_class_name("save", True)
+        )
+        assert len(reset_cue_buttons) == 2
+        assert text_input.get_attribute("value") == input_answer + " update"
+        #
+        WebDriverWait(driver, 1).until(
+            expected_conditions.element_to_be_clickable(load_button)
+        ).click()
+        # wait for uncued box
+        nb_cell.find_element(By.CLASS_NAME, cue_box_class_name("save", False))
+        # check if there are two buttons are uncued
+        reset_cue_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, reset_cue_button_class_name("save", False)
+        )
+        # test if last test has been loaded
+        WebDriverWait(driver, 5).until(
+            expected_conditions.invisibility_of_element_located(output)
+        )
+        output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        assert (
+            output.text
+            == "Answer has been loaded from file 'pytest-test-answers.json'."
+        )
+        assert text_input.get_attribute("value") == input_answer
+
+        # Test 3:
+        # -------
+        # Test if CodeDemo shows correct output
+
+        nb_cell = nb_cells[4]
+
+        answer_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, reset_cue_button_class_name("save", False)
+        )
+        assert len(answer_buttons) == 2
+        assert answer_buttons[0].text == "Save code"
+        save_button = answer_buttons[0]
+        assert answer_buttons[1].text == "Load code"
+        load_button = answer_buttons[1]
+
+        reset_cue_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, reset_cue_button_class_name("save", False)
+        )
+        assert len(reset_cue_buttons) == 2
+        WebDriverWait(driver, 1).until(
+            expected_conditions.element_to_be_clickable(save_button)
+        ).click()
+
+        output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        assert (
+            output.text == "Answer has been saved in file 'pytest-test-answers.json'."
+        )
+
+        WebDriverWait(driver, 1).until(
+            expected_conditions.element_to_be_clickable(load_button)
+        ).click()
+        WebDriverWait(driver, 5).until(
+            expected_conditions.invisibility_of_element_located(output)
+        )
+        output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        assert (
+            output.text
+            == "Answer has been loaded from file 'pytest-test-answers.json'."
+        )
+        # Issue #22
+        # Please add tests using send_keys works once it works with code input
 
 
 @pytest.mark.parametrize(
@@ -524,7 +797,7 @@ def test_widget_check_registry(selenium_driver):
     test_button_clicks(
         nb_cells[3],
         "Widget 1 all checks were successful.",
-        "Successful set all references.",
+        "Successfully set all references.",
         "Widget 1 all checks were successful.",
     )
 
@@ -532,7 +805,7 @@ def test_widget_check_registry(selenium_driver):
     test_button_clicks(
         nb_cells[4],
         "Widget 1 all checks were successful.",
-        "Successful set all references.",
+        "Successfully set all references.",
         "Widget 1 all checks were successful.",
     )
 
@@ -540,7 +813,7 @@ def test_widget_check_registry(selenium_driver):
     test_button_clicks(
         nb_cells[5],
         "Widget 1 not all checks were successful",
-        "Successful set all references.",
+        "Successfully set all references.",
         "Widget 1 all checks were successful.",
     )
 
@@ -548,7 +821,7 @@ def test_widget_check_registry(selenium_driver):
     test_button_clicks(
         nb_cells[6],
         "Widget 1 not all checks were successful",
-        "Successful set all references.",
+        "Successfully set all references.",
         "Widget 1 all checks were successful.",
     )
 
