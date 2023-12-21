@@ -13,13 +13,13 @@
 /* scwidgets save cue box */
 
 .scwidget-save-cue-box {
-  border-left : 5px solid;
-  border-left-color: transparent;
+  border-right : 5px solid;
+  border-right-color: transparent;
 }
 
 .scwidget-save-cue-box--cue {
-  border-left : 5px solid;
-  border-left-color: #77216F;
+  border-right : 5px solid;
+  border-right-color: #f066f0;
 }
 
 /* scwidgets check cue box */
@@ -70,8 +70,8 @@
 }
 
 .scwidget-save-reset-cue-button--cue {
-    background-color: #77216F;
-    border-color: #77216F;
+    background-color: #f066f0;
+    border-color: #f066f0;
 }
 
 /* scwidgets check reset cue button */

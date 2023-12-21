@@ -6,14 +6,18 @@ import types
 from platform import python_version
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from ipywidgets import HBox, Layout, VBox, Widget
+from ipywidgets import Box, HBox, Layout, VBox, Widget
 from widget_code_input.utils import CodeValidationError
 
+from .._utils import Printer
+from ..answer import AnswerRegistry, AnswerWidget
 from ..check import Check, CheckableWidget, CheckRegistry, ChecksLog
 from ..cue import (
     CheckCueBox,
     CheckResetCueButton,
     CueOutput,
+    SaveCueBox,
+    SaveResetCueButton,
     UpdateCueBox,
     UpdateResetCueButton,
 )
@@ -21,7 +25,7 @@ from ._widget_code_input import CodeInput
 from ._widget_parameter_panel import ParameterPanel
 
 
-class CodeDemo(VBox, CheckableWidget):
+class CodeDemo(VBox, CheckableWidget, AnswerWidget):
     """
     A widget to demonstrate code interactively in a variety of ways. It is a combination
     of the several widgets that allow to check check, run and visualize code.
@@ -54,6 +58,8 @@ class CodeDemo(VBox, CheckableWidget):
         self,
         code: Union[None, CodeInput, types.FunctionType] = None,
         check_registry: Optional[CheckRegistry] = None,
+        answer_registry: Optional[AnswerRegistry] = None,
+        answer_key: Optional[str] = None,
         parameters: Optional[
             Union[Dict[str, Union[Check.FunInParamT, Widget]], ParameterPanel]
         ] = None,
@@ -114,22 +120,29 @@ class CodeDemo(VBox, CheckableWidget):
             cue_outputs = [cue_outputs]
 
         CheckableWidget.__init__(self, check_registry)
+        AnswerWidget.__init__(self, answer_registry, answer_key)
 
         self._code = code
-        # TODO this needs to be settable
         self._output = CueOutput()
+
+        self._parameter_panel: Union[ParameterPanel, None]
+        self._parameters: Union[dict, None]
         if isinstance(parameters, dict):
             self._parameter_panel = ParameterPanel(**parameters)
+            self._parameters = self._parameter_panel.parameters
         elif isinstance(parameters, ParameterPanel):
             self._parameter_panel = parameters
-            parameters = self._parameter_panel.parameters
-        self._parameters = parameters
+            self._parameters = self._parameter_panel.parameters
+        else:
+            self._parameter_panel = None
+            self._parameters = None
+
         self._cue_code = self._code
         self._cue_outputs = cue_outputs
 
-        if self._check_registry is None:
+        if self._check_registry is None or self._code is None:
             self._check_button = None
-        elif self._code is not None:
+        else:
             self._cue_code = CheckCueBox(
                 self._code, "function_body", self._cue_code, cued=True
             )
@@ -146,9 +159,46 @@ class CodeDemo(VBox, CheckableWidget):
                 button_tooltip="Check the correctness of your code",
             )
 
-        if self._parameters is None:
+        if self._answer_registry is None or (
+            self._code is None and self._parameter_panel is None
+        ):
+            self._save_button = None
+            self._load_button = None
+            self._save_cue_box = None
+        else:
+            self._cue_code = SaveCueBox(
+                self._code, "function_body", self._cue_code, cued=True
+            )
+            self._save_cue_box = self._cue_code
+            self._save_button = SaveResetCueButton(
+                self._cue_code,
+                self._on_click_save_action,
+                cued=True,
+                disable_on_successful_action=kwargs.pop(
+                    "disable_save_button_on_successful_action", False
+                ),
+                disable_during_action=kwargs.pop(
+                    "disable_save_button_during_action", True
+                ),
+                description="Save code",
+                button_tooltip="Loads your code and parameters from the loaded file",
+            )
+            self._load_button = SaveResetCueButton(
+                self._cue_code,
+                self._on_click_load_action,
+                cued=True,
+                disable_on_successful_action=kwargs.pop(
+                    "disable_load_button_on_successful_action", False
+                ),
+                disable_during_action=kwargs.pop(
+                    "disable_load_button_during_action", True
+                ),
+                description="Load code",
+                button_tooltip="Saves your code and parameters to the loaded file",
+            )
+
+        if self._parameter_panel is None:
             self._update_button = None
-            self._parameter_panel = VBox([])
         else:
             # set up update button and cueing
             # -------------------------------
@@ -267,21 +317,38 @@ class CodeDemo(VBox, CheckableWidget):
                 button_tooltip=button_tooltip,
             )
 
-        if self._check_button is None and self._update_button is None:
-            self._buttons_panel = HBox([])
-        elif self._check_button is None:
-            self._buttons_panel = HBox([self._update_button])
-        elif self._update_button is None:
-            self._buttons_panel = HBox([self._check_button])
-        else:
-            self._buttons_panel = HBox([self._check_button, self._update_button])
-
         demo_children = []
         if self._code is not None:
             demo_children.append(self._cue_code)
+        if self._parameters is not None:
+            demo_children.append(self._cue_parameter_panel)
+
+        buttons = []
+        if self._check_button is None and self._update_button is None:
+            self._code_buttons = HBox([])
+        elif self._check_button is None:
+            self._code_buttons = HBox([self._update_button])
+        elif self._update_button is None:
+            self._code_buttons = HBox([self._check_button])
+        else:
+            self._code_buttons = HBox([self._check_button, self._update_button])
+        buttons.append(self._code_buttons)
+
+        if self._save_button is not None and self._load_button is not None:
+            self._answer_buttons = HBox(
+                [self._save_button, self._load_button],
+                layout=Layout(justify_content="flex-end"),
+            )
+        else:
+            self._answer_buttons = Box([])
+        buttons.append(self._answer_buttons)
+
+        self._buttons_panel = HBox(
+            buttons, layout=Layout(justify_content="space-between")
+        )
+
         demo_children.extend(
             [
-                self._cue_parameter_panel,
                 self._buttons_panel,
                 self._output,
             ]
@@ -296,8 +363,41 @@ class CodeDemo(VBox, CheckableWidget):
         )
 
     @property
+    def answer(self) -> dict:
+        return {
+            "code": None if self._code is None else self._code.function_body,
+            "parameter_panel": None
+            if self._parameter_panel is None
+            else self._parameter_panel.parameters,
+        }
+
+    @answer.setter
+    def answer(self, answer: dict):
+        if self._save_cue_box is not None:
+            self._save_cue_box.unobserve_widgets()
+        if self._save_button is not None:
+            self._save_button.unobserve_widgets()
+        if self._load_button is not None:
+            self._load_button.unobserve_widgets()
+
+        if answer["code"] is not None and self._code is not None:
+            self._code.function_body = answer["code"]
+        if answer["parameter_panel"] is not None and self._parameter_panel is not None:
+            self._parameter_panel.parameters = answer["parameter_panel"]
+
+        if self._save_cue_box is not None:
+            self._save_cue_box.observe_widgets()
+        if self._save_button is not None:
+            self._save_button.observe_widgets()
+        if self._load_button is not None:
+            self._load_button.observe_widgets()
+
+    @property
     def panel_parameters(self) -> Dict[str, Check.FunInParamT]:
-        return self._parameter_panel.parameters
+        if self._parameter_panel is not None:
+            parameter_panel = self._parameter_panel
+            return parameter_panel.parameters
+        return {}
 
     def _on_trait_parameters_changed(self, change: dict):
         if self._update_button is None:
@@ -313,14 +413,52 @@ class CodeDemo(VBox, CheckableWidget):
 
     def _on_click_check_action(self) -> bool:
         self._output.clear_output(wait=True)
-        try:
-            self.check()
-        except Exception as e:
-            with self._output:
+        raised_error = False
+        with self._output:
+            try:
+                self.check()
+            except Exception as e:
+                raised_error = True
                 if python_version() >= "3.11":
-                    e.add_note("This is most likely not related to your code input.")
+                    e.add_note("This error is most likely not related to your code.")
                 raise e
-        return True
+        return not (raised_error)
+
+    def _on_click_save_action(self) -> bool:
+        self._output.clear_output(wait=True)
+        raised_error = False
+        with self._output:
+            try:
+                result = self.save()
+                if isinstance(result, str):
+                    Printer.print_success_message(result)
+                elif isinstance(result, Exception):
+                    raise result
+                else:
+                    print(result)
+            except Exception as e:
+                raised_error = True
+                Printer.print_error_message("Error raised while saving file:")
+                raise e
+        return not (raised_error)
+
+    def _on_click_load_action(self) -> bool:
+        self._output.clear_output(wait=True)
+        raised_error = False
+        with self._output:
+            try:
+                result = self.load()
+                if isinstance(result, str):
+                    Printer.print_success_message(result)
+                elif isinstance(result, Exception):
+                    raise result
+                else:
+                    print(result)
+            except Exception as e:
+                raised_error = True
+                Printer.print_error_message("Error raised while loading file:")
+                raise e
+        return not (raised_error)
 
     def check(self) -> Union[ChecksLog, Exception]:
         self._output.clear_output(wait=True)
@@ -330,21 +468,46 @@ class CodeDemo(VBox, CheckableWidget):
         return self.run_code(*args, **kwargs)
 
     def handle_checks_result(self, result: Union[ChecksLog, Exception]):
-        self._output_results([result])
-
-    def _output_results(self, results: List[Union[str, ChecksLog, Exception]]):
+        self._output.clear_output(wait=True)
         with self._output:
-            for result in results:
-                if isinstance(result, Exception):
-                    raise result
-                elif isinstance(result, ChecksLog):
-                    if result.successful:
-                        print("Check was successful.")
-                    else:
-                        print("Check failed:")
-                        print(result.message())
+            if isinstance(result, Exception):
+                raise result
+            elif isinstance(result, ChecksLog):
+                if result.successful:
+                    Printer.print_success_message("Check was successful.")
                 else:
-                    print(result)
+                    Printer.print_error_message("Check failed:")
+                    print(result.message())
+            else:
+                print(result)
+
+    def handle_save_result(self, result: Union[str, Exception]):
+        self._output.clear_output(wait=True)
+        with self._output:
+            if isinstance(result, Exception):
+                raise result
+            else:
+                if self._load_button is not None:
+                    self._load_button.cued = False
+                if self._save_button is not None:
+                    self._save_button.cued = False
+                if self._save_cue_box is not None:
+                    self._save_cue_box.cued = False
+                Printer.print_success_message(result)
+
+    def handle_load_result(self, result: Union[str, Exception]):
+        self._output.clear_output(wait=True)
+        with self._output:
+            if isinstance(result, Exception):
+                raise result
+            else:
+                if self._load_button is not None:
+                    self._load_button.cued = False
+                if self._save_button is not None:
+                    self._save_button.cued = False
+                if self._save_cue_box is not None:
+                    self._save_cue_box.cued = False
+                Printer.print_success_message(result)
 
     @property
     def code(self):

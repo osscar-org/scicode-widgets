@@ -51,7 +51,15 @@ class ParameterPanel(VBox):
 
     @property
     def parameters(self) -> dict:
-        return self._interactive_widget.kwargs
+        return self._interactive_widget.kwargs.copy()
+
+    @parameters.setter
+    def parameters(self, parameters: dict):
+        # self._interactive_widget.kwargs is not sync with the trait
+        # we assume that kwargs has the same order as in the widget children
+        # to change the value of the children
+        for i, key in enumerate(self._interactive_widget.kwargs):
+            self._interactive_widget.children[i].value = parameters[key]
 
     def observe_parameters(
         self,
