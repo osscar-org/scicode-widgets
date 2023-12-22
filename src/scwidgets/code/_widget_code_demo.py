@@ -6,7 +6,7 @@ import types
 from platform import python_version
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from ipywidgets import Box, HBox, Layout, VBox, Widget
+from ipywidgets import HTML, Box, HBox, HTMLMath, Layout, VBox, Widget
 from widget_code_input.utils import CodeValidationError
 
 from .._utils import Printer
@@ -68,6 +68,8 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
         update_func: Optional[
             Callable[[CodeDemo], Union[Any, Check.FunOutParamsT]]
         ] = None,
+        exercise_description: Optional[str] = None,
+        exercise_title: Optional[str] = None,
         *args,
         **kwargs,
     ):
@@ -80,6 +82,27 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
         self._update_mode = update_mode
 
         self._update_func = update_func
+
+        self._exercise_description = exercise_description
+        if exercise_description is None:
+            self._exercise_description_html = None
+        else:
+            self._exercise_description_html = HTMLMath(self._exercise_description)
+        if exercise_title is None:
+            if answer_key is None:
+                self._exercise_title = None
+                self._exercise_title_html = None
+            else:
+                self._exercise_title = answer_key
+                self._exercise_title_html = HTML(f"<b>{answer_key}</b>")
+        else:
+            self._exercise_title = exercise_title
+            self._exercise_title_html = HTML(f"<b>{exercise_title}</b>")
+
+        if self._exercise_description_html is not None:
+            self._exercise_description_html.add_class("exercise-description")
+        if self._exercise_title_html is not None:
+            self._exercise_title_html.add_class("exercise-title")
 
         # verify if input argument `parameter` is valid
         if parameters is not None:
@@ -372,6 +395,11 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
             )
 
         demo_children = []
+        if self._exercise_title_html is not None:
+            demo_children.append(self._exercise_title_html)
+        if self._exercise_description_html is not None:
+            demo_children.append(self._exercise_description_html)
+
         if self._cue_code is not None:
             demo_children.append(self._cue_code)
         if self._cue_parameter_panel is not None:
@@ -452,6 +480,14 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
             parameter_panel = self._parameter_panel
             return parameter_panel.parameters
         return {}
+
+    @property
+    def exercise_title(self) -> Union[str, None]:
+        return self._exercise_title
+
+    @property
+    def exercise_description(self) -> Union[str, None]:
+        return self._exercise_description
 
     def _on_trait_parameters_changed(self, change: dict):
         if self._update_button is None:

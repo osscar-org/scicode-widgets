@@ -111,3 +111,22 @@
 .scwidget-cue-output--cue {
     opacity: 0.4;
 }
+
+.exercise-title {
+  font-family: helvetica;
+  font-size: 150%;
+}
+.exercise-description {
+  font-family: helvetica;
+  font-size: 110%;
+  color: black;
+  word-spacing: 2px;
+}
+
+a {
+  color: blue;
+}
+
+a:hover {
+  color: lightblue;
+}

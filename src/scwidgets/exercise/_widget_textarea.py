@@ -1,7 +1,7 @@
 from typing import Optional, Union
 
 import ipywidgets
-from ipywidgets import HBox, Layout, Output, VBox
+from ipywidgets import HTML, HBox, HTMLMath, Layout, Output, VBox
 
 from .._utils import Printer
 from ..answer import AnswerRegistry, AnswerWidget
@@ -19,16 +19,37 @@ class Textarea(VBox, AnswerWidget):
 
     def __init__(
         self,
-        textarea: Optional[ipywidgets.Textarea] = None,
-        answer_registry: Optional[AnswerRegistry] = None,
+        value: Optional[str] = None,
         answer_key: Optional[str] = None,
+        answer_registry: Optional[AnswerRegistry] = None,
+        exercise_description: Optional[str] = None,
+        exercise_title: Optional[str] = None,
         *args,
         **kwargs,
     ):
-        if textarea is None:
-            textarea = ipywidgets.Textarea(layout=Layout(width="auto"))
+        self._exercise_description = exercise_description
+        if exercise_description is None:
+            self._exercise_description_html = None
+        else:
+            self._exercise_description_html = HTMLMath(self._exercise_description)
+        if exercise_title is None:
+            if answer_key is None:
+                self._exercise_title = None
+                self._exercise_title_html = None
+            else:
+                self._exercise_title = answer_key
+                self._exercise_title_html = HTML(f"<b>{answer_key}</b>")
+        else:
+            self._exercise_title = exercise_title
+            self._exercise_title_html = HTML(f"<b>{exercise_title}</b>")
 
-        self._textarea = textarea
+        if self._exercise_description_html is not None:
+            self._exercise_description_html.add_class("exercise-description")
+        if self._exercise_title_html is not None:
+            self._exercise_title_html.add_class("exercise-title")
+
+        layout = kwargs.pop("layout", Layout(width="auto", height="150px"))
+        self._textarea = ipywidgets.Textarea(value, *args, layout=layout, **kwargs)
         self._cue_textarea = self._textarea
         self._output = Output()
 
@@ -80,6 +101,10 @@ class Textarea(VBox, AnswerWidget):
         AnswerWidget.__init__(self, answer_registry, answer_key)
 
         widget_children = []
+        if self._exercise_title_html is not None:
+            widget_children.append(self._exercise_title_html)
+        if self._exercise_description_html is not None:
+            widget_children.append(self._exercise_description_html)
         widget_children.append(self._cue_textarea)
         if self._button_panel:
             widget_children.append(self._button_panel)
@@ -89,9 +114,15 @@ class Textarea(VBox, AnswerWidget):
         VBox.__init__(
             self,
             widget_children,
-            *args,
-            **kwargs,
         )
+
+    @property
+    def exercise_title(self) -> Union[str, None]:
+        return self._exercise_title
+
+    @property
+    def exercise_description(self) -> Union[str, None]:
+        return self._exercise_description
 
     @property
     def answer(self) -> dict:
