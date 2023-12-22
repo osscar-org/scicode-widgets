@@ -183,7 +183,7 @@ class TestAnswerWidgets:
         answer_registry_buttons = nb_cell.find_elements(
             By.CLASS_NAME, BUTTON_CLASS_NAME
         )
-        assert len(answer_registry_buttons) == 4
+        assert len(answer_registry_buttons) == 3
 
         choose_other_file_button = answer_registry_buttons[1]
         save_all_answers_button = answer_registry_buttons[2]
@@ -204,8 +204,11 @@ class TestAnswerWidgets:
         answer_registry_buttons = nb_cell.find_elements(
             By.CLASS_NAME, BUTTON_CLASS_NAME
         )
-        assert len(answer_registry_buttons) == 6
-        confirm_button = answer_registry_buttons[4]
+        answer_registry_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, BUTTON_CLASS_NAME
+        )
+        assert len(answer_registry_buttons) == 5
+        confirm_button = answer_registry_buttons[3]
         WebDriverWait(driver, 5).until(
             expected_conditions.element_to_be_clickable(confirm_button)
         ).click()
@@ -226,8 +229,8 @@ class TestAnswerWidgets:
         answer_registry_buttons = nb_cell.find_elements(
             By.CLASS_NAME, BUTTON_CLASS_NAME
         )
-        assert len(answer_registry_buttons) == 6
-        cancel_button = answer_registry_buttons[5]
+        assert len(answer_registry_buttons) == 5
+        cancel_button = answer_registry_buttons[4]
         WebDriverWait(driver, 5).until(
             expected_conditions.element_to_be_clickable(cancel_button)
         ).click()
