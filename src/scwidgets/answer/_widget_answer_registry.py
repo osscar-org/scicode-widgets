@@ -260,9 +260,6 @@ class AnswerRegistry(VBox):
         dropdown_options = self._get_dropdown_options()
         self._answers_files_dropdown.options = dropdown_options
 
-        dropdown_options = self._get_dropdown_options()
-        self._answers_files_dropdown.options = dropdown_options
-
     @property
     def registered_widgets(self):
         return self._widgets.copy()
