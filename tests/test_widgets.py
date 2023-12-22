@@ -1,3 +1,4 @@
+import base64
 import glob
 import os
 import time
@@ -7,6 +8,7 @@ import numpy as np
 import pytest
 import requests
 from imageio.v3 import imread
+from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
@@ -15,8 +17,13 @@ from selenium.webdriver.support.wait import WebDriverWait
 from skimage.metrics import structural_similarity
 from skimage.transform import resize
 
+from .conftest import JUPYTER_TYPE
+
 
 def crop_const_color_borders(image: np.ndarray, const_color: int = 255):
+    """
+    Removes all constant color borders of the image
+    """
     if np.all(image == const_color):
         return image[:0, :0, :0]
 
@@ -35,25 +42,42 @@ def crop_const_color_borders(image: np.ndarray, const_color: int = 255):
     return image[i1:i2, j1:j2, :]
 
 
-def test_notebook_running(notebook_service):
-    """Tests if juypter notebook is running
+if JUPYTER_TYPE == "notebook":
+    BUTTON_CLASS_NAME = "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
+    OUTPUT_CLASS_NAME = "lm-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-output"
+    TEXT_INPUT_CLASS_NAME = "widget-input"
+    CODE_MIRROR_CLASS_NAME = "CodeMirror-code"
+    MATPLOTLIB_CANVAS_CLASS_NAME = "jupyter-widgets.jupyter-matplotlib-canvas-container"
+    CUE_BOX_CLASS_NAME = (
+        "lm-Widget.lm-Panel.jupyter-widgets.widget-container"
+        ".widget-box.widget-vbox.scwidget-cue-box"
+    )
+elif JUPYTER_TYPE == "lab":
+    BUTTON_CLASS_NAME = (
+        "lm-Widget.p-Widget.jupyter-widgets.jupyter-button.widget-button"
+    )
+    OUTPUT_CLASS_NAME = (
+        "lm-Widget.p-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-output"
+    )
+    TEXT_INPUT_CLASS_NAME = "widget-input"
+    CODE_MIRROR_CLASS_NAME = "CodeMirror-code"
 
-    :param notebook_service: see conftest.py
-    """
-    url, token = notebook_service
-    nb_path = "tree"
-    response = requests.get(f"{url}/{nb_path}?token={token}")
-    # status code 200 means it was successful
-    assert response.status_code == 200
+    MATPLOTLIB_CANVAS_CLASS_NAME = "jupyter-widgets.jupyter-matplotlib-canvas-container"
+    CUE_BOX_CLASS_NAME = (
+        "lm-Widget.p-Widget.lm-Panel.p-Panel.jupyter-widgets."
+        "widget-container.widget-box.widget-vbox.scwidget-cue-box"
+    )
+else:
+    raise ValueError(
+        f"Tests do not support jupyter type {JUPYTER_TYPE!r}. Please use 'notebook' or"
+        " 'lab'."
+    )
 
+CUED_CUE_BOX_CLASS_NAME = f"{CUE_BOX_CLASS_NAME}.scwidget-cue-box--cue"
 
-CUE_BOX_CLASS_NAME = (
-    "lm-Widget.lm-Panel.jupyter-widgets.widget-container"
-    ".widget-box.widget-vbox.scwidget-cue-box"
-)
-CUED_CUE_BOX_CLASS_NAME = (
-    "lm-Widget.lm-Panel.jupyter-widgets.widget-container"
-    ".widget-box.widget-vbox.scwidget-cue-box.scwidget-cue-box--cue"
+RESET_CUE_BUTTON_CLASS_NAME = f"{BUTTON_CLASS_NAME}.scwidget-reset-cue-button"
+CUED_RESET_CUE_BUTTON_CLASS_NAME = (
+    f"{RESET_CUE_BUTTON_CLASS_NAME}.scwidget-reset-cue-button--cue"
 )
 
 
@@ -72,16 +96,6 @@ def scwidget_cue_box_class_name(cue_type: str, cued: bool):
     if cue_type is None:
         return class_name
     return class_name.replace("cue-box", f"{cue_type}-cue-box")
-
-
-RESET_CUE_BUTTON_CLASS_NAME = (
-    "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
-    ".scwidget-reset-cue-button"
-)
-CUED_RESET_CUE_BUTTON_CLASS_NAME = (
-    "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
-    ".scwidget-reset-cue-button.scwidget-reset-cue-button--cue"
-)
 
 
 def reset_cue_button_class_name(cue_type: str, cued: bool):
@@ -103,11 +117,69 @@ def scwidget_reset_cue_button_class_name(cue_type: str, cued: bool):
     return class_name.replace("reset-cue-button", f"{cue_type}-reset-cue-button")
 
 
-BUTTON_CLASS_NAME = "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
-OUTPUT_CLASS_NAME = "lm-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-output"
-TEXT_INPUT_CLASS_NAME = "widget-input"
-CODE_MIRROR_CLASS_NAME = "CodeMirror-code"
-MATPLOTLIB_CANVAS_CLASS_NAME = "jupyter-widgets.jupyter-matplotlib-canvas-container"
+def get_nb_cells(driver) -> List[WebElement]:
+    """
+    Filters out empty cells
+
+    :param driver: see conftest.py selenium_driver function
+    """
+    # Each cell of the notebook, the cell number can be retrieved from the
+    # attribute "data-windowed-list-index"
+    nb_cells = driver.find_elements(
+        By.CLASS_NAME, "lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell"
+    )
+    return [nb_cell for nb_cell in nb_cells if nb_cell.text != ""]
+
+
+#########
+# Tests #
+#########
+
+
+def test_notebook_running(notebook_service):
+    """Tests if juypter notebook is running
+
+    :param notebook_service: see conftest.py
+    """
+    url, token = notebook_service
+    # jupyter lab
+    if JUPYTER_TYPE == "lab":
+        nb_path = ""
+    elif JUPYTER_TYPE == "notebook":
+        nb_path = "tree"
+    else:
+        raise ValueError(
+            f"Tests do not support jupyter type {JUPYTER_TYPE!r}. Please use 'notebook'"
+            " or 'lab'."
+        )
+    response = requests.get(f"{url}/{nb_path}?token={token}")
+    # status code 200 means it was successful
+    assert response.status_code == 200
+
+
+def test_privacy_policy(selenium_driver):
+    """
+    The first time jupyter lab is started on a fresh installation a privacy popup
+    appears that blocks any other button events. This test opens an arbitrary notebook
+    to trigger the popup and click it away. This test needs to be run before the widget
+    tests so the work correctly.
+    """
+    if JUPYTER_TYPE == "lab":
+        driver = selenium_driver("tests/notebooks/widget_answers.ipynb")
+        # we search for the button to appear so we can be sure that the privacy window
+        # appeared
+        privacy_buttons = driver.find_elements(
+            By.CLASS_NAME, "bp3-button.bp3-small.jp-toast-button.jp-Button"
+        )
+        yes_button = None
+        for button in privacy_buttons:
+            if button.text == "Yes":
+                yes_button = button
+
+        if yes_button is not None:
+            WebDriverWait(driver, 5).until(
+                expected_conditions.element_to_be_clickable(yes_button)
+            ).click()
 
 
 class TestAnswerWidgets:
@@ -138,16 +210,13 @@ class TestAnswerWidgets:
 
         driver = selenium_driver("tests/notebooks/widget_answers.ipynb")
 
-        # Each cell of the notebook, the cell number can be retrieved from the
-        # attribute "data-windowed-list-index"
-        nb_cells = driver.find_elements(
-            By.CLASS_NAME, "lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell"
-        )
+        nb_cells = get_nb_cells(driver)
 
         # Test 1:
         # -------
         nb_cell = nb_cells[2]
 
+        nb_cell.find_elements(By.CLASS_NAME, BUTTON_CLASS_NAME)
         answer_registry_buttons = nb_cell.find_elements(
             By.CLASS_NAME, BUTTON_CLASS_NAME
         )
@@ -270,6 +339,7 @@ class TestAnswerWidgets:
         answer_buttons = nb_cell.find_elements(
             By.CLASS_NAME, reset_cue_button_class_name("save", False)
         )
+
         assert len(answer_buttons) == 2
         assert answer_buttons[0].text == "Save answer"
         save_button = answer_buttons[0]
@@ -292,7 +362,12 @@ class TestAnswerWidgets:
         #
         WebDriverWait(driver, 1).until(
             expected_conditions.element_to_be_clickable(save_button)
-        ).click()
+        )
+        WebDriverWait(driver, 1).until(
+            expected_conditions.element_to_be_clickable(save_button)
+        )
+        # save button is hidden so we use actions to click
+        ActionChains(driver).move_to_element(save_button).click(save_button).perform()
         # wait for uncued box
         cue_box = nb_cell.find_element(By.CLASS_NAME, cue_box_class_name("save", False))
         assert "--cued" not in cue_box.get_attribute("class")
@@ -447,44 +522,44 @@ def test_widget_figure(selenium_driver, nb_filename, mpl_backend):
     # TODO for inline i need to get the image directly from the panel
     driver = selenium_driver(nb_filename)
 
-    # Each cell of the notebook, the cell number can be retrieved from the
-    # attribute "data-windowed-list-index"
-    nb_cells = driver.find_elements(
-        By.CLASS_NAME, "lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell"
-    )
+    nb_cells = get_nb_cells(driver)
 
     if "inline" == mpl_backend:
-        WebDriverWait(nb_cells[20], 5).until(
-            expected_conditions.visibility_of_all_elements_located(
-                (By.TAG_NAME, "img"),
-            )
-        )
-        matplotlib_canvases = driver.find_elements(By.TAG_NAME, "img")
+        by_type = By.TAG_NAME
+        matplotlib_element_name = "img"
+
     elif "ipympl" == mpl_backend:
-        WebDriverWait(nb_cells[20], 5).until(
-            expected_conditions.visibility_of_all_elements_located(
-                (By.CLASS_NAME, MATPLOTLIB_CANVAS_CLASS_NAME),
-            )
-        )
-        driver.find_elements(By.CLASS_NAME, MATPLOTLIB_CANVAS_CLASS_NAME)
-        matplotlib_canvases = driver.find_elements(
-            By.CLASS_NAME, MATPLOTLIB_CANVAS_CLASS_NAME
-        )
+        by_type = By.CLASS_NAME
+        matplotlib_element_name = MATPLOTLIB_CANVAS_CLASS_NAME
     else:
         raise ValueError(f"matplotlib backend {mpl_backend!r} is not known.")
-    assert len(matplotlib_canvases) >= 5, (
-        "Not all matplotlib canvases have been correctly " "loaded."
+
+    WebDriverWait(nb_cells[20], 5).until(
+        expected_conditions.visibility_of_all_elements_located(
+            (by_type, matplotlib_element_name),
+        )
     )
-    assert len(matplotlib_canvases) == 5, (
-        "Test that plt.show() does not show any plot "
-        "failed. For each test there should be only "
-        "one plot."
+    matplotlib_canvases = driver.find_elements(by_type, matplotlib_element_name)
+
+    # sometimes the canvaeses are not ordered
+    matplotlib_canvases = sorted(
+        matplotlib_canvases, key=lambda canvas: canvas.location["y"]
     )
 
-    def test_cue_figure(web_element: WebElement, ref_png_filename: str, rtol=5e-2):
+    def test_cue_figure(
+        web_element: WebElement, ref_png_filename: str, mpl_backend: str, rtol=5e-2
+    ):
         # images can have different white border and slightly
         # different shape so we cut the border of and resize them
-        image = imread(web_element.screenshot_as_png)
+        if mpl_backend == "inline":
+            image = imread(
+                base64.decodebytes(
+                    web_element.get_property("src").split(",")[1].encode()
+                )
+            )
+        elif mpl_backend == "ipympl":
+            image = imread(web_element.screenshot_as_png)
+
         image = crop_const_color_borders(image)
         ref_image = imread(ref_png_filename)
         ref_image = crop_const_color_borders(ref_image)
@@ -500,32 +575,61 @@ def test_widget_figure(selenium_driver, nb_filename, mpl_backend):
 
     time.sleep(0.2)
     # Test 1.1
-    # inline does not show a plot
     if mpl_backend == "inline":
-        # in inline mode no image is shown by the figure but somehow
-        # an image of the python logo is show, we ignore this case
+        # in inline mode no image is shown by the first figure
+        nb_expected_canvases = 4
+        if JUPYTER_TYPE == "notebook":
+            # in the notebook an image of the python logo is shown as first canvas, so
+            # we remove it
+            matplotlib_canvases = matplotlib_canvases[1:]
+
+        assert (
+            len(matplotlib_canvases) >= nb_expected_canvases
+        ), "Not all matplotlib canvases have been correctly loaded."
+        assert len(matplotlib_canvases) == nb_expected_canvases, (
+            "Test that plt.show() does not show any plot "
+            "failed. For each test there should be only "
+            "one plot."
+        )
+        # no test for inline
         pass
     elif mpl_backend == "ipympl":
+        nb_expected_canvases = 5
+        assert (
+            len(matplotlib_canvases) >= nb_expected_canvases
+        ), "Not all matplotlib canvases have been correctly loaded."
+        assert len(matplotlib_canvases) == nb_expected_canvases, (
+            "Test that plt.show() does not show any plot "
+            "failed. For each test there should be only "
+            "one plot."
+        )
         image = imread(matplotlib_canvases[0].screenshot_as_png)
         assert crop_const_color_borders(image).shape == (0, 0, 0), "Image is not white"
+        matplotlib_canvases = matplotlib_canvases[1:]
+
     # Test 1.2
     test_cue_figure(
-        matplotlib_canvases[1], "tests/screenshots/widget_cue_figure/empty_axis.png"
+        matplotlib_canvases[0],
+        "tests/screenshots/widget_cue_figure/empty_axis.png",
+        mpl_backend,
     )
     # Test 1.3
     test_cue_figure(
-        matplotlib_canvases[2],
+        matplotlib_canvases[1],
         "tests/screenshots/widget_cue_figure/update_figure_plot.png",
+        mpl_backend,
     )
     # Test 1.4
     test_cue_figure(
-        matplotlib_canvases[3],
+        matplotlib_canvases[2],
         "tests/screenshots/widget_cue_figure/update_figure_set.png",
+        mpl_backend,
     )
     # Test 1.5
     test_cue_figure(
-        matplotlib_canvases[4],
+        matplotlib_canvases[3],
         "tests/screenshots/widget_cue_figure/update_figure_plot.png",
+        mpl_backend,
     )
 
 
@@ -537,11 +641,7 @@ def test_widgets_cue(selenium_driver):
     """
     driver = selenium_driver("tests/notebooks/widgets_cue.ipynb")
 
-    # Each cell of the notebook, the cell number can be retrieved from the
-    # attribute "data-windowed-list-index"
-    nb_cells = driver.find_elements(
-        By.CLASS_NAME, "lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell"
-    )
+    nb_cells = get_nb_cells(driver)
     # Test 1:
     # -------
     # Check if CueBox shows cue when changed
@@ -758,11 +858,7 @@ def test_widget_check_registry(selenium_driver):
     """
     driver = selenium_driver("tests/notebooks/widget_check_registry.ipynb")
 
-    # Each cell of the notebook, the cell number can be retrieved from the
-    # attribute "data-windowed-list-index"
-    nb_cells = driver.find_elements(
-        By.CLASS_NAME, "lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell"
-    )
+    nb_cells = get_nb_cells(driver)
 
     # Test 1:
     # -------
@@ -890,11 +986,7 @@ def test_widgets_code(selenium_driver):
     """
     driver = selenium_driver("tests/notebooks/widget_code_demo.ipynb")
 
-    # Each cell of the notebook, the cell number can be retrieved from the
-    # attribute "data-windowed-list-index"
-    nb_cells = driver.find_elements(
-        By.CLASS_NAME, "lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell"
-    )
+    nb_cells = get_nb_cells(driver)
     # Test 1:
     # -------
     WebDriverWait(driver, 5).until(
@@ -1019,10 +1111,8 @@ def test_widgets_code(selenium_driver):
         # asserts on reaction on text input #
         #####################################
         # expected_conditions.text_to_be_present_in_element does not work for code input
-        code_input = nb_cell.find_elements(By.CLASS_NAME, "CodeMirror-lines")
-
-        code_input = nb_cell.find_elements(By.CLASS_NAME, CODE_MIRROR_CLASS_NAME)[2]
-        assert "return" in code_input.text
+        code_input_lines = nb_cell.find_elements(By.CLASS_NAME, CODE_MIRROR_CLASS_NAME)
+        assert any(["return" in line.text for line in code_input_lines])
         # Issue #22
         #   sending keys to code widget does not work at the moment
         #   once this works please add this code

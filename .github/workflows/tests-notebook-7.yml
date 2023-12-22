@@ -1,4 +1,4 @@
-name: Tests
+name: Tests - notebook 7
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
     - run: pip install tox
 
     - name: run Python tests
-      run: tox -e tests
+      run: tox -e tests-notebook-7
 
     - name: run Python tests for coverage
       run: tox -e coverage
