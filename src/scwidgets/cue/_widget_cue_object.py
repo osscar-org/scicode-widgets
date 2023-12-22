@@ -70,4 +70,7 @@ class CueObject(CueOutput):
 
     def draw_display(self):
         with self:
-            display(self._display_object)
+            if isinstance(self._display_object, str):
+                print(self._display_object)
+            elif self._display_object is not None:
+                display(self._display_object)
