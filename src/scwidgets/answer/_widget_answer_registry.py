@@ -202,16 +202,10 @@ class AnswerRegistry(VBox):
             disabled=True,
             tooltip="Save all answers saved into a .json file.",
         )
-        self._reload_all_answers_button = Button(
-            description="Reload all answers",
-            disabled=True,
-            tooltip="Reload answers saved in .json file to notebook.",
-        )
         self._lower_panel_box = HBox(
             [
                 self._choose_other_file_button,
                 self._save_all_answers_button,
-                self._reload_all_answers_button,
             ]
         )
         # lower panel appears when file has been loaded and is there display within an
@@ -251,9 +245,6 @@ class AnswerRegistry(VBox):
         # lower panel box events
         self._choose_other_file_button.on_click(self._on_click_choose_other_file_button)
         self._save_all_answers_button.on_click(self._on_click_save_all_answers_button)
-        self._reload_all_answers_button.on_click(
-            self._on_click_reload_all_answers_button
-        )
 
         # confirmation box events
         self._confirm_save_button.on_click(self._on_click_confirm_save_button)
@@ -471,18 +462,6 @@ class AnswerRegistry(VBox):
                 Printer.print_success_message(message)
             except Exception as exception:
                 Printer.print_error_message("Error raised while saving file:")
-                raise exception
-
-    def _on_click_reload_all_answers_button(self, change: dict):
-        self._output.clear_output(wait=True)
-        with self._output:
-            try:
-                self.load_file()
-                Printer.print_success_message(
-                    f"All answers were reloaded from file {self._loaded_file_name!r}."
-                )
-            except Exception as exception:
-                Printer.print_error_message("Error raised while loading file:")
                 raise exception
 
     def _on_click_choose_other_file_button(self, change: dict):
