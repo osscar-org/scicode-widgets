@@ -294,12 +294,18 @@ class TestAnswerWidgets:
             expected_conditions.element_to_be_clickable(save_button)
         ).click()
         # wait for uncued box
-        nb_cell.find_element(By.CLASS_NAME, cue_box_class_name("save", False))
+        cue_box = nb_cell.find_element(By.CLASS_NAME, cue_box_class_name("save", False))
+        assert "--cued" not in cue_box.get_attribute("class")
         # check if there are two buttons are uncued
         reset_cue_buttons = nb_cell.find_elements(
             By.CLASS_NAME, reset_cue_button_class_name("save", False)
         )
-        assert len(reset_cue_buttons) == 2
+        assert all(
+            [
+                "--cued" not in button.get_attribute("class")
+                for button in reset_cue_buttons
+            ]
+        )
         assert text_input.get_attribute("value") == input_answer
         output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
         assert (
@@ -325,10 +331,17 @@ class TestAnswerWidgets:
             expected_conditions.element_to_be_clickable(load_button)
         ).click()
         # wait for uncued box
-        nb_cell.find_element(By.CLASS_NAME, cue_box_class_name("save", False))
+        cue_box = nb_cell.find_element(By.CLASS_NAME, cue_box_class_name("save", False))
+        assert "--cued" not in cue_box.get_attribute("class")
         # check if there are two buttons are uncued
         reset_cue_buttons = nb_cell.find_elements(
             By.CLASS_NAME, reset_cue_button_class_name("save", False)
+        )
+        assert all(
+            [
+                "--cued" not in button.get_attribute("class")
+                for button in reset_cue_buttons
+            ]
         )
         # test if last test has been loaded
         WebDriverWait(driver, 5).until(
@@ -356,10 +369,6 @@ class TestAnswerWidgets:
         assert answer_buttons[1].text == "Load code"
         load_button = answer_buttons[1]
 
-        reset_cue_buttons = nb_cell.find_elements(
-            By.CLASS_NAME, reset_cue_button_class_name("save", False)
-        )
-        assert len(reset_cue_buttons) == 2
         WebDriverWait(driver, 1).until(
             expected_conditions.element_to_be_clickable(save_button)
         ).click()
@@ -368,7 +377,30 @@ class TestAnswerWidgets:
         assert (
             output.text == "Answer has been saved in file 'pytest-test-answers.json'."
         )
+        # not cued
+        cue_box = nb_cell.find_element(By.CLASS_NAME, cue_box_class_name("save", False))
+        assert "--cued" not in cue_box.get_attribute("class")
+        reset_cue_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, reset_cue_button_class_name("save", False)
+        )
+        assert all(
+            [
+                "--cued" not in button.get_attribute("class")
+                for button in reset_cue_buttons
+            ]
+        )
 
+        slider_input_box = nb_cell.find_element(By.CLASS_NAME, "widget-readout")
+        slider_input_box.send_keys(Keys.BACKSPACE)
+        slider_input_box.send_keys(Keys.BACKSPACE)
+        slider_input_box.send_keys(0)
+        slider_input_box.send_keys(Keys.ENTER)
+        time.sleep(0.2)
+
+        reset_cue_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, reset_cue_button_class_name("save", True)
+        )
+        assert len(reset_cue_buttons) == 2
         WebDriverWait(driver, 1).until(
             expected_conditions.element_to_be_clickable(load_button)
         ).click()
@@ -380,6 +412,19 @@ class TestAnswerWidgets:
             output.text
             == "Answer has been loaded from file 'pytest-test-answers.json'."
         )
+        # not cued
+        cue_box = nb_cell.find_element(By.CLASS_NAME, cue_box_class_name("save", False))
+        assert "--cued" not in cue_box.get_attribute("class")
+        reset_cue_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, reset_cue_button_class_name("save", False)
+        )
+        assert all(
+            [
+                "--cued" not in button.get_attribute("class")
+                for button in reset_cue_buttons
+            ]
+        )
+
         # Issue #22
         # Please add tests using send_keys works once it works with code input
 

@@ -159,46 +159,9 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
                 button_tooltip="Check the correctness of your code",
             )
 
-        if self._answer_registry is None or (
-            self._code is None and self._parameter_panel is None
-        ):
-            self._save_button = None
-            self._load_button = None
-            self._save_cue_box = None
-        else:
-            self._cue_code = SaveCueBox(
-                self._code, "function_body", self._cue_code, cued=True
-            )
-            self._save_cue_box = self._cue_code
-            self._save_button = SaveResetCueButton(
-                self._cue_code,
-                self._on_click_save_action,
-                cued=True,
-                disable_on_successful_action=kwargs.pop(
-                    "disable_save_button_on_successful_action", False
-                ),
-                disable_during_action=kwargs.pop(
-                    "disable_save_button_during_action", True
-                ),
-                description="Save code",
-                button_tooltip="Loads your code and parameters from the loaded file",
-            )
-            self._load_button = SaveResetCueButton(
-                self._cue_code,
-                self._on_click_load_action,
-                cued=True,
-                disable_on_successful_action=kwargs.pop(
-                    "disable_load_button_on_successful_action", False
-                ),
-                disable_during_action=kwargs.pop(
-                    "disable_load_button_during_action", True
-                ),
-                description="Load code",
-                button_tooltip="Saves your code and parameters to the loaded file",
-            )
-
         if self._parameter_panel is None:
             self._update_button = None
+            self._self._cue_parameter_panel = None
         else:
             # set up update button and cueing
             # -------------------------------
@@ -315,6 +278,77 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
                 traits_to_observe=traits_to_observe,
                 description=description,
                 button_tooltip=button_tooltip,
+            )
+
+        if self._answer_registry is None or (
+            self._code is None and self._parameter_panel is None
+        ):
+            self._save_button = None
+            self._load_button = None
+            self._save_cue_box = None
+        else:
+            save_widgets_to_observe = [self._code]
+            save_traits_to_observe = ["function_body"]
+            if self._parameter_panel is not None:
+                save_widgets_to_observe.extend(self._parameter_panel.parameters_widget)
+                save_traits_to_observe.extend(self._parameter_panel.parameters_trait)
+            self._cue_code = SaveCueBox(
+                save_widgets_to_observe,
+                save_traits_to_observe,
+                self._cue_code,
+                cued=True,
+            )
+
+            self._save_cue_box = self._cue_code
+            self._save_button = SaveResetCueButton(
+                self._cue_code,
+                self._on_click_save_action,
+                cued=True,
+                disable_on_successful_action=kwargs.pop(
+                    "disable_save_button_on_successful_action", False
+                ),
+                disable_during_action=kwargs.pop(
+                    "disable_save_button_during_action", True
+                ),
+                description="Save code",
+                button_tooltip="Loads your code and parameters from the loaded file",
+            )
+            self._load_button = SaveResetCueButton(
+                self._cue_code,
+                self._on_click_load_action,
+                cued=True,
+                disable_on_successful_action=kwargs.pop(
+                    "disable_load_button_on_successful_action", False
+                ),
+                disable_during_action=kwargs.pop(
+                    "disable_load_button_during_action", True
+                ),
+                description="Load code",
+                button_tooltip="Saves your code and parameters to the loaded file",
+            )
+
+            # click on load button resets cue of save buton and vise-versa
+            self._save_button.set_cue_widgets(
+                [
+                    widget
+                    for widget in [
+                        self._cue_code,
+                        self._cue_parameter_panel,
+                        self._load_button,
+                    ]
+                    if widget is not None
+                ]
+            )
+            self._load_button.set_cue_widgets(
+                [
+                    widget
+                    for widget in [
+                        self._cue_code,
+                        self._cue_parameter_panel,
+                        self._save_button,
+                    ]
+                    if widget is not None
+                ]
             )
 
         demo_children = []

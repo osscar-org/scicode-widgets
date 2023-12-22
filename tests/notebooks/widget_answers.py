@@ -50,10 +50,16 @@ textarea
 
 
 # +
-def foo():
-    return
+def foo(x):
+    return x
 
 
-code_demo = CodeDemo(foo, answer_registry=answer_registry, answer_key="exercise_2")
+code_demo = CodeDemo(
+    foo,
+    parameters={"x": (0, 2, 1)},
+    update_mode="manual",
+    answer_registry=answer_registry,
+    answer_key="exercise_2",
+)
 code_demo
 # -
