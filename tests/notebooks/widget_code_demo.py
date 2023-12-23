@@ -27,19 +27,12 @@ from tests.test_code import get_code_demo  # noqa: E402
 
 scwidgets.get_css_style()
 
-
-def run_code_demo(checks, include_checks, include_params, tunable_params, update_mode):
-    return get_code_demo(
-        checks, include_checks, include_params, tunable_params, update_mode
-    )
-
-
 # Test 1:
 # -------
 # Test if CodeDemo shows correct output
 
 # Test 1.1
-run_code_demo(
+get_code_demo(
     [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
     include_checks=True,
     include_params=True,
@@ -48,7 +41,7 @@ run_code_demo(
 )
 
 # Test 1.2
-run_code_demo(
+get_code_demo(
     [single_param_check(use_fingerprint=False, failing=True, buggy=False)],
     include_checks=True,
     include_params=True,
@@ -57,7 +50,7 @@ run_code_demo(
 )
 
 # Test 1.3
-run_code_demo(
+get_code_demo(
     [single_param_check(use_fingerprint=False, failing=False, buggy=True)],
     include_checks=True,
     include_params=True,
@@ -66,7 +59,7 @@ run_code_demo(
 )
 
 # Test 1.4
-run_code_demo(
+get_code_demo(
     [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
     include_checks=True,
     include_params=True,
@@ -75,7 +68,7 @@ run_code_demo(
 )
 
 # Test 1.5
-run_code_demo(
+get_code_demo(
     [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
     include_checks=True,
     include_params=True,
@@ -84,7 +77,7 @@ run_code_demo(
 )
 
 # Test 1.6
-run_code_demo(
+get_code_demo(
     [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
     include_checks=True,
     include_params=True,
@@ -95,28 +88,48 @@ run_code_demo(
 
 # Test 2:
 # -------
-# Test if CodeDemo works correct for only checks
+# Test if CodeDemo works correct for only update
 
+
+# +
 # Test 2.1
-# TODO
-# run_code_demo([single_param_check(use_fingerprint=False, failing=True, buggy=False)],
-#        include_checks=True, include_params=False)
+# Test if update button is shown even if params are None
+def function_to_check():
+    print("SomeText")
+    return 5
+
+
+get_code_demo(
+    [],
+    code=function_to_check,
+    include_checks=False,
+    include_params=False,
+    tunable_params=False,
+    update_mode="release",
+)
+# -
 
 # Test 2.2
 # TODO
-# run_code_demo([single_param_check(use_fingerprint=True, failing=True, buggy=False)],
-#        include_checks=True, include_params=False)
+# get_code_demo([single_param_check(use_fingerprint=False, failing=True, buggy=False)],
+#        include_checks=False, include_params=True, tunable_params)
+
+# Test 2.3
+# TODO
+# get_code_demo([single_param_check(use_fingerprint=True, failing=True, buggy=False)],
+#        include_checks=False, include_params=True, tunable_params)
+
 
 # Test 3:
 # -------
-# Test if CodeDemo works correct for only update
+# Test if CodeDemo works correct for only checks
 
 # Test 3.1
 # TODO
-# run_code_demo([single_param_check(use_fingerprint=False, failing=True, buggy=False)],
-#        include_checks=False, include_params=True, tunable_params)
+# get_code_demo([single_param_check(use_fingerprint=False, failing=True, buggy=False)],
+#        include_checks=True, include_params=False)
 
 # Test 3.2
 # TODO
-# run_code_demo([single_param_check(use_fingerprint=True, failing=True, buggy=False)],
-#        include_checks=False, include_params=True, tunable_params)
+# get_code_demo([single_param_check(use_fingerprint=True, failing=True, buggy=False)],
+#        include_checks=True, include_params=False)

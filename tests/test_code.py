@@ -1,4 +1,4 @@
-from typing import List
+from typing import Callable, List
 
 import numpy as np
 import pytest
@@ -69,6 +69,7 @@ class TestCodeInput:
 
 def get_code_demo(
     checks: List[Check],
+    code: Callable = None,
     include_checks=True,
     include_params=True,
     tunable_params=False,
@@ -76,8 +77,13 @@ def get_code_demo(
 ):
     # Important:
     # we take the the function_to_check from the first check as code input
-    code_input = CodeInput(checks[0].function_to_check)
-    if tunable_params:
+    if len(checks) == 0 and code is None:
+        raise ValueError("Either nonempty checks must given or code")
+    if code is None:
+        code_input = CodeInput(checks[0].function_to_check)
+    else:
+        code_input = CodeInput(code)
+    if len(checks) > 0 and tunable_params:
         # convert single value arrays to tuples
         for value in checks[0].inputs_parameters[0].values():
             assert (
@@ -87,11 +93,13 @@ def get_code_demo(
             key: value.reshape(-1)[0]
             for key, value in checks[0].inputs_parameters[0].items()
         }
-    else:
+    elif len(checks) > 0:
         # we convert the arguments to fixed one
         parameters = {
             key: fixed(value) for key, value in checks[0].inputs_parameters[0].items()
         }
+    else:
+        parameters = None
 
     def update_print(code_demo: CodeDemo):
         output = code_demo.run_code(**code_demo.panel_parameters)

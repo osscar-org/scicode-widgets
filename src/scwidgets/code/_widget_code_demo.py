@@ -159,9 +159,14 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
                 button_tooltip="Check the correctness of your code",
             )
 
-        if self._parameter_panel is None:
+        self._cue_parameter_panel = self._parameter_panel
+        if (
+            self._parameter_panel is None
+            and self._update_func is None
+            and self._code is None
+        ):
             self._update_button = None
-            self._self._cue_parameter_panel = None
+            self._cue_parameter_panel = None
         else:
             # set up update button and cueing
             # -------------------------------
@@ -178,83 +183,97 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
             # set up parameter panel
             # ----------------------
 
-            if self._update_mode == "continuous":
-                self._parameter_panel.set_parameters_widget_attr(
-                    "continuous_update", True
-                )
-            elif self._update_mode == "release":
-                self._parameter_panel.set_parameters_widget_attr(
-                    "continuous_update", False
-                )
+            if self._parameter_panel is not None:
+                if self._update_mode == "continuous":
+                    self._parameter_panel.set_parameters_widget_attr(
+                        "continuous_update", True
+                    )
+                elif self._update_mode == "release":
+                    self._parameter_panel.set_parameters_widget_attr(
+                        "continuous_update", False
+                    )
 
-            if self._update_mode in ["continuous", "release"]:
-                self._parameter_panel.observe_parameters(
-                    self._on_trait_parameters_changed, "value"
-                )
+                if self._update_mode in ["continuous", "release"]:
+                    self._parameter_panel.observe_parameters(
+                        self._on_trait_parameters_changed, "value"
+                    )
 
-                if self._code is not None:
-                    # the button only cues on cue_code change
-                    widgets_to_observe = [self._code]
-                    traits_to_observe = ["function_body"]
+                    if self._code is not None:
+                        # the button only cues on cue_code change
+                        widgets_to_observe = [self._code]
+                        traits_to_observe = ["function_body"]
+                    else:
+                        widgets_to_observe = None
+                        traits_to_observe = None
+                    # assume when continuous that the function is fast
+                    # and that disabling causes flicker
+                    update_button_disable_during_action = False
+                    if self._code is not None:
+                        for cue_output in self._cue_outputs:
+                            # TODO this has to be made public
+                            cue_output._widgets_to_observe = [self._code]
+                            cue_output._traits_to_observe = ["function_body"]
+                            cue_output.observe_widgets()
+
+                        # TODO set this
+                        self._output._widgets_to_observe = [self._code]
+                        self._output._traits_to_observe = ["function_body"]
+                        self._output.observe_widgets()
+
+                    self._cue_parameter_panel = UpdateCueBox(
+                        [],
+                        [],
+                        self._parameter_panel,
+                    )
                 else:
                     widgets_to_observe = None
                     traits_to_observe = None
-                # assume when continuous that the function is fast
-                # and that disabling causes flicker
-                disable_during_action = False
-                if self._code is not None:
+                    update_button_disable_during_action = True
+
+                    self._cue_parameter_panel = UpdateCueBox(
+                        self._parameter_panel.parameters_widget,
+                        self._parameter_panel.parameters_trait,
+                        self._parameter_panel,
+                    )
+
                     for cue_output in self._cue_outputs:
-                        # TODO this has to be made public
-                        cue_output._widgets_to_observe = [self._code]
-                        cue_output._traits_to_observe = ["function_body"]
-                        cue_output.observe_widgets()
-
-                    # TODO set this
-                    self._output._widgets_to_observe = [self._code]
-                    self._output._traits_to_observe = ["function_body"]
-                    self._output.observe_widgets()
-
-                self._cue_parameter_panel = UpdateCueBox(
-                    [],
-                    [],
-                    self._parameter_panel,
-                )
+                        if self._code is not None:
+                            # TODO this has to be made public
+                            cue_output._widgets_to_observe = [
+                                self._code
+                            ] + self._parameter_panel.parameters_widget
+                            cue_output._traits_to_observe = [
+                                "function_body"
+                            ] + self._parameter_panel.parameters_trait
+                            cue_output.observe_widgets()
+                        else:
+                            # TODO this has to be made public
+                            cue_output._widgets_to_observe = (
+                                self._parameter_panel.parameters_widget
+                            )
+                            cue_output._traits_to_observe = (
+                                self._parameter_panel.parameters_trait
+                            )
+                            cue_output.observe_widgets()
+            elif self._code is not None:
+                widgets_to_observe = [self._code]
+                traits_to_observe = ["function_body"]
+                # only code demo with an update function exists,
+                # we therefore assume update is slow
+                update_button_disable_during_action = True
             else:
-                widgets_to_observe = None
-                traits_to_observe = None
-                disable_during_action = True
-
-                self._cue_parameter_panel = UpdateCueBox(
-                    self._parameter_panel.parameters_widget,
-                    self._parameter_panel.parameters_trait,
-                    self._parameter_panel,
-                )
-
-                for cue_output in self._cue_outputs:
-                    if self._code is not None:
-                        # TODO this has to be made public
-                        cue_output._widgets_to_observe = [
-                            self._code
-                        ] + self._parameter_panel.parameters_widget
-                        cue_output._traits_to_observe = [
-                            "function_body"
-                        ] + self._parameter_panel.parameters_trait
-                        cue_output.observe_widgets()
-                    else:
-                        # TODO this has to be made public
-                        cue_output._widgets_to_observe = (
-                            self._parameter_panel.parameters_widget
-                        )
-                        cue_output._traits_to_observe = (
-                            self._parameter_panel.parameters_trait
-                        )
-                        cue_output.observe_widgets()
+                widgets_to_observe = []
+                traits_to_observe = []
+                # only update function exists, we assume update is slow
+                update_button_disable_during_action = True
 
             reset_update_cue_widgets = []
-            if self._code is not None:
+            if self._cue_code is not None:
                 reset_update_cue_widgets.append(self._cue_code)
-            reset_update_cue_widgets.append(self._cue_parameter_panel)
-            reset_update_cue_widgets.extend(self._cue_outputs)
+            if self._cue_parameter_panel is not None:
+                reset_update_cue_widgets.append(self._cue_parameter_panel)
+            if self._cue_outputs is not None:
+                reset_update_cue_widgets.extend(self._cue_outputs)
 
             if self._code is not None:
                 description = "Run Code"
@@ -272,7 +291,8 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
                     "disable_update_button_on_successful_action", False
                 ),
                 disable_during_action=kwargs.pop(
-                    "disable_update_button_during_action", disable_during_action
+                    "disable_update_button_during_action",
+                    update_button_disable_during_action,
                 ),
                 widgets_to_observe=widgets_to_observe,
                 traits_to_observe=traits_to_observe,
@@ -352,9 +372,9 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
             )
 
         demo_children = []
-        if self._code is not None:
+        if self._cue_code is not None:
             demo_children.append(self._cue_code)
-        if self._parameters is not None:
+        if self._cue_parameter_panel is not None:
             demo_children.append(self._cue_parameter_panel)
 
         buttons = []
