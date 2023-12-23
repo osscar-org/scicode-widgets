@@ -1006,6 +1006,9 @@ def test_widgets_code(selenium_driver):
         tunable_params=False,
         update_mode="manual",
     ):
+        assert (
+            not (tunable_params) or include_params
+        ), "tunable_params requires include_params to be true"
         ########################################################
         # asserts for correct initialization of check elements #
         ########################################################
@@ -1034,35 +1037,39 @@ def test_widgets_code(selenium_driver):
         #########################################################
         # asserts for correct initialization of update elements #
         #########################################################
+
+        update_boxes = nb_cell.find_elements(
+            By.CLASS_NAME, cue_box_class_name("update", False)
+        )
         if include_params:
-            update_boxes = nb_cell.find_elements(
-                By.CLASS_NAME, cue_box_class_name("update", False)
-            )
             assert len(update_boxes) == 2
-            update_code_input = update_boxes[0]
-            assert "def function_to_check" in update_code_input.text
-            assert scwidget_cue_box_class_name(
-                "update", True
-            ) in update_code_input.get_attribute("class")
+        else:
+            assert len(update_boxes) == 1
+        update_code_input = update_boxes[0]
+        assert "def function_to_check" in update_code_input.text
+        assert scwidget_cue_box_class_name(
+            "update", True
+        ) in update_code_input.get_attribute("class")
+        if include_params:
             parameter_panel = update_boxes[1]
             # in these tests it should not be contain inything
-            if not (tunable_params):
-                assert parameter_panel.size["height"] == 0
-            else:
+            if tunable_params:
                 assert scwidget_cue_box_class_name(
                     "update", True
                 ) in parameter_panel.get_attribute("class")
+            else:
+                assert parameter_panel.size["height"] == 0
 
-            update_buttons = nb_cell.find_elements(
-                By.CLASS_NAME, reset_cue_button_class_name("update", False)
-            )
-            assert len(update_buttons) == 1
-            update_button = update_buttons[0]
-            assert update_button.text == "Run Code"
-            assert update_button.is_enabled()
-            assert scwidget_reset_cue_button_class_name(
-                "update", True
-            ) in update_button.get_attribute("class")
+        update_buttons = nb_cell.find_elements(
+            By.CLASS_NAME, reset_cue_button_class_name("update", False)
+        )
+        assert len(update_buttons) == 1
+        update_button = update_buttons[0]
+        assert update_button.text == "Run Code"
+        assert update_button.is_enabled()
+        assert scwidget_reset_cue_button_class_name(
+            "update", True
+        ) in update_button.get_attribute("class")
 
         #################################################
         # asserts for behavior on click of check button #
@@ -1086,26 +1093,25 @@ def test_widgets_code(selenium_driver):
         ##################################################
         # asserts for behavior on click of update button #
         ##################################################
-        if include_params:
-            update_button.click()
-            time.sleep(0.2)
+        update_button.click()
+        time.sleep(0.2)
+        assert not (
+            scwidget_cue_box_class_name("update", True)
+            in update_code_input.get_attribute("class")
+        )
+        assert not (
+            scwidget_reset_cue_button_class_name("update", True)
+            in update_button.get_attribute("class")
+        )
+        assert update_button.is_enabled()
+        if include_params and tunable_params:
             assert not (
                 scwidget_cue_box_class_name("update", True)
-                in update_code_input.get_attribute("class")
+                in parameter_panel.get_attribute("class")
             )
-            assert not (
-                scwidget_reset_cue_button_class_name("update", True)
-                in update_button.get_attribute("class")
-            )
-            assert update_button.is_enabled()
-            if tunable_params:
-                assert not (
-                    scwidget_cue_box_class_name("update", True)
-                    in parameter_panel.get_attribute("class")
-                )
-            outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
-            for text in expected_texts_on_update:
-                assert sum([output.text.count(text) for output in outputs]) == 1
+        outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
+        for text in expected_texts_on_update:
+            assert sum([output.text.count(text) for output in outputs]) == 1
 
         #####################################
         # asserts on reaction on text input #
@@ -1160,7 +1166,7 @@ def test_widgets_code(selenium_driver):
 
     # Test 1.1
     test_code_demo(
-        nb_cells[3],
+        nb_cells[2],
         ["SomeText", "Output"],
         ["Check was successful"],
         include_checks=True,
@@ -1171,7 +1177,7 @@ def test_widgets_code(selenium_driver):
 
     # Test 1.2
     test_code_demo(
-        nb_cells[4],
+        nb_cells[3],
         ["SomeText", "Output"],
         ["Check failed"],
         include_checks=True,
@@ -1182,7 +1188,7 @@ def test_widgets_code(selenium_driver):
 
     # Test 1.3
     test_code_demo(
-        nb_cells[5],
+        nb_cells[4],
         ["SomeText", "NameError: name 'bug' is not defined"],
         ["NameError: name 'bug' is not defined"],
         include_checks=True,
@@ -1192,7 +1198,7 @@ def test_widgets_code(selenium_driver):
     )
     # Test 1.4
     test_code_demo(
-        nb_cells[6],
+        nb_cells[5],
         ["SomeText", "Output"],
         ["Check was successful"],
         include_checks=True,
@@ -1203,7 +1209,7 @@ def test_widgets_code(selenium_driver):
 
     # Test 1.5
     test_code_demo(
-        nb_cells[7],
+        nb_cells[6],
         ["SomeText", "Output"],
         ["Check was successful"],
         include_checks=True,
@@ -1214,7 +1220,7 @@ def test_widgets_code(selenium_driver):
 
     # Test 1.6
     test_code_demo(
-        nb_cells[8],
+        nb_cells[7],
         ["SomeText", "Output"],
         ["Check was successful"],
         include_checks=True,
@@ -1225,6 +1231,19 @@ def test_widgets_code(selenium_driver):
 
     # Test 2:
     # -------
+
+    # Test 2.1
+    # Test if update button is shown even if params are None
+    test_code_demo(
+        nb_cells[8],
+        ["SomeText", "Output"],
+        [],
+        include_checks=False,
+        include_params=False,
+        tunable_params=False,
+        update_mode="release",
+    )
+
     # TODO test only update, no check
 
     # Test 3:
