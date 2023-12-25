@@ -327,7 +327,7 @@ class TestAnswerWidgets:
 
         # Test 2:
         # -------
-        # Test if Textarea shows correct output
+        # Test if TextExercise shows correct output
 
         nb_cell = nb_cells[3]
 
