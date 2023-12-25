@@ -576,6 +576,11 @@ def test_widget_figure(selenium_driver, nb_filename, mpl_backend):
             # in the notebook an image of the python logo is shown as first canvas, so
             # we remove it
             matplotlib_canvases = matplotlib_canvases[1:]
+        elif JUPYTER_TYPE == "lab":
+            # sometimes another canvas is shown that we filter out
+            matplotlib_canvases = [
+                canvas for canvas in matplotlib_canvases if canvas.is_displayed()
+            ]
 
         assert (
             len(matplotlib_canvases) >= nb_expected_canvases
