@@ -7,7 +7,7 @@ from scwidgets.check import (
     Check,
     CheckableWidget,
     CheckRegistry,
-    ChecksLog,
+    ChecksResult,
     assert_numpy_allclose,
     assert_numpy_floating_sub_dtype,
     assert_shape,
@@ -186,7 +186,7 @@ class TestCheck:
         check.compute_and_set_references()
         # now checks should be successful again
         result = check.check_function()
-        assert isinstance(result, ChecksLog)
+        assert isinstance(result, ChecksResult)
         assert result.successful
 
     @pytest.mark.parametrize(
@@ -200,7 +200,7 @@ class TestCheck:
     )
     def test_failing_check_all_widgets(self, check):
         result = check.check_function()
-        assert isinstance(result, ChecksLog)
+        assert isinstance(result, ChecksResult)
         assert not (result.successful)
 
     def test_invalid_asserts_arguments_count(self):
@@ -286,7 +286,7 @@ class TestCheckRegistry:
         widgets_results = check_registry.check_all_widgets()
         nb_conducted_asserts = 0
         for result in widgets_results.values():
-            assert isinstance(result, ChecksLog)
+            assert isinstance(result, ChecksResult)
             assert result.successful
             nb_conducted_asserts += len(result.assert_results)
         assert nb_conducted_asserts == checkable_widget.nb_conducted_asserts
@@ -294,7 +294,7 @@ class TestCheckRegistry:
         assert len(checkable_widget.results) == len(checks)
         nb_conducted_asserts = 0
         for result in checkable_widget.results:
-            assert isinstance(result, ChecksLog)
+            assert isinstance(result, ChecksResult)
             assert result.successful
             nb_conducted_asserts += len(result.assert_results)
         assert nb_conducted_asserts == checkable_widget.nb_conducted_asserts
@@ -324,7 +324,7 @@ class TestCheckRegistry:
 
         nb_conducted_asserts = 0
         for result in widgets_results.values():
-            assert isinstance(result, ChecksLog)
+            assert isinstance(result, ChecksResult)
             assert result.successful
             nb_conducted_asserts += len(result.assert_results)
         assert nb_conducted_asserts == checkable_widget.nb_conducted_asserts
@@ -332,7 +332,7 @@ class TestCheckRegistry:
         nb_conducted_asserts = 0
         assert len(checkable_widget.results) == len(checks)
         for result in checkable_widget.results:
-            assert isinstance(result, ChecksLog)
+            assert isinstance(result, ChecksResult)
             assert result.successful
             nb_conducted_asserts += len(result.assert_results)
         assert nb_conducted_asserts == checkable_widget.nb_conducted_asserts
@@ -357,10 +357,10 @@ class TestCheckRegistry:
 
         widgets_results = check_registry.check_all_widgets()
         for result in widgets_results.values():
-            assert isinstance(result, ChecksLog)
+            assert isinstance(result, ChecksResult)
             assert not (result.successful)
 
         assert len(checkable_widget.results) == len(checks)
         for result in checkable_widget.results:
-            assert isinstance(result, ChecksLog)
+            assert isinstance(result, ChecksResult)
             assert not (result.successful)

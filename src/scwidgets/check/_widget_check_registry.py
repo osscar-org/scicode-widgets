@@ -8,7 +8,7 @@ from typing import Callable, List, Optional, Union
 from ipywidgets import Button, HBox, Layout, Output, VBox, Widget
 
 from .._utils import Formatter
-from ._check import Check, ChecksLog
+from ._check import Check, ChecksResult
 
 
 class CheckableWidget:
@@ -38,7 +38,7 @@ class CheckableWidget:
         """
         raise NotImplementedError("compute_output_to_check has not been implemented")
 
-    def handle_checks_result(self, result: Union[ChecksLog, Exception]) -> None:
+    def handle_checks_result(self, result: Union[ChecksResult, Exception]) -> None:
         """
         Function that controls how results of the checks are handled.
         """
@@ -102,7 +102,7 @@ class CheckableWidget:
 
         self._check_registry.compute_and_set_references(self)
 
-    def check(self) -> Union[ChecksLog, Exception]:
+    def check(self) -> Union[ChecksResult, Exception]:
         if self._check_registry is None:
             raise ValueError(
                 "No check registry given on initialization, " "check cannot be used"
@@ -235,9 +235,9 @@ class CheckRegistry(VBox):
         for widget in self._checks.keys():
             self.compute_and_set_references(widget)
 
-    def check_widget(self, widget: CheckableWidget) -> Union[ChecksLog, Exception]:
+    def check_widget(self, widget: CheckableWidget) -> Union[ChecksResult, Exception]:
         try:
-            results = ChecksLog()
+            results = ChecksResult()
             for check in self._checks[widget]:
                 result = check.check_function()
                 results.extend(result)
@@ -249,9 +249,9 @@ class CheckRegistry(VBox):
 
     def check_all_widgets(
         self,
-    ) -> OrderedDict[CheckableWidget, Union[ChecksLog, Exception]]:
+    ) -> OrderedDict[CheckableWidget, Union[ChecksResult, Exception]]:
         messages: OrderedDict[
-            CheckableWidget, Union[ChecksLog, Exception]
+            CheckableWidget, Union[ChecksResult, Exception]
         ] = OrderedDict()
         for widget in self._checks.keys():
             try:
@@ -285,7 +285,7 @@ class CheckRegistry(VBox):
                             )
                         )
                         raise widget_results
-                    elif isinstance(widget_results, ChecksLog):
+                    elif isinstance(widget_results, ChecksResult):
                         if widget_results.successful:
                             print(
                                 Formatter.color_success_message(

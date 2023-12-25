@@ -11,7 +11,7 @@ from widget_code_input.utils import CodeValidationError
 
 from .._utils import Formatter
 from ..answer import AnswerRegistry, AnswerWidget
-from ..check import Check, CheckableWidget, CheckRegistry, ChecksLog
+from ..check import Check, CheckableWidget, CheckRegistry, ChecksResult
 from ..cue import (
     CheckCueBox,
     CheckResetCueButton,
@@ -550,19 +550,19 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
                 raise e
         return not (raised_error)
 
-    def check(self) -> Union[ChecksLog, Exception]:
+    def check(self) -> Union[ChecksResult, Exception]:
         self._output.clear_output(wait=True)
         return CheckableWidget.check(self)
 
     def compute_output_to_check(self, *args, **kwargs) -> Check.FunOutParamsT:
         return self.run_code(*args, **kwargs)
 
-    def handle_checks_result(self, result: Union[ChecksLog, Exception]):
+    def handle_checks_result(self, result: Union[ChecksResult, Exception]):
         self._output.clear_output(wait=True)
         with self._output:
             if isinstance(result, Exception):
                 raise result
-            elif isinstance(result, ChecksLog):
+            elif isinstance(result, ChecksResult):
                 if result.successful:
                     print(Formatter.color_success_message("Check was successful"))
                     print(Formatter.color_success_message("--------------------"))

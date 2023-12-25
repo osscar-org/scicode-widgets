@@ -5,7 +5,7 @@ import pytest
 from ipywidgets import fixed
 from widget_code_input.utils import CodeValidationError
 
-from scwidgets.check import Check, CheckRegistry, ChecksLog
+from scwidgets.check import Check, CheckRegistry, ChecksResult
 from scwidgets.code import CodeDemo, CodeInput
 from scwidgets.cue import CueObject
 
@@ -148,7 +148,7 @@ class TestCodeDemo:
     )
     def test_successful_check_widget(self, code_demo):
         result = code_demo.check()
-        assert isinstance(result, ChecksLog)
+        assert isinstance(result, ChecksResult)
         assert result.successful
         assert len(result.assert_results) == code_demo.nb_conducted_asserts
 
@@ -174,7 +174,7 @@ class TestCodeDemo:
         code_demo.compute_and_set_references()
 
         result = code_demo.check()
-        assert isinstance(result, ChecksLog)
+        assert isinstance(result, ChecksResult)
         assert result.successful
         assert len(result.assert_results) == code_demo.nb_conducted_asserts
 
