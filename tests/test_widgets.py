@@ -8,7 +8,6 @@ import numpy as np
 import pytest
 import requests
 from imageio.v3 import imread
-from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
@@ -362,12 +361,7 @@ class TestAnswerWidgets:
         #
         WebDriverWait(driver, 1).until(
             expected_conditions.element_to_be_clickable(save_button)
-        )
-        WebDriverWait(driver, 1).until(
-            expected_conditions.element_to_be_clickable(save_button)
-        )
-        # save button is hidden so we use actions to click
-        ActionChains(driver).move_to_element(save_button).click(save_button).perform()
+        ).click()
         # wait for uncued box
         cue_box = nb_cell.find_element(By.CLASS_NAME, cue_box_class_name("save", False))
         assert "--cued" not in cue_box.get_attribute("class")
