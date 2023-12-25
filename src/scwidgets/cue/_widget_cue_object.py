@@ -35,7 +35,7 @@ class CueObject(CueOutput):
 
     def __init__(
         self,
-        display_object: Any,
+        display_object: Any = None,
         widgets_to_observe: Union[None, List[Widget], Widget] = None,
         traits_to_observe: Union[
             None, str, List[str], List[List[str]], Sentinel
