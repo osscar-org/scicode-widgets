@@ -11,7 +11,7 @@ from typing import Hashable, Optional, Union
 from IPython.display import display
 from ipywidgets import Button, Dropdown, HBox, Label, Layout, Output, Text, VBox
 
-from .._utils import Printer
+from .._utils import Formatter
 
 
 class AnswerWidget:
@@ -456,9 +456,9 @@ class AnswerRegistry(VBox):
         with self._output:
             try:
                 message = self.save_all_answers()
-                Printer.print_success_message(message)
+                print(Formatter.color_success_message(message))
             except Exception as exception:
-                Printer.print_error_message("Error raised while saving file:")
+                print(Formatter.color_error_message("Error raised while saving file:"))
                 raise exception
 
     def _on_click_choose_other_file_button(self, change: dict):
@@ -479,9 +479,9 @@ class AnswerRegistry(VBox):
                 self._disable_upper_panel_box()
                 self._enable_lower_panel_box()
                 self._show_lower_panel_box()
-                Printer.print_success_message(result)
+                print(Formatter.color_success_message(result))
             except Exception as exception:
-                Printer.print_error_message("Error raised while loading file:")
+                print(Formatter.color_error_message("Error raised while loading file:"))
                 raise exception
 
     def _on_answers_files_dropdown_value_changed(self, change: dict):
@@ -504,9 +504,11 @@ class AnswerRegistry(VBox):
         with self._output:
             try:
                 result = self.create_new_file()
-                Printer.print_success_message(result)
+                print(Formatter.color_success_message(result))
             except Exception as exception:
-                Printer.print_error_message("Error raised while creating file:")
+                print(
+                    Formatter.color_error_message("Error raised while creating file:")
+                )
                 raise exception
 
     def _on_click_cancel_save_button(self, change: dict):
@@ -516,7 +518,7 @@ class AnswerRegistry(VBox):
         self._output.clear_output(wait=True)
         with self._output:
             display(self._confirmation_button_box)
-            Printer.print_info_message("Are you sure?")
+            print(Formatter.color_info_message("Are you sure?"))
 
     #####################
     # private functions #

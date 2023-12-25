@@ -3,7 +3,7 @@ from typing import Optional, Union
 import ipywidgets
 from ipywidgets import HTML, HBox, HTMLMath, Layout, Output, VBox
 
-from .._utils import Printer
+from .._utils import Formatter
 from ..answer import AnswerRegistry, AnswerWidget
 from ..cue import SaveCueBox, SaveResetCueButton
 
@@ -155,13 +155,13 @@ class Textarea(VBox, AnswerWidget):
             try:
                 result = self.save()
                 if isinstance(result, str):
-                    Printer.print_success_message(result)
+                    print(Formatter.color_success_message(result))
                 elif isinstance(result, Exception):
                     raise result
                 else:
                     print(result)
             except Exception as e:
-                Printer.print_error_message("Error raised while saving file:")
+                print(Formatter.color_error_message("Error raised while saving file:"))
                 raised_error = True
                 raise e
         return not (raised_error)
@@ -173,14 +173,14 @@ class Textarea(VBox, AnswerWidget):
             try:
                 result = self.load()
                 if isinstance(result, str):
-                    Printer.print_success_message(result)
+                    print(Formatter.color_success_message(result))
                 elif isinstance(result, Exception):
                     raise result
                 else:
                     print(result)
                 return True
             except Exception as e:
-                Printer.print_error_message("Error raised while loading file:")
+                print(Formatter.color_error_message("Error raised while loading file:"))
                 raised_error = True
                 raise e
         return not (raised_error)
@@ -189,7 +189,7 @@ class Textarea(VBox, AnswerWidget):
         self._output.clear_output(wait=True)
         with self._output:
             if isinstance(result, Exception):
-                Printer.print_error_message("Error raised while saving file:")
+                print(Formatter.color_error_message("Error raised while saving file:"))
                 raise result
             else:
                 # answer changes, so we have to disable the automatic cueing
@@ -199,13 +199,13 @@ class Textarea(VBox, AnswerWidget):
                     self._save_button.cued = False
                 if self._cue_textarea is not None:
                     self._cue_textarea.cued = False
-                Printer.print_success_message(result)
+                print(Formatter.color_success_message(result))
 
     def handle_load_result(self, result: Union[str, Exception]) -> None:
         self._output.clear_output(wait=True)
         with self._output:
             if isinstance(result, Exception):
-                Printer.print_error_message("Error raised while loading file:")
+                print(Formatter.color_error_message("Error raised while loading file:"))
                 raise result
             else:
                 if self._load_button is not None:
@@ -214,4 +214,4 @@ class Textarea(VBox, AnswerWidget):
                     self._save_button.cued = False
                 if self._cue_textarea is not None:
                     self._cue_textarea.cued = False
-                Printer.print_success_message(result)
+                print(Formatter.color_success_message(result))

@@ -7,7 +7,7 @@ from typing import Callable, List, Optional, Union
 
 from ipywidgets import Button, HBox, Layout, Output, VBox, Widget
 
-from .._utils import Printer
+from .._utils import Formatter
 from ._check import Check, ChecksLog
 
 
@@ -264,7 +264,7 @@ class CheckRegistry(VBox):
         self._output.clear_output(wait=True)
         with self._output:
             self.compute_and_set_all_references()
-            Printer.print_success_message("Successfully set all references.")
+            print(Formatter.color_success_message("Successfully set all references."))
 
     def _on_click_check_all_widgets_button(self, change: dict):
         self._output.clear_output(wait=True)
@@ -277,26 +277,32 @@ class CheckRegistry(VBox):
             for widget, widget_results in widgets_results.items():
                 with self._output:
                     if isinstance(widget_results, Exception):
-                        Printer.print_error_message(
-                            Printer.format_title_message(
-                                f"Widget {self._names[widget]} " f"raised error:"
+                        print(
+                            Formatter.color_error_message(
+                                Formatter.format_title_message(
+                                    f"Widget {self._names[widget]} " f"raised error:"
+                                )
                             )
                         )
                         raise widget_results
                     elif isinstance(widget_results, ChecksLog):
                         if widget_results.successful:
-                            Printer.print_success_message(
-                                Printer.format_title_message(
-                                    f"Widget {self._names[widget]} all checks "
-                                    f"were successful"
+                            print(
+                                Formatter.color_success_message(
+                                    Formatter.format_title_message(
+                                        f"Widget {self._names[widget]} all checks "
+                                        f"were successful"
+                                    )
                                 )
                             )
                             print(widget_results.message())
                         else:
-                            Printer.print_error_message(
-                                Printer.format_title_message(
-                                    f"Widget {self._names[widget]} not all checks were "
-                                    "successful:"
+                            print(
+                                Formatter.color_error_message(
+                                    Formatter.format_title_message(
+                                        f"Widget {self._names[widget]} not all checks "
+                                        "were successful:"
+                                    )
                                 )
                             )
                             print(widget_results.message())
@@ -308,5 +314,9 @@ class CheckRegistry(VBox):
                         )
         except Exception as exception:
             with self._output:
-                Printer.print_error_message("Error raised while checking widgets:")
+                print(
+                    Formatter.color_error_message(
+                        "Error raised while checking widgets:"
+                    )
+                )
                 raise exception

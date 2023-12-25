@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from ipywidgets import HTML, Box, HBox, HTMLMath, Layout, VBox, Widget
 from widget_code_input.utils import CodeValidationError
 
-from .._utils import Printer
+from .._utils import Formatter
 from ..answer import AnswerRegistry, AnswerWidget
 from ..check import Check, CheckableWidget, CheckRegistry, ChecksLog
 from ..cue import (
@@ -521,14 +521,14 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
             try:
                 result = self.save()
                 if isinstance(result, str):
-                    Printer.print_success_message(result)
+                    print(Formatter.color_success_message(result))
                 elif isinstance(result, Exception):
                     raise result
                 else:
                     print(result)
             except Exception as e:
                 raised_error = True
-                Printer.print_error_message("Error raised while saving file:")
+                print(Formatter.color_error_message("Error raised while saving file:"))
                 raise e
         return not (raised_error)
 
@@ -539,14 +539,14 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
             try:
                 result = self.load()
                 if isinstance(result, str):
-                    Printer.print_success_message(result)
+                    print(Formatter.color_success_message(result))
                 elif isinstance(result, Exception):
                     raise result
                 else:
                     print(result)
             except Exception as e:
                 raised_error = True
-                Printer.print_error_message("Error raised while loading file:")
+                print(Formatter.color_error_message("Error raised while loading file:"))
                 raise e
         return not (raised_error)
 
@@ -564,12 +564,12 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
                 raise result
             elif isinstance(result, ChecksLog):
                 if result.successful:
-                    Printer.print_success_message("Check was successful")
-                    Printer.print_success_message("--------------------")
+                    print(Formatter.color_success_message("Check was successful"))
+                    print(Formatter.color_success_message("--------------------"))
                     print(result.message())
                 else:
-                    Printer.print_error_message("Check failed")
-                    Printer.print_error_message("------------")
+                    print(Formatter.color_error_message("Check failed"))
+                    print(Formatter.color_error_message("------------"))
                     print(result.message())
             else:
                 print(result)
@@ -586,7 +586,7 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
                     self._save_button.cued = False
                 if self._save_cue_box is not None:
                     self._save_cue_box.cued = False
-                Printer.print_success_message(result)
+                print(Formatter.color_success_message(result))
 
     def handle_load_result(self, result: Union[str, Exception]):
         self._output.clear_output(wait=True)
@@ -600,7 +600,7 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
                     self._save_button.cued = False
                 if self._save_cue_box is not None:
                     self._save_cue_box.cued = False
-                Printer.print_success_message(result)
+                print(Formatter.color_success_message(result))
 
     @property
     def code(self):

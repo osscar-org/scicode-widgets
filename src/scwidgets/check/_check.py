@@ -14,7 +14,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
 
 import IPython.core.ultratb
 
-from .._utils import Printer
+from .._utils import Formatter
 
 ExecutionInfo = Tuple[
     Union[None, type],  # BaseException type
@@ -312,23 +312,24 @@ class ChecksLog:
             if (isinstance(result, str) and result == "") or (
                 isinstance(result, AssertResult) and result.successful
             ):
-                message = Printer.color_assert_success(
+                message = Formatter.color_assert_success(
                     f"{self._assert_names[i]} passed",
                 )
             else:
-                message = Printer.color_assert_failed(
+                message = Formatter.color_assert_failed(
                     f"{self._assert_names[i]} failed",
                 )
                 if len(self._inputs_parameters[i]) > 0:
-                    message += Printer.color_error_message(" for input\n")
+                    message += Formatter.color_error_message(" for input\n")
                 elif (isinstance(result, tuple) and len(result) == 3) or not (
                     self._suppress_assert_messages[i]
                 ):
-                    message += Printer.color_error_message("\n")
+                    message += Formatter.color_error_message("\n")
 
                 message += "\n".join(
                     [
-                        f"  {Printer.color_info_message(param_name)}:  {param_value!r}"
+                        f"  {Formatter.color_info_message(param_name)}:  "
+                        f"{param_value!r}"
                         for param_name, param_value in self._inputs_parameters[
                             i
                         ].items()
@@ -339,13 +340,13 @@ class ChecksLog:
                     if len(self._inputs_parameters[i]) > 0:
                         message += "\n"
                     tb = IPython.core.ultratb.VerboseTB()
-                    message = Printer.color_assert_failed(
+                    message = Formatter.color_assert_failed(
                         f"{self._assert_names[i]} failed\n"
                     )
                     assert_result = tb.text(*result)
                     assert_result = re.sub(
                         r"(^)",
-                        r"\1" + f"{Printer.color_assert_failed('|')} ",
+                        r"\1" + f"{Formatter.color_assert_failed('|')} ",
                         assert_result,
                         flags=re.M,
                     )
@@ -356,11 +357,11 @@ class ChecksLog:
                     if hasattr(result, "message"):
                         assert_result = f"{result.message()}"
                     else:
-                        assert_result = f"{Printer.color_assert_failed(result)}"
+                        assert_result = f"{Formatter.color_assert_failed(result)}"
                     # adds "| " to the beginning of each line
                     assert_result = re.sub(
                         r"(^)",
-                        r"\1" + f"{Printer.color_assert_failed('|')} ",
+                        r"\1" + f"{Formatter.color_assert_failed('|')} ",
                         assert_result,
                         flags=re.M,
                     )
@@ -446,9 +447,9 @@ class AssertResult:
         message = ""
         for i in range(len(self._parameter_indices)):
             message += (
-                Printer.color_assert_failed(f"output {self._parameter_indices[i]}: ")
-                + Printer.color_assert_failed(f"{self._parameter_values[i]}\n")
-                + Printer.color_assert_failed(self._messages[i])
+                Formatter.color_assert_failed(f"output {self._parameter_indices[i]}: ")
+                + Formatter.color_assert_failed(f"{self._parameter_values[i]}\n")
+                + Formatter.color_assert_failed(self._messages[i])
             )
         return message
 
