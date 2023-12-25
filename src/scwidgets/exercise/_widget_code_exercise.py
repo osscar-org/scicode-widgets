@@ -12,6 +12,8 @@ from widget_code_input.utils import CodeValidationError
 from .._utils import Formatter
 from ..answer import AnswerRegistry, AnswerWidget
 from ..check import Check, CheckableWidget, CheckRegistry, ChecksResult
+from ..code._widget_code_input import CodeInput
+from ..code._widget_parameter_panel import ParameterPanel
 from ..cue import (
     CheckCueBox,
     CheckResetCueButton,
@@ -21,11 +23,9 @@ from ..cue import (
     UpdateCueBox,
     UpdateResetCueButton,
 )
-from ._widget_code_input import CodeInput
-from ._widget_parameter_panel import ParameterPanel
 
 
-class CodeDemo(VBox, CheckableWidget, AnswerWidget):
+class CodeExercise(VBox, CheckableWidget, AnswerWidget):
     """
     A widget to demonstrate code interactively in a variety of ways. It is a combination
     of the several widgets that allow to check check, run and visualize code.
@@ -50,7 +50,7 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
 
     :param update_func:
         A function that is run during the update process. The function takes as argument
-        the CodeDemo, so it can update all cue_ouputs
+        the CodeExercise, so it can update all cue_ouputs
 
     """
 
@@ -66,7 +66,7 @@ class CodeDemo(VBox, CheckableWidget, AnswerWidget):
         update_mode: str = "release",
         cue_outputs: Union[None, CueOutput, List[CueOutput]] = None,
         update_func: Optional[
-            Callable[[CodeDemo], Union[Any, Check.FunOutParamsT]]
+            Callable[[CodeExercise], Union[Any, Check.FunOutParamsT]]
         ] = None,
         exercise_description: Optional[str] = None,
         exercise_title: Optional[str] = None,

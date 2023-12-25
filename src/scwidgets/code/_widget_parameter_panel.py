@@ -14,7 +14,7 @@ class ParameterPanel(VBox):
     :param parameters:
         Can be any input that is allowed as keyword arguments in ipywidgets.interactive
         for the parameters. _options and other widget layout parameter are controlled
-        by CodeDemo.
+        by CodeExercise.
 
     """
 
@@ -25,7 +25,8 @@ class ParameterPanel(VBox):
         if "_option" in parameters.keys():
             raise ValueError(
                 "Found interactive argument `_option` in paramaters, but "
-                "CodeDemo controls this parameter to ensure correct initialization."
+                "ParameterPanels should be controled by an exercise widget "
+                "to ensure correct initialization."
             )
 
         # we use a dummy function because interactive executes it once on init

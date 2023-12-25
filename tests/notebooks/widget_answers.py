@@ -19,8 +19,7 @@ import sys
 
 import scwidgets
 from scwidgets.answer import AnswerRegistry
-from scwidgets.code import CodeDemo
-from scwidgets.exercise import TextExercise
+from scwidgets.exercise import CodeExercise, TextExercise
 
 sys.path.insert(0, os.path.abspath("../.."))
 
@@ -46,7 +45,7 @@ text_exercise
 
 # Test 3:
 # -------
-# Test if CodeDemo shows correct output
+# Test if CodeExercise shows correct output
 
 
 # +
@@ -54,12 +53,12 @@ def foo(x):
     return x
 
 
-code_demo = CodeDemo(
+code_ex = CodeExercise(
     foo,
     parameters={"x": (0, 2, 1)},
     update_mode="manual",
     answer_registry=answer_registry,
     answer_key="exercise_2",
 )
-code_demo
+code_ex
 # -

@@ -6,8 +6,9 @@ from ipywidgets import fixed
 from widget_code_input.utils import CodeValidationError
 
 from scwidgets.check import Check, CheckRegistry, ChecksResult
-from scwidgets.code import CodeDemo, CodeInput
+from scwidgets.code import CodeInput
 from scwidgets.cue import CueObject
+from scwidgets.exercise import CodeExercise
 
 from .test_check import multi_param_check, single_param_check
 
@@ -67,7 +68,7 @@ class TestCodeInput:
             CodeInput.get_code(lambda x: x)
 
 
-def get_code_demo(
+def get_code_exercise(
     checks: List[Check],
     code: Callable = None,
     include_checks=True,
@@ -101,11 +102,11 @@ def get_code_demo(
     else:
         parameters = None
 
-    def update_print(code_demo: CodeDemo):
-        output = code_demo.run_code(**code_demo.panel_parameters)
-        code_demo.cue_outputs[0].display_object = f"Output:\n{output}"
+    def update_print(code_ex: CodeExercise):
+        output = code_ex.run_code(**code_ex.panel_parameters)
+        code_ex.cue_outputs[0].display_object = f"Output:\n{output}"
 
-    code_demo = CodeDemo(
+    code_ex = CodeExercise(
         code=code_input,
         check_registry=CheckRegistry() if include_checks is True else None,
         parameters=parameters if include_params is True else None,
@@ -116,23 +117,23 @@ def get_code_demo(
 
     if include_checks is True:
         for check in checks:
-            code_demo.add_check(
+            code_ex.add_check(
                 check.asserts,
                 check.inputs_parameters,
                 check.outputs_references,
                 check.fingerprint,
             )
-    return code_demo
+    return code_ex
 
 
-class TestCodeDemo:
+class TestCodeExercise:
     @pytest.mark.parametrize(
-        "code_demo",
+        "code_ex",
         [
-            get_code_demo(
+            get_code_exercise(
                 [single_param_check(use_fingerprint=False, failing=False, buggy=False)]
             ),
-            get_code_demo(
+            get_code_exercise(
                 [
                     single_param_check(
                         use_fingerprint=False, failing=False, buggy=False
@@ -142,23 +143,25 @@ class TestCodeDemo:
                     ),
                 ]
             ),
-            get_code_demo([multi_param_check(use_fingerprint=False, failing=False)]),
-            get_code_demo([multi_param_check(use_fingerprint=True, failing=False)]),
+            get_code_exercise(
+                [multi_param_check(use_fingerprint=False, failing=False)]
+            ),
+            get_code_exercise([multi_param_check(use_fingerprint=True, failing=False)]),
         ],
     )
-    def test_successful_check_widget(self, code_demo):
-        result = code_demo.check()
+    def test_successful_check_widget(self, code_ex):
+        result = code_ex.check()
         assert isinstance(result, ChecksResult)
         assert result.successful
-        assert len(result.assert_results) == code_demo.nb_conducted_asserts
+        assert len(result.assert_results) == code_ex.nb_conducted_asserts
 
     @pytest.mark.parametrize(
-        "code_demo",
+        "code_ex",
         [
-            get_code_demo(
+            get_code_exercise(
                 [single_param_check(use_fingerprint=False, failing=True, buggy=False)]
             ),
-            get_code_demo(
+            get_code_exercise(
                 [
                     single_param_check(
                         use_fingerprint=False, failing=True, buggy=False
@@ -166,47 +169,49 @@ class TestCodeDemo:
                     single_param_check(use_fingerprint=True, failing=True, buggy=False),
                 ]
             ),
-            get_code_demo([multi_param_check(use_fingerprint=False, failing=True)]),
-            get_code_demo([multi_param_check(use_fingerprint=True, failing=True)]),
+            get_code_exercise([multi_param_check(use_fingerprint=False, failing=True)]),
+            get_code_exercise([multi_param_check(use_fingerprint=True, failing=True)]),
         ],
     )
-    def test_compute_and_set_references(self, code_demo):
-        code_demo.compute_and_set_references()
+    def test_compute_and_set_references(self, code_ex):
+        code_ex.compute_and_set_references()
 
-        result = code_demo.check()
+        result = code_ex.check()
         assert isinstance(result, ChecksResult)
         assert result.successful
-        assert len(result.assert_results) == code_demo.nb_conducted_asserts
+        assert len(result.assert_results) == code_ex.nb_conducted_asserts
 
     @pytest.mark.parametrize(
-        "code_demo",
+        "code_ex",
         [
-            get_code_demo(
+            get_code_exercise(
                 [single_param_check(use_fingerprint=False, failing=False, buggy=False)]
             ),
-            get_code_demo([multi_param_check(use_fingerprint=False, failing=False)]),
-            get_code_demo(
+            get_code_exercise(
+                [multi_param_check(use_fingerprint=False, failing=False)]
+            ),
+            get_code_exercise(
                 [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
                 include_params=True,
                 tunable_params=True,
             ),
         ],
     )
-    def test_run_code(self, code_demo):
-        output = code_demo.run_code(**code_demo.panel_parameters)
-        assert np.allclose((output,), code_demo.checks[0].outputs_references[0])
+    def test_run_code(self, code_ex):
+        output = code_ex.run_code(**code_ex.panel_parameters)
+        assert np.allclose((output,), code_ex.checks[0].outputs_references[0])
 
     @pytest.mark.parametrize(
-        "code_demo",
+        "code_ex",
         [
-            get_code_demo(
+            get_code_exercise(
                 [single_param_check(use_fingerprint=False, failing=False, buggy=True)]
             ),
         ],
     )
-    def test_erroneous_run_code(self, code_demo):
+    def test_erroneous_run_code(self, code_ex):
         with pytest.raises(
             CodeValidationError,
             match="NameError in code input: name 'bug' is not defined.*",
         ):
-            code_demo.run_code(**code_demo.panel_parameters)
+            code_ex.run_code(**code_ex.panel_parameters)
