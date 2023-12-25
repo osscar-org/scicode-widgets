@@ -1,14 +1,13 @@
 from typing import Optional, Union
 
-import ipywidgets
-from ipywidgets import HTML, HBox, HTMLMath, Layout, Output, VBox
+from ipywidgets import HTML, HBox, HTMLMath, Layout, Output, Textarea, VBox
 
 from .._utils import Formatter
 from ..answer import AnswerRegistry, AnswerWidget
 from ..cue import SaveCueBox, SaveResetCueButton
 
 
-class Textarea(VBox, AnswerWidget):
+class TextExercise(VBox, AnswerWidget):
     """
     :param textarea:
         a custom textarea with custom styling, if not specified the standard parameters
@@ -49,7 +48,7 @@ class Textarea(VBox, AnswerWidget):
             self._exercise_title_html.add_class("exercise-title")
 
         layout = kwargs.pop("layout", Layout(width="auto", height="150px"))
-        self._textarea = ipywidgets.Textarea(value, *args, layout=layout, **kwargs)
+        self._textarea = Textarea(value, *args, layout=layout, **kwargs)
         self._cue_textarea = self._textarea
         self._output = Output()
 

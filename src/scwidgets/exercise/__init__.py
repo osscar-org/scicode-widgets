@@ -1,3 +1,3 @@
-from ._widget_textarea import Textarea
+from ._widget_text_exercise import TextExercise
 
-__all__ = ["Textarea"]
+__all__ = ["TextExercise"]

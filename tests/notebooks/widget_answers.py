@@ -20,7 +20,7 @@ import sys
 import scwidgets
 from scwidgets.answer import AnswerRegistry
 from scwidgets.code import CodeDemo
-from scwidgets.exercise import Textarea
+from scwidgets.exercise import TextExercise
 
 sys.path.insert(0, os.path.abspath("../.."))
 
@@ -39,10 +39,10 @@ answer_registry
 
 # Test 2:
 # -------
-# Test if Textarea shows correct output
+# Test if TextExercise shows correct output
 
-textarea = Textarea(answer_registry=answer_registry, answer_key="exercise_1")
-textarea
+text_exercise = TextExercise(answer_registry=answer_registry, answer_key="exercise_1")
+text_exercise
 
 # Test 3:
 # -------
