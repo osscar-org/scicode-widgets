@@ -425,7 +425,7 @@ class TestAnswerWidgets:
 
         # Test 3:
         # -------
-        # Test if CodeDemo shows correct output
+        # Test if CodeExercise shows correct output
 
         nb_cell = nb_cells[4]
 
@@ -983,7 +983,7 @@ def test_widgets_code(selenium_driver):
 
     :param selenium_driver: see conftest.py
     """
-    driver = selenium_driver("tests/notebooks/widget_code_demo.ipynb")
+    driver = selenium_driver("tests/notebooks/widget_code_exercise.ipynb")
 
     nb_cells = get_nb_cells(driver)
     # Test 1:
@@ -996,7 +996,7 @@ def test_widgets_code(selenium_driver):
         )
     )
 
-    def test_code_demo(
+    def test_code_exercise(
         nb_cell,
         expected_texts_on_update: List[str],
         expected_texts_on_check: List[str],
@@ -1164,7 +1164,7 @@ def test_widgets_code(selenium_driver):
             assert before_parameter_change_text != after_parameter_change_text
 
     # Test 1.1
-    test_code_demo(
+    test_code_exercise(
         nb_cells[2],
         ["SomeText", "Output"],
         ["Check was successful"],
@@ -1175,7 +1175,7 @@ def test_widgets_code(selenium_driver):
     )
 
     # Test 1.2
-    test_code_demo(
+    test_code_exercise(
         nb_cells[3],
         ["SomeText", "Output"],
         ["Check failed"],
@@ -1186,7 +1186,7 @@ def test_widgets_code(selenium_driver):
     )
 
     # Test 1.3
-    test_code_demo(
+    test_code_exercise(
         nb_cells[4],
         ["SomeText", "NameError: name 'bug' is not defined"],
         ["NameError: name 'bug' is not defined"],
@@ -1196,7 +1196,7 @@ def test_widgets_code(selenium_driver):
         update_mode="manual",
     )
     # Test 1.4
-    test_code_demo(
+    test_code_exercise(
         nb_cells[5],
         ["SomeText", "Output"],
         ["Check was successful"],
@@ -1207,7 +1207,7 @@ def test_widgets_code(selenium_driver):
     )
 
     # Test 1.5
-    test_code_demo(
+    test_code_exercise(
         nb_cells[6],
         ["SomeText", "Output"],
         ["Check was successful"],
@@ -1218,7 +1218,7 @@ def test_widgets_code(selenium_driver):
     )
 
     # Test 1.6
-    test_code_demo(
+    test_code_exercise(
         nb_cells[7],
         ["SomeText", "Output"],
         ["Check was successful"],
@@ -1233,7 +1233,7 @@ def test_widgets_code(selenium_driver):
 
     # Test 2.1
     # Test if update button is shown even if params are None
-    test_code_demo(
+    test_code_exercise(
         nb_cells[8],
         ["SomeText", "Output"],
         [],

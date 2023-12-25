@@ -21,7 +21,7 @@ import scwidgets
 
 sys.path.insert(0, os.path.abspath("../.."))
 from tests.test_check import single_param_check  # noqa: E402
-from tests.test_code import get_code_demo  # noqa: E402
+from tests.test_code import get_code_exercise  # noqa: E402
 
 # -
 
@@ -29,10 +29,10 @@ scwidgets.get_css_style()
 
 # Test 1:
 # -------
-# Test if CodeDemo shows correct output
+# Test if CodeExercise shows correct output
 
 # Test 1.1
-get_code_demo(
+get_code_exercise(
     [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
     include_checks=True,
     include_params=True,
@@ -41,7 +41,7 @@ get_code_demo(
 )
 
 # Test 1.2
-get_code_demo(
+get_code_exercise(
     [single_param_check(use_fingerprint=False, failing=True, buggy=False)],
     include_checks=True,
     include_params=True,
@@ -50,7 +50,7 @@ get_code_demo(
 )
 
 # Test 1.3
-get_code_demo(
+get_code_exercise(
     [single_param_check(use_fingerprint=False, failing=False, buggy=True)],
     include_checks=True,
     include_params=True,
@@ -59,7 +59,7 @@ get_code_demo(
 )
 
 # Test 1.4
-get_code_demo(
+get_code_exercise(
     [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
     include_checks=True,
     include_params=True,
@@ -68,7 +68,7 @@ get_code_demo(
 )
 
 # Test 1.5
-get_code_demo(
+get_code_exercise(
     [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
     include_checks=True,
     include_params=True,
@@ -77,7 +77,7 @@ get_code_demo(
 )
 
 # Test 1.6
-get_code_demo(
+get_code_exercise(
     [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
     include_checks=True,
     include_params=True,
@@ -88,7 +88,7 @@ get_code_demo(
 
 # Test 2:
 # -------
-# Test if CodeDemo works correct for only update
+# Test if CodeExercise works correct for only update
 
 
 # +
@@ -99,7 +99,7 @@ def function_to_check():
     return 5
 
 
-get_code_demo(
+get_code_exercise(
     [],
     code=function_to_check,
     include_checks=False,
@@ -111,25 +111,39 @@ get_code_demo(
 
 # Test 2.2
 # TODO
-# get_code_demo([single_param_check(use_fingerprint=False, failing=True, buggy=False)],
-#        include_checks=False, include_params=True, tunable_params)
+# get_code_exercise(
+#    [single_param_check(use_fingerprint=False, failing=True, buggy=False)],
+#    include_checks=False,
+#    include_params=True,
+#    tunable_params=True,
+# )
 
 # Test 2.3
 # TODO
-# get_code_demo([single_param_check(use_fingerprint=True, failing=True, buggy=False)],
-#        include_checks=False, include_params=True, tunable_params)
+# get_code_exercise(
+#    [single_param_check(use_fingerprint=True, failing=True, buggy=False)],
+#    include_checks=False,
+#    include_params=True,
+#    tunable_params=True,
+# )
 
 
 # Test 3:
 # -------
-# Test if CodeDemo works correct for only checks
+# Test if CodeExercise works correct for only checks
 
 # Test 3.1
 # TODO
-# get_code_demo([single_param_check(use_fingerprint=False, failing=True, buggy=False)],
-#        include_checks=True, include_params=False)
+# get_code_exercise(
+#    [single_param_check(use_fingerprint=False, failing=True, buggy=False)],
+#    include_checks=True,
+#    include_params=False,
+# )
 
 # Test 3.2
 # TODO
-# get_code_demo([single_param_check(use_fingerprint=True, failing=True, buggy=False)],
-#        include_checks=True, include_params=False)
+# get_code_exercise(
+#    [single_param_check(use_fingerprint=True, failing=True, buggy=False)],
+#    include_checks=True,
+#    include_params=False,
+# )
