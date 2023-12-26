@@ -649,6 +649,19 @@ class CodeExercise(VBox, CheckableWidget, AnswerWidget):
 
         return not (raised_error)
 
+    def run_update(self):
+        """
+        Invokes an update run, the same that is invoked by a click on the update button
+        or for :param update_mode: "release" and "continuous" when a parameter panel
+        parameter is changed
+        """
+        if self._update_button is not None:
+            self._update_button.click()
+        else:
+            # we might be in update_mode "release" or "continuous" where no button is
+            # displayed
+            self._on_click_update_action()
+
     def run_code(self, *args, **kwargs) -> Check.FunOutParamsT:
         """
         Runs the `code` with the given (keyword) arguments and returns the output of the
