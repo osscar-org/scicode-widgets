@@ -315,6 +315,22 @@ class ChecksResult:
                 message = Formatter.color_assert_success(
                     f"{self._assert_names[i]} passed",
                 )
+                if len(self._inputs_parameters[i]) > 0:
+                    message += Formatter.color_assert_success(" for input\n")
+                elif (isinstance(result, tuple) and len(result) == 3) or not (
+                    self._suppress_assert_messages[i]
+                ):
+                    message += "\n"
+
+                message += "\n".join(
+                    [
+                        f"  {Formatter.color_info_message(param_name)}:  "
+                        f"{param_value!r}"
+                        for param_name, param_value in self._inputs_parameters[
+                            i
+                        ].items()
+                    ]
+                )
             else:
                 message = Formatter.color_assert_failed(
                     f"{self._assert_names[i]} failed",
