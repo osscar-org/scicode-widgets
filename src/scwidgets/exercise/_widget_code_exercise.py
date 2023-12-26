@@ -11,7 +11,6 @@ from widget_code_input import WidgetCodeInput
 from widget_code_input.utils import CodeValidationError
 
 from .._utils import Formatter
-from ..answer import AnswerRegistry, AnswerWidget
 from ..check import Check, CheckableWidget, CheckRegistry, ChecksResult
 from ..code._widget_code_input import CodeInput
 from ..code._widget_parameter_panel import ParameterPanel
@@ -24,9 +23,10 @@ from ..cue import (
     UpdateCueBox,
     UpdateResetCueButton,
 )
+from ._widget_exercise_registry import ExerciseRegistry, ExerciseWidget
 
 
-class CodeExercise(VBox, CheckableWidget, AnswerWidget):
+class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
     """
     A widget to demonstrate code interactively in a variety of ways. It is a combination
     of the several widgets that allow to check check, run and visualize code.
@@ -59,8 +59,8 @@ class CodeExercise(VBox, CheckableWidget, AnswerWidget):
         self,
         code: Union[None, WidgetCodeInput, types.FunctionType] = None,
         check_registry: Optional[CheckRegistry] = None,
-        answer_registry: Optional[AnswerRegistry] = None,
-        answer_key: Optional[str] = None,
+        exercise_registry: Optional[ExerciseRegistry] = None,
+        exercise_key: Optional[str] = None,
         parameters: Optional[
             Union[Dict[str, Union[Check.FunInParamT, Widget]], ParameterPanel]
         ] = None,
@@ -90,12 +90,12 @@ class CodeExercise(VBox, CheckableWidget, AnswerWidget):
         else:
             self._exercise_description_html = HTMLMath(self._exercise_description)
         if exercise_title is None:
-            if answer_key is None:
+            if exercise_key is None:
                 self._exercise_title = None
                 self._exercise_title_html = None
             else:
-                self._exercise_title = answer_key
-                self._exercise_title_html = HTML(f"<b>{answer_key}</b>")
+                self._exercise_title = exercise_key
+                self._exercise_title_html = HTML(f"<b>{exercise_key}</b>")
         else:
             self._exercise_title = exercise_title
             self._exercise_title_html = HTML(f"<b>{exercise_title}</b>")
@@ -148,8 +148,8 @@ class CodeExercise(VBox, CheckableWidget, AnswerWidget):
         elif not (isinstance(cue_outputs, list)):
             cue_outputs = [cue_outputs]
 
-        CheckableWidget.__init__(self, check_registry, answer_key)
-        AnswerWidget.__init__(self, answer_registry, answer_key)
+        CheckableWidget.__init__(self, check_registry, exercise_key)
+        ExerciseWidget.__init__(self, exercise_registry, exercise_key)
 
         self._code = code
         self._output = CueOutput()
@@ -320,7 +320,7 @@ class CodeExercise(VBox, CheckableWidget, AnswerWidget):
                 button_tooltip=button_tooltip,
             )
 
-        if self._answer_registry is None or (
+        if self._exercise_registry is None or (
             self._code is None and self._parameter_panel is None
         ):
             self._save_button = None

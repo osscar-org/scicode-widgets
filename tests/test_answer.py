@@ -6,13 +6,13 @@ from typing import Union
 
 import pytest
 
-from scwidgets.answer import AnswerRegistry, AnswerWidget
+from scwidgets.exercise import ExerciseRegistry, ExerciseWidget
 
 
-def mock_answer_widget(answer_registry: AnswerRegistry, answer_key: str):
-    class MockAnswerWidget(AnswerWidget):
-        def __init__(self, answer_registry: AnswerRegistry, answer_key: str):
-            super().__init__(answer_registry, answer_key)
+def mock_answer_widget(answer_registry: ExerciseRegistry, exercise_key: str):
+    class MockExerciseWidget(ExerciseWidget):
+        def __init__(self, answer_registry: ExerciseRegistry, exercise_key: str):
+            super().__init__(answer_registry, exercise_key)
             self._answer = "answer"
 
         @property
@@ -29,10 +29,10 @@ def mock_answer_widget(answer_registry: AnswerRegistry, answer_key: str):
         def handle_load_result(self, result: Union[str, Exception]):
             pass
 
-    return MockAnswerWidget(answer_registry, answer_key)
+    return MockExerciseWidget(answer_registry, exercise_key)
 
 
-class TestAnswerRegistry:
+class TestExerciseRegistry:
     prefix = "pytest"
     student_name = "test-answer-registry"
     tmp_dir = None
@@ -72,15 +72,15 @@ class TestAnswerRegistry:
         with open(f"{self.prefix}-{self.student_name}-2.json", "w") as answer_file:
             json.dump(answers, answer_file)
 
-        answer_registry = AnswerRegistry(filename_prefix=self.prefix)
+        answer_registry = ExerciseRegistry(filename_prefix=self.prefix)
         # test if existing file is selected on initialization
         assert (
             f"{self.prefix}-{self.student_name}-2.json"
             in answer_registry._answers_files_dropdown.options
         )
 
-        answer_key_1 = "exercise_1"
-        answer_widget_1 = mock_answer_widget(answer_registry, answer_key_1)
+        exercise_key_1 = "exercise_1"
+        answer_widget_1 = mock_answer_widget(answer_registry, exercise_key_1)
         answer_widget_1.answer = "answer_1"
 
         # simulating typing of name into text widget
@@ -100,21 +100,21 @@ class TestAnswerRegistry:
             answer_registry.create_new_file()
 
     def test_save_answer(self):
-        answer_registry = AnswerRegistry(filename_prefix=self.prefix)
+        answer_registry = ExerciseRegistry(filename_prefix=self.prefix)
 
         with pytest.raises(
             KeyError,
-            match=r".*There is no widget registered with answer key 'notkey'.*",
+            match=r".*There is no widget registered with exercise key 'notkey'.*",
         ):
             answer_registry.save_answer("notkey")
 
-        answer_key_1 = "exercise_1"
-        answer_widget_1 = mock_answer_widget(answer_registry, answer_key_1)
+        exercise_key_1 = "exercise_1"
+        answer_widget_1 = mock_answer_widget(answer_registry, exercise_key_1)
         answer_widget_1.answer = "answer_1"
 
         # Test if error is raised when no file is loaded
         with pytest.raises(FileNotFoundError, match=r".*No file has been loaded.*"):
-            answer_registry.save_answer(answer_key_1)
+            answer_registry.save_answer(exercise_key_1)
 
         # create file
         answer_registry._student_name_text.value = self.student_name
@@ -125,19 +125,19 @@ class TestAnswerRegistry:
         with pytest.raises(
             FileNotFoundError, match=r".*Loaded file does not exist anymore.*"
         ):
-            answer_registry.save_answer(answer_key_1)
+            answer_registry.save_answer(exercise_key_1)
         os.rename("tmp.json", f"{self.prefix}-{self.student_name}.json")
 
         # Test that file is contains only the updated answer
         answer_widget_1.answer = "update"
-        answer_key_2 = "exercise_2"
+        exercise_key_2 = "exercise_2"
         answer_widget_2 = mock_answer_widget(  # noqa: F841
-            answer_registry, answer_key_2
+            answer_registry, exercise_key_2
         )
 
-        result = answer_registry.save_answer(answer_key_1)
+        result = answer_registry.save_answer(exercise_key_1)
         assert (
-            result == "Answer has been saved in file "
+            result == "Exercise has been saved in file "
             "'pytest-test-answer-registry.json'."
         )
         with open(f"{self.prefix}-{self.student_name}.json", "r") as answer_file:
@@ -145,15 +145,15 @@ class TestAnswerRegistry:
         assert answers == {"exercise_1": "update"}
 
     def test_save_all_answers(self):
-        answer_registry = AnswerRegistry(filename_prefix=self.prefix)
+        answer_registry = ExerciseRegistry(filename_prefix=self.prefix)
 
-        answer_key_1 = "exercise_1"
-        answer_widget_1 = mock_answer_widget(answer_registry, answer_key_1)
+        exercise_key_1 = "exercise_1"
+        answer_widget_1 = mock_answer_widget(answer_registry, exercise_key_1)
         answer_widget_1.answer = "answer_1"
 
         # Test if error is raised when no file is loaded
         with pytest.raises(FileNotFoundError, match=r".*No file has been loaded.*"):
-            answer_registry.save_answer(answer_key_1)
+            answer_registry.save_answer(exercise_key_1)
 
         # create file
         answer_registry._student_name_text.value = self.student_name
@@ -164,13 +164,13 @@ class TestAnswerRegistry:
         with pytest.raises(
             FileNotFoundError, match=r".*Loaded file does not exist anymore.*"
         ):
-            answer_registry.save_answer(answer_key_1)
+            answer_registry.save_answer(exercise_key_1)
         os.rename("tmp.json", f"{self.prefix}-{self.student_name}.json")
 
         # Test that file is contains all updated answers
         answer_widget_1.answer = "update"
-        answer_key_2 = "exercise_2"
-        answer_widget_2 = mock_answer_widget(answer_registry, answer_key_2)
+        exercise_key_2 = "exercise_2"
+        answer_widget_2 = mock_answer_widget(answer_registry, exercise_key_2)
         answer_widget_2.answer = "answer_2"
 
         result = answer_registry.save_all_answers()
@@ -187,14 +187,14 @@ class TestAnswerRegistry:
         with open(f"{self.prefix}-{self.student_name}.json", "w") as answer_file:
             json.dump(answers, answer_file)
 
-        answer_registry = AnswerRegistry(filename_prefix=self.prefix)
+        answer_registry = ExerciseRegistry(filename_prefix=self.prefix)
         # test if existing file is selected on initialization
         assert (
             f"{self.prefix}-{self.student_name}.json"
             in answer_registry._answers_files_dropdown.options
         )
-        answer_key_1 = "exercise_1"
-        answer_widget_1 = mock_answer_widget(answer_registry, answer_key_1)
+        exercise_key_1 = "exercise_1"
+        answer_widget_1 = mock_answer_widget(answer_registry, exercise_key_1)
         answer_widget_1.answer = "answer_1"
 
         # Test if error is raised when no file is loaded
@@ -226,8 +226,8 @@ class TestAnswerRegistry:
         ):
             answer_registry.load_file()
 
-        answer_key_2 = "exercise_2"
-        answer_widget_2 = mock_answer_widget(answer_registry, answer_key_2)
+        exercise_key_2 = "exercise_2"
+        answer_widget_2 = mock_answer_widget(answer_registry, exercise_key_2)
         answer_widget_2.answer = "answer_2"
         result = answer_registry.load_file()
         assert (
@@ -241,18 +241,18 @@ class TestAnswerRegistry:
         with open(f"{self.prefix}-{self.student_name}.json", "w") as answer_file:
             json.dump(answers, answer_file)
 
-        answer_registry = AnswerRegistry(filename_prefix=self.prefix)
+        answer_registry = ExerciseRegistry(filename_prefix=self.prefix)
 
         with pytest.raises(
             KeyError,
-            match=r".*There is no widget registered with answer key 'notkey'.*",
+            match=r".*There is no widget registered with exercise key 'notkey'.*",
         ):
             answer_registry.load_answer("notkey")
 
-        answer_key_1 = "exercise_1"
-        answer_widget_1 = mock_answer_widget(answer_registry, answer_key_1)
-        answer_key_2 = "exercise_2"
-        answer_widget_2 = mock_answer_widget(answer_registry, answer_key_2)
+        exercise_key_1 = "exercise_1"
+        answer_widget_1 = mock_answer_widget(answer_registry, exercise_key_1)
+        exercise_key_2 = "exercise_2"
+        answer_widget_2 = mock_answer_widget(answer_registry, exercise_key_2)
         answer_widget_1.answer = "update_2"
 
         # Test if error is raised when no file is loaded
@@ -262,7 +262,7 @@ class TestAnswerRegistry:
         with pytest.raises(
             ValueError, match=r".*No file has been selected in the dropdown list.*"
         ):
-            answer_registry.load_answer(answer_key_1)
+            answer_registry.load_answer(exercise_key_1)
         # select back file to load
         answer_registry._answers_files_dropdown.value = (
             f"{self.prefix}-{self.student_name}.json"
@@ -274,15 +274,15 @@ class TestAnswerRegistry:
         with pytest.raises(
             FileNotFoundError, match=r".*Selected file does not exist anymore.*"
         ):
-            answer_registry.load_answer(answer_key_1)
+            answer_registry.load_answer(exercise_key_1)
         os.rename("tmp.json", f"{self.prefix}-{self.student_name}.json")
 
         # Test that file is contains only the updated answer
         answer_widget_1.answer = "update_1"
         answer_widget_2.answer = "update_2"
-        result = answer_registry.load_answer(answer_key_1)
+        result = answer_registry.load_answer(exercise_key_1)
         assert (
-            result == "Answer has been loaded from file "
+            result == "Exercise has been loaded from file "
             "'pytest-test-answer-registry.json'."
         )
         assert answer_widget_1.answer == "answer_1"
