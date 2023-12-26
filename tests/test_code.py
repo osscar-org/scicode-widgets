@@ -103,7 +103,7 @@ def get_code_exercise(
         parameters = None
 
     def update_print(code_ex: CodeExercise):
-        output = code_ex.run_code(**code_ex.panel_parameters)
+        output = code_ex.run_code(**code_ex.parameters)
         code_ex.cue_outputs[0].display_object = f"Output:\n{output}"
 
     code_ex = CodeExercise(
@@ -198,7 +198,7 @@ class TestCodeExercise:
         ],
     )
     def test_run_code(self, code_ex):
-        output = code_ex.run_code(**code_ex.panel_parameters)
+        output = code_ex.run_code(**code_ex.parameters)
         assert np.allclose((output,), code_ex.checks[0].outputs_references[0])
 
     @pytest.mark.parametrize(
@@ -214,4 +214,4 @@ class TestCodeExercise:
             CodeValidationError,
             match="NameError in code input: name 'bug' is not defined.*",
         ):
-            code_ex.run_code(**code_ex.panel_parameters)
+            code_ex.run_code(**code_ex.parameters)

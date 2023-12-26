@@ -149,16 +149,12 @@ class CodeExercise(VBox, CheckableWidget, AnswerWidget):
         self._output = CueOutput()
 
         self._parameter_panel: Union[ParameterPanel, None]
-        self._parameters: Union[dict, None]
         if isinstance(parameters, dict):
             self._parameter_panel = ParameterPanel(**parameters)
-            self._parameters = self._parameter_panel.parameters
         elif isinstance(parameters, ParameterPanel):
             self._parameter_panel = parameters
-            self._parameters = self._parameter_panel.parameters
         else:
             self._parameter_panel = None
-            self._parameters = None
 
         self._cue_code = self._code
         self._cue_outputs = cue_outputs
@@ -476,6 +472,21 @@ class CodeExercise(VBox, CheckableWidget, AnswerWidget):
 
     @property
     def panel_parameters(self) -> Dict[str, Check.FunInParamT]:
+        """
+        :return: Only parameters that are tunable in the parameter panel are returned.
+            Fixed parameters are ignored.
+        """
+        if self._parameter_panel is not None:
+            parameter_panel = self._parameter_panel
+            return parameter_panel.panel_parameters
+        return {}
+
+    @property
+    def parameters(self) -> Dict[str, Check.FunInParamT]:
+        """
+        :return: All parameters that were given on input are returned. Including also
+            fixed parameters.
+        """
         if self._parameter_panel is not None:
             parameter_panel = self._parameter_panel
             return parameter_panel.parameters
@@ -623,7 +634,7 @@ class CodeExercise(VBox, CheckableWidget, AnswerWidget):
                 if self._update_func is not None:
                     self._update_func(self)
                 elif self._code is not None:
-                    self.run_code(**self.panel_parameters)
+                    self.run_code(**self.parameters)
 
                 for cue_output in self.cue_outputs:
                     if hasattr(cue_output, "draw_display"):
