@@ -240,11 +240,6 @@ class CodeExercise(VBox, CheckableWidget, AnswerWidget):
                             cue_output._traits_to_observe = ["function_body"]
                             cue_output.observe_widgets()
 
-                        # TODO set this
-                        self._output._widgets_to_observe = [self._code]
-                        self._output._traits_to_observe = ["function_body"]
-                        self._output.observe_widgets()
-
                     self._cue_parameter_panel = UpdateCueBox(
                         [],
                         [],
