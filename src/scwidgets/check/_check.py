@@ -317,10 +317,6 @@ class ChecksResult:
                 )
                 if len(self._inputs_parameters[i]) > 0:
                     message += Formatter.color_assert_success(" for input\n")
-                elif (isinstance(result, tuple) and len(result) == 3) or not (
-                    self._suppress_assert_messages[i]
-                ):
-                    message += "\n"
 
                 message += "\n".join(
                     [
