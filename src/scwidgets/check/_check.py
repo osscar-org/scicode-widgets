@@ -324,7 +324,7 @@ class ChecksResult:
 
                 message += "\n".join(
                     [
-                        f"  {Formatter.color_info_message(param_name)}:  "
+                        f"  {Formatter.color_assert_info(param_name)}:  "
                         f"{param_value!r}"
                         for param_name, param_value in self._inputs_parameters[
                             i
@@ -344,7 +344,7 @@ class ChecksResult:
 
                 message += "\n".join(
                     [
-                        f"  {Formatter.color_info_message(param_name)}:  "
+                        f"  {Formatter.color_assert_info(param_name)}:  "
                         f"{param_value!r}"
                         for param_name, param_value in self._inputs_parameters[
                             i
