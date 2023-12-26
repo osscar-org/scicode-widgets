@@ -3,11 +3,11 @@ from typing import Optional, Union
 from ipywidgets import HTML, HBox, HTMLMath, Layout, Output, Textarea, VBox
 
 from .._utils import Formatter
-from ..answer import AnswerRegistry, AnswerWidget
 from ..cue import SaveCueBox, SaveResetCueButton
+from ._widget_exercise_registry import ExerciseRegistry, ExerciseWidget
 
 
-class TextExercise(VBox, AnswerWidget):
+class TextExercise(VBox, ExerciseWidget):
     """
     :param textarea:
         a custom textarea with custom styling, if not specified the standard parameters
@@ -19,8 +19,8 @@ class TextExercise(VBox, AnswerWidget):
     def __init__(
         self,
         value: Optional[str] = None,
-        answer_key: Optional[str] = None,
-        answer_registry: Optional[AnswerRegistry] = None,
+        exercise_key: Optional[str] = None,
+        exercise_registry: Optional[ExerciseRegistry] = None,
         exercise_description: Optional[str] = None,
         exercise_title: Optional[str] = None,
         *args,
@@ -32,12 +32,12 @@ class TextExercise(VBox, AnswerWidget):
         else:
             self._exercise_description_html = HTMLMath(self._exercise_description)
         if exercise_title is None:
-            if answer_key is None:
+            if exercise_key is None:
                 self._exercise_title = None
                 self._exercise_title_html = None
             else:
-                self._exercise_title = answer_key
-                self._exercise_title_html = HTML(f"<b>{answer_key}</b>")
+                self._exercise_title = exercise_key
+                self._exercise_title_html = HTML(f"<b>{exercise_key}</b>")
         else:
             self._exercise_title = exercise_title
             self._exercise_title_html = HTML(f"<b>{exercise_title}</b>")
@@ -52,7 +52,7 @@ class TextExercise(VBox, AnswerWidget):
         self._cue_textarea = self._textarea
         self._output = Output()
 
-        if answer_registry is None:
+        if exercise_registry is None:
             self._save_button = None
             self._load_button = None
             self._button_panel = None
@@ -97,7 +97,7 @@ class TextExercise(VBox, AnswerWidget):
                 layout=Layout(justify_content="flex-end"),
             )
 
-        AnswerWidget.__init__(self, answer_registry, answer_key)
+        ExerciseWidget.__init__(self, exercise_registry, exercise_key)
 
         widget_children = []
         if self._exercise_title_html is not None:

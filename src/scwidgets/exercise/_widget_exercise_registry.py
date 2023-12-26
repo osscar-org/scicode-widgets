@@ -14,16 +14,16 @@ from ipywidgets import Button, Dropdown, HBox, Label, Layout, Output, Text, VBox
 from .._utils import Formatter
 
 
-class AnswerWidget:
+class ExerciseWidget:
     """
     Any widget inheriting from this class can be (de)serialized
     :py:class:`WidgetStateRegistry`. The serialization offered by ipywidgets
     cannot be loaded out-of-the-box for restarted notebook since the widget IDs change
 
-    :param answer_registry:
-        the answer registry that registers the answers for this widget
+    :param exercise_registry:
+        the exercise registry that registers the answers for this widget
 
-    :param answer_key:
+    :param exercise_key:
         Identifier for the widget, must be unique for each regestired widget
 
     Reference
@@ -34,19 +34,23 @@ class AnswerWidget:
 
     def __init__(
         self,
-        answer_registry: Union[None, AnswerRegistry],
-        answer_key: Union[None, Hashable],
+        exercise_registry: Union[None, ExerciseRegistry],
+        exercise_key: Union[None, Hashable],
     ):
-        if answer_registry is not None and answer_key is None:
-            raise ValueError("answer registry was given but no answer key was given")
-        elif answer_registry is None and answer_key is not None:
-            raise ValueError("answer key was given but no answer registry was given")
+        if exercise_registry is not None and exercise_key is None:
+            raise ValueError(
+                "exercise registry was given but no exercise key was given"
+            )
+        elif exercise_registry is None and exercise_key is not None:
+            raise ValueError(
+                "exercise key was given but no exercise registry was given"
+            )
         # we need to use a key because self is not persistent on kernel restarts
-        self._answer_registry = answer_registry
-        self._answer_key = answer_key
+        self._exercise_registry = exercise_registry
+        self._exercise_key = exercise_key
 
-        if self._answer_registry is not None and answer_key is not None:
-            self._answer_registry.register_widget(self, self._answer_key)
+        if self._exercise_registry is not None and exercise_key is not None:
+            self._exercise_registry.register_widget(self, self._exercise_key)
 
     @property
     def answer(self) -> dict:
@@ -77,34 +81,34 @@ class AnswerWidget:
         raise NotImplementedError("handle_load_result has not been implemented")
 
     def save(self) -> Union[str, Exception]:
-        if self._answer_registry is None:
+        if self._exercise_registry is None:
             raise ValueError(
-                "No answer registry given on initialization, save cannot be used"
+                "No exercise registry given on initialization, save cannot be used"
             )
-        if self._answer_key is None:
+        if self._exercise_key is None:
             raise ValueError(
-                "No answer key given on initialization, save cannot be used"
+                "No exercise key given on initialization, save cannot be used"
             )
-        return self._answer_registry.save_answer(self._answer_key)
+        return self._exercise_registry.save_answer(self._exercise_key)
 
     def load(self) -> Union[str, Exception]:
-        if self._answer_registry is None:
+        if self._exercise_registry is None:
             raise ValueError(
-                "No answer registry given on initialization, load cannot be used"
+                "No exercise registry given on initialization, load cannot be used"
             )
-        if self._answer_key is None:
+        if self._exercise_key is None:
             raise ValueError(
-                "No answer key given on initialization, save cannot be used"
+                "No exercise key given on initialization, save cannot be used"
             )
-        return self._answer_registry.load_answer(self._answer_key)
+        return self._exercise_registry.load_answer(self._exercise_key)
 
     @property
-    def answer_registry(self):
-        return self._answer_registry
+    def exercise_registry(self):
+        return self._exercise_registry
 
     @property
-    def answer_key(self):
-        return self._answer_key
+    def exercise_key(self):
+        return self._exercise_key
 
 
 class FilenameParser:
@@ -152,7 +156,7 @@ class FilenameParser:
             )
 
 
-class AnswerRegistry(VBox):
+class ExerciseRegistry(VBox):
     """ """
 
     def __init__(self, filename_prefix: Optional[str] = None, *args, **kwargs):
@@ -268,15 +272,15 @@ class AnswerRegistry(VBox):
     def loaded_file_name(self):
         return self._loaded_file_name
 
-    def register_widget(self, widget: AnswerWidget, answer_key: Hashable):
+    def register_widget(self, widget: ExerciseWidget, exercise_key: Hashable):
         """
         :param widget:
             widget answer is save on click of save button
-        :param answer_key:
-            unique answer key for widget to store, so it can be reloaded persistently
+        :param exercise_key:
+            unique exercise key for widget to store, so it can be reloaded persistently
             after a restart of the python kernel
         """
-        self._widgets[answer_key] = widget
+        self._widgets[exercise_key] = widget
 
     def create_new_file(self) -> str:
         FilenameParser.verify_valid_student_name(self._student_name_text.value)
@@ -314,17 +318,17 @@ class AnswerRegistry(VBox):
             self._loaded_file_name = answers_filename
             return f"File {answers_filename!r} created and loaded."
 
-    def load_answer(self, answer_key: Hashable) -> str:
+    def load_answer(self, exercise_key: Hashable) -> str:
         """
         Only works when file has been loaded
 
-        :param answer_key:
-            unique answer key for widget to store, so it can be reloaded persistently
+        :param exercise_key:
+            unique exercise key for widget to store, so it can be reloaded persistently
             after a restart of the python kernel
         """
-        if answer_key not in self._widgets.keys():
+        if exercise_key not in self._widgets.keys():
             raise KeyError(
-                f"There is no widget registered with answer key {answer_key!r}."
+                f"There is no widget registered with exercise key {exercise_key!r}."
             )
         if self._loaded_file_name is None:
             raise ValueError("No file has been selected in the dropdown list.")
@@ -340,14 +344,15 @@ class AnswerRegistry(VBox):
         answers_filename = self._answers_files_dropdown.value
         with open(answers_filename, "r") as answers_file:
             answers = json.load(answers_file)
-        if answer_key not in answers.keys():
+        if exercise_key not in answers.keys():
             raise KeyError(
-                f"Your file does not contain the answer with answer key {answer_key!r}."
+                "Your file does not contain the answer with exercise key "
+                f"{exercise_key!r}."
             )
         else:
-            self._widgets[answer_key].answer = answers[answer_key]
+            self._widgets[exercise_key].answer = answers[exercise_key]
         self._loaded_file_name = answers_filename
-        return f"Answer has been loaded from file {answers_filename!r}."
+        return f"Exercise has been loaded from file {answers_filename!r}."
 
     def load_file(self) -> str:
         """
@@ -376,26 +381,26 @@ class AnswerRegistry(VBox):
 
         with open(answers_filename, "r") as answers_file:
             answers = json.load(answers_file)
-        for answer_key, answer in answers.items():
-            if answer_key not in self._widgets.keys():
+        for exercise_key, answer in answers.items():
+            if exercise_key not in self._widgets.keys():
                 raise ValueError(
-                    f"Your file contains an answer with key {answer_key!r} "
+                    f"Your file contains an answer with key {exercise_key!r} "
                     f"with no corresponding registered widget."
                 )
             else:
-                self._widgets[answer_key].answer = answer
+                self._widgets[exercise_key].answer = answer
         self._loaded_file_name = answers_filename
 
         # only notifiy all widgets when result was successful
         for widget in self._widgets.values():
-            result = f"Answer has been loaded from file {self._loaded_file_name!r}."
+            result = f"Exercise has been loaded from file {self._loaded_file_name!r}."
             widget.handle_load_result(result)
         return f"All answers loaded from file {answers_filename!r}."
 
-    def save_answer(self, answer_key: Hashable) -> str:
-        if not (answer_key in self._widgets.keys()):
+    def save_answer(self, exercise_key: Hashable) -> str:
+        if not (exercise_key in self._widgets.keys()):
             raise KeyError(
-                f"There is no widget registered with answer key {answer_key!r}."
+                f"There is no widget registered with exercise key {exercise_key!r}."
             )
 
         if self._loaded_file_name is None:
@@ -411,11 +416,11 @@ class AnswerRegistry(VBox):
         else:
             with open(self._loaded_file_name, "r") as answers_file:
                 answers = json.load(answers_file)
-            answers[answer_key] = self._widgets[answer_key].answer
+            answers[exercise_key] = self._widgets[exercise_key].answer
 
             with open(self._loaded_file_name, "w") as answers_file:
                 json.dump(answers, answers_file)
-            result = f"Answer has been saved in file {self._loaded_file_name!r}."
+            result = f"Exercise has been saved in file {self._loaded_file_name!r}."
         return result
 
     def save_all_answers(self) -> str:
@@ -434,15 +439,15 @@ class AnswerRegistry(VBox):
         else:
             with open(self._loaded_file_name, "r") as answers_file:
                 answers = json.load(answers_file)
-            for answer_key, widget in self._widgets.items():
-                answers[answer_key] = widget.answer
+            for exercise_key, widget in self._widgets.items():
+                answers[exercise_key] = widget.answer
 
             with open(self._loaded_file_name, "w") as answers_file:
                 json.dump(answers, answers_file)
 
             # only notifiy all widgets when result was successful
             for widget in self._widgets.values():
-                result = f"Answer has been saved in file {self._loaded_file_name!r}."
+                result = f"Exercise has been saved in file {self._loaded_file_name!r}."
                 widget.handle_save_result(result)
 
             return f"All answers were saved in file {self._loaded_file_name!r}."

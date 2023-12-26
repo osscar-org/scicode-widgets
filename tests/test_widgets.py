@@ -181,7 +181,7 @@ def test_privacy_policy(selenium_driver):
             ).click()
 
 
-class TestAnswerWidgets:
+class TestExerciseWidgets:
     prefix = "pytest"
 
     def setup_method(self, method):
@@ -202,7 +202,7 @@ class TestAnswerWidgets:
 
     def test_widget_answer(self, selenium_driver):
         """
-        Tests the save/loading mechanism of all widgets inheriting from AnswerWidget
+        Tests the save/loading mechanism of all widgets inheriting from ExerciseWidget
 
         :param selenium_driver: see conftest.py
         """
@@ -323,7 +323,7 @@ class TestAnswerWidgets:
         output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
         assert output.text == "All answers loaded from file 'pytest-test-answers.json'."
 
-        # TODO test interaction of AnswerWidgets with AnswerRegistry
+        # TODO test interaction of ExerciseWidgets with ExerciseRegistry
 
         # Test 2:
         # -------
@@ -378,7 +378,7 @@ class TestAnswerWidgets:
         assert text_input.get_attribute("value") == input_answer
         output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
         assert (
-            output.text == "Answer has been saved in file 'pytest-test-answers.json'."
+            output.text == "Exercise has been saved in file 'pytest-test-answers.json'."
         )
 
         # tests load button
@@ -419,7 +419,7 @@ class TestAnswerWidgets:
         output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
         assert (
             output.text
-            == "Answer has been loaded from file 'pytest-test-answers.json'."
+            == "Exercise has been loaded from file 'pytest-test-answers.json'."
         )
         assert text_input.get_attribute("value") == input_answer
 
@@ -444,7 +444,7 @@ class TestAnswerWidgets:
 
         output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
         assert (
-            output.text == "Answer has been saved in file 'pytest-test-answers.json'."
+            output.text == "Exercise has been saved in file 'pytest-test-answers.json'."
         )
         # not cued
         cue_box = nb_cell.find_element(By.CLASS_NAME, cue_box_class_name("save", False))
@@ -479,7 +479,7 @@ class TestAnswerWidgets:
         output = nb_cell.find_element(By.CLASS_NAME, OUTPUT_CLASS_NAME)
         assert (
             output.text
-            == "Answer has been loaded from file 'pytest-test-answers.json'."
+            == "Exercise has been loaded from file 'pytest-test-answers.json'."
         )
         # not cued
         cue_box = nb_cell.find_element(By.CLASS_NAME, cue_box_class_name("save", False))
