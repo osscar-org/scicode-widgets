@@ -1,6 +1,6 @@
 from typing import Callable, Dict, List, Union
 
-from ipywidgets import Output, VBox, Widget, interactive
+from ipywidgets import Output, VBox, Widget, fixed, interactive
 from traitlets.utils.sentinel import Sentinel
 
 from ..check import Check
@@ -52,15 +52,28 @@ class ParameterPanel(VBox):
 
     @property
     def parameters(self) -> dict:
+        """
+        :return: All parameters that were given on input are returned. Including also
+            fixed parameters.
+        """
         return self._interactive_widget.kwargs.copy()
 
     @parameters.setter
     def parameters(self, parameters: dict):
-        # self._interactive_widget.kwargs is not sync with the trait
-        # we assume that kwargs has the same order as in the widget children
-        # to change the value of the children
-        for i, key in enumerate(self._interactive_widget.kwargs):
-            self._interactive_widget.children[i].value = parameters[key]
+        for i, key in enumerate(self._interactive_widget.kwargs.keys()):
+            self._interactive_widget.kwargs_widgets[i].value = parameters[key]
+
+    @property
+    def panel_parameters(self) -> dict:
+        """
+        :return: Only parameters that are tunable in the parameter panel are returned.
+            Fixed parameters are ignored.
+        """
+        return {
+            key: self._interactive_widget.kwargs_widgets[i].value
+            for i, key in enumerate(self._interactive_widget.kwargs.keys())
+            if not (isinstance(self._interactive_widget.kwargs_widgets[i], fixed))
+        }
 
     def observe_parameters(
         self,
