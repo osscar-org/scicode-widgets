@@ -147,7 +147,7 @@ class CheckRegistry(VBox):
         VBox.__init__(
             self,
             [
-                HBox([self._set_all_references_button, self._check_all_widgets_button]),
+                HBox([self._check_all_widgets_button]),
                 self._output,
             ],
             *args,
