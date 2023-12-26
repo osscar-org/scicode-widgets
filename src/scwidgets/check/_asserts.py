@@ -46,7 +46,7 @@ def assert_shape(
     for i in parameter_indices:
         if output_parameters[i].shape != output_references[i].shape:
             message = (
-                f"Expected shape {output_references[i].shape})"
+                f"Expected shape {output_references[i].shape} "
                 f"but got {output_parameters[i].shape}."
             )
             failed_parameter_indices.append(i)
