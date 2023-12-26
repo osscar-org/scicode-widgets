@@ -318,7 +318,7 @@ class ChecksResult:
                 if len(self._inputs_parameters[i]) > 0:
                     message += Formatter.color_assert_success(" for input\n")
 
-                message += "\n".join(
+                input_parameters_message = "\n".join(
                     [
                         f"  {Formatter.color_assert_info(param_name)}:  "
                         f"{param_value!r}"
@@ -327,57 +327,51 @@ class ChecksResult:
                         ].items()
                     ]
                 )
+                if input_parameters_message != "":
+                    message += input_parameters_message
             else:
                 message = Formatter.color_assert_failed(
                     f"{self._assert_names[i]} failed",
                 )
-                if len(self._inputs_parameters[i]) > 0:
-                    message += Formatter.color_assert_failed(" for input\n")
-                elif (isinstance(result, tuple) and len(result) == 3) or not (
+                if len(self._inputs_parameters[i]) > 0 or not (
                     self._suppress_assert_messages[i]
                 ):
-                    message += "\n"
+                    message += Formatter.color_assert_failed(" for\n")
 
-                message += "\n".join(
+                input_parameters_message = "\n".join(
                     [
-                        f"  {Formatter.color_assert_info(param_name)}:  "
+                        f"  {Formatter.color_assert_info(param_name)}: "
                         f"{param_value!r}"
                         for param_name, param_value in self._inputs_parameters[
                             i
                         ].items()
                     ]
                 )
+                assert_message = ""
+                if input_parameters_message != "":
+                    assert_message += input_parameters_message
 
+                assert_result = ""
                 if isinstance(result, tuple) and len(result) == 3:
-                    if len(self._inputs_parameters[i]) > 0:
-                        message += "\n"
+                    # Execution info
                     tb = IPython.core.ultratb.VerboseTB()
-                    message = Formatter.color_assert_failed(
-                        f"{self._assert_names[i]} failed\n"
-                    )
                     assert_result = tb.text(*result)
-                    assert_result = re.sub(
-                        r"(^)",
-                        r"\1" + f"{Formatter.color_assert_failed('|')} ",
-                        assert_result,
-                        flags=re.M,
-                    )
-                    message += assert_result
                 elif not (self._suppress_assert_messages[i]):
-                    if len(self._inputs_parameters[i]) > 0:
-                        message += "\n"
                     if hasattr(result, "message"):
                         assert_result = f"{result.message()}"
                     else:
                         assert_result = f"{Formatter.color_assert_failed(result)}"
+                if assert_result != "":
+                    assert_message += "\n" + assert_result
+                if assert_message != "":
                     # adds "| " to the beginning of each line
-                    assert_result = re.sub(
+                    assert_message = re.sub(
                         r"(^)",
                         r"\1" + f"{Formatter.color_assert_failed('|')} ",
-                        assert_result,
+                        assert_message,
                         flags=re.M,
                     )
-                    message += f"{assert_result}"
+                message += f"{assert_message}"
             messages.append(message)
 
         return "\n".join(messages)
@@ -459,8 +453,8 @@ class AssertResult:
         message = ""
         for i in range(len(self._parameter_indices)):
             message += (
-                Formatter.color_assert_failed(f"output {self._parameter_indices[i]}: ")
-                + Formatter.color_assert_failed(f"{self._parameter_values[i]}\n")
+                Formatter.color_assert_info(f"> output {self._parameter_indices[i]}: ")
+                + f"{self._parameter_values[i]}\n"
                 + Formatter.color_assert_failed(self._messages[i])
             )
         return message
