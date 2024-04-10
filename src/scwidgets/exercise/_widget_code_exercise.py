@@ -7,7 +7,7 @@ from platform import python_version
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from ipywidgets import HTML, Box, HBox, HTMLMath, Layout, VBox, Widget
-from widget_code_input import WidgetCodeInput
+from widget_code_input import CodeInputWidget
 from widget_code_input.utils import CodeValidationError
 
 from .._utils import Formatter
@@ -57,7 +57,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
 
     def __init__(
         self,
-        code: Union[None, WidgetCodeInput, types.FunctionType] = None,
+        code: Union[None, CodeInputWidget, types.FunctionType] = None,
         check_registry: Optional[CheckRegistry] = None,
         exercise_registry: Optional[ExerciseRegistry] = None,
         exercise_key: Optional[str] = None,
@@ -121,10 +121,10 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         # verify if input argument `parameter` is valid
         if isinstance(code, types.FunctionType):
             code = CodeInput(function=code)
-        elif code is not None and not (isinstance(code, WidgetCodeInput)):
+        elif code is not None and not (isinstance(code, CodeInputWidget)):
             raise TypeError(
                 "For input code expected type None, FunctionType or "
-                f"WidgetCodeInput but got {type(code)!r}"
+                f"CodeInputWidget but got {type(code)!r}"
             )
 
         # check compability between code and parameters, can only be checked if

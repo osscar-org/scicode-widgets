@@ -3,14 +3,14 @@ import re
 import types
 from typing import List, Optional
 
-from widget_code_input import WidgetCodeInput
+from widget_code_input import CodeInputWidget
 
 from ..check import Check
 
 
-class CodeInput(WidgetCodeInput):
+class CodeInput(CodeInputWidget):
     """
-    Small wrapper around WidgetCodeInput that controls the output
+    Small wrapper around CodeInputWidget that controls the output
     """
 
     def __init__(
@@ -36,7 +36,7 @@ class CodeInput(WidgetCodeInput):
                 self.get_code(function) if function_body is None else function_body
             )
 
-        # default parameters from WidgetCodeInput
+        # default parameters from CodeInputWidget
         if function_name is None:
             raise ValueError("function_name must be given if no function is given.")
         function_parameters = "" if function_parameters is None else function_parameters
