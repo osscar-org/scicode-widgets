@@ -403,14 +403,13 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             demo_children.append(self._cue_parameter_panel)
 
         buttons = []
-        if self._check_button is None and self._update_button is None:
-            self._code_buttons = HBox([])
-        elif self._check_button is None:
-            self._code_buttons = HBox([self._update_button])
-        elif self._update_button is None:
-            self._code_buttons = HBox([self._check_button])
-        else:
-            self._code_buttons = HBox([self._check_button, self._update_button])
+        no_show_update = self._update_mode != "manual" or self._update_button is None
+        button_box = []
+        if self._check_button is not None:
+            button_box.append(self._check_button)
+        if self._update_mode == "manual" and self._update_button is not None:
+            button_box.append(self._update_button)
+        self._code_buttons = HBox(button_box)
         buttons.append(self._code_buttons)
 
         if self._save_button is not None and self._load_button is not None:
