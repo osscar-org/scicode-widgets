@@ -445,9 +445,11 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
     def answer(self) -> dict:
         return {
             "code": None if self._code is None else self._code.function_body,
-            "parameter_panel": None
-            if self._parameter_panel is None
-            else self._parameter_panel.parameters,
+            "parameter_panel": (
+                None
+                if self._parameter_panel is None
+                else self._parameter_panel.parameters
+            ),
         }
 
     @answer.setter
