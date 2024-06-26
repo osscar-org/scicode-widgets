@@ -20,7 +20,7 @@ class CodeInput(WidgetCodeInput):
         function_parameters: Optional[str] = None,
         docstring: Optional[str] = None,
         function_body: Optional[str] = None,
-        code_theme: str = "default",
+        code_theme: str = "",
     ):
         if function is not None:
             function_name = (
