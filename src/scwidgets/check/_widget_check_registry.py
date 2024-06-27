@@ -147,11 +147,19 @@ class CheckRegistry(VBox):
         self._check_all_widgets_button = Button(description="Check all widgets")
         self._output = Output()
         kwargs["layout"] = kwargs.pop("layout", Layout(width="100%"))
+
+        self._buttons_hbox = HBox()
+
+        # needs to be after the _buttons_hbox already was created
+        self.display_set_all_references_button = kwargs.pop(
+            "display_set_all_references_button", False
+        )
+
         VBox.__init__(
             self,
             [
                 CssStyle(),
-                HBox([self._set_all_references_button, self._check_all_widgets_button]),
+                self._buttons_hbox,
                 self._output,
             ],
             *args,
@@ -169,6 +177,22 @@ class CheckRegistry(VBox):
         all registerd checks from widgets to checks
         """
         return self._checks
+
+    @property
+    def display_set_all_references_button(self) -> bool:
+        return self._display_set_all_references_button
+
+    @display_set_all_references_button.setter
+    def display_set_all_references_button(self, value: bool):
+        if value:
+            self._display_set_all_references_button = True
+            self._buttons_hbox.children = (
+                self._check_all_widgets_button,
+                self._set_all_references_button,
+            )
+        else:
+            self._display_set_all_references_button = False
+            self._buttons_hbox.children = (self._check_all_widgets_button,)
 
     @property
     def registered_widgets(self):
