@@ -64,7 +64,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         parameters: Optional[
             Union[Dict[str, Union[Check.FunInParamT, Widget]], ParameterPanel]
         ] = None,
-        update_mode: str = "release",
+        update_mode: str = "manual",
         cue_outputs: Union[None, CueOutput, List[CueOutput]] = None,
         update_func: Optional[
             Callable[[CodeExercise], Union[Any, Check.FunOutParamsT]]
