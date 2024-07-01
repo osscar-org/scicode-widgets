@@ -29,8 +29,8 @@ classifiers = [
 ]
 dependencies = [
   "ipywidgets>=8.0.0",
-  "numpy",
-  "widget_code_input",
+  "numpy<2.0.0",
+  "widget_code_input<4.0.0",
   "matplotlib",
   "termcolor"
 ]

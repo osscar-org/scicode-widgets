@@ -250,9 +250,9 @@ class CheckRegistry(VBox):
     def check_all_widgets(
         self,
     ) -> OrderedDict[CheckableWidget, Union[ChecksResult, Exception]]:
-        messages: OrderedDict[
-            CheckableWidget, Union[ChecksResult, Exception]
-        ] = OrderedDict()
+        messages: OrderedDict[CheckableWidget, Union[ChecksResult, Exception]] = (
+            OrderedDict()
+        )
         for widget in self._checks.keys():
             try:
                 messages[widget] = self.check_widget(widget)
