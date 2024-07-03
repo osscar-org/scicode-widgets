@@ -102,6 +102,7 @@ class NotebookCellList(list):
         nb_cells_non_empty = []
         for nb_cell in nb_cells:
             driver.execute_script("arguments[0].scrollIntoView();", nb_cell)
+            time.sleep(0.05)
             if nb_cell.text != "":
                 nb_cells_non_empty.append(nb_cell)
 
@@ -115,9 +116,11 @@ class NotebookCellList(list):
             self._driver.execute_script(
                 "arguments[0].scrollIntoView();", super().__getitem__(i)
             )
+            time.sleep(0.05)
 
         nb_cell = super().__getitem__(key)
         self._driver.execute_script("arguments[0].scrollIntoView();", nb_cell)
+        time.sleep(0.05)
         return nb_cell
 
 
