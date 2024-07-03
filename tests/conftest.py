@@ -4,6 +4,7 @@ import time
 from urllib.parse import urljoin
 
 import pytest
+from packaging.version import Version
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
@@ -17,7 +18,7 @@ JUPYTER_TYPE = os.environ["JUPYTER_TYPE"] if "JUPYTER_TYPE" in os.environ else "
 JUPYTER_VERSION = None
 
 
-def get_jupyter_version() -> str:
+def get_jupyter_version() -> Version:
     """
     Function so we can update the jupyter version during initialization
     and use it in other files
@@ -45,7 +46,7 @@ def notebook_service():
         ["jupyter", f"{JUPYTER_TYPE}", "--version"]
     )
     # convert to string
-    JUPYTER_VERSION = jupyter_version.decode().replace("\n", "")
+    JUPYTER_VERSION = Version(jupyter_version.decode().replace("\n", ""))
 
     jupyter_process = subprocess.Popen(
         [
@@ -106,7 +107,7 @@ def selenium_driver(notebook_service, selenium):
 
         # jupyter lab < 4
         if JUPYTER_TYPE == "lab":
-            if get_jupyter_version() < "4.0.0":
+            if get_jupyter_version() < Version("4.0.0"):
                 restart_kernel_button_class_name = (
                     "bp3-button.bp3-minimal.jp-ToolbarButtonComponent.minimal.jp-Button"
                 )
@@ -114,9 +115,12 @@ def selenium_driver(notebook_service, selenium):
                     "Restart Kernel and Run All Cells…"
                 )
             else:
-                raise ValueError("jupyter lab > 4.0.0 is not supported.")
+                restart_kernel_button_class_name = "jp-ToolbarButtonComponent"
+                restart_kernel_button_title_attribute = (
+                    "Restart the kernel and run all cells"
+                )
         elif JUPYTER_TYPE == "notebook":
-            if get_jupyter_version() < "7.0.0":
+            if get_jupyter_version() < Version("7.0.0"):
                 restart_kernel_button_class_name = "btn.btn-default"
                 restart_kernel_button_title_attribute = (
                     "restart the kernel, then re-run the whole notebook (with dialog)"
@@ -169,15 +173,18 @@ def selenium_driver(notebook_service, selenium):
         # -------------------------------
 
         if JUPYTER_TYPE == "lab":
-            if get_jupyter_version() < "4.0.0":
+            if get_jupyter_version() < Version("4.0.0"):
                 restart_button_class_name = (
                     "jp-Dialog-button.jp-mod-accept.jp-mod-warn.jp-mod-styled"
                 )
                 restart_button_text = "Restart"
             else:
-                raise ValueError("jupyter lab > 4.0.0 is not supported.")
+                restart_button_class_name = (
+                    "jp-Dialog-button.jp-mod-accept.jp-mod-warn.jp-mod-styled"
+                )
+                restart_button_text = "Restart"
         elif JUPYTER_TYPE == "notebook":
-            if get_jupyter_version() < "7.0.0":
+            if get_jupyter_version() < Version("7.0.0"):
                 restart_button_class_name = "btn.btn-default.btn-sm.btn-danger"
                 restart_button_text = "Restart and Run All Cells"
             else:

@@ -8,6 +8,8 @@ import numpy as np
 import pytest
 import requests
 from imageio.v3 import imread
+from packaging.version import Version
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
@@ -39,45 +41,6 @@ def crop_const_color_borders(image: np.ndarray, const_color: int = 255):
         if np.any(image[:, j2, :] != const_color):
             break
     return image[i1:i2, j1:j2, :]
-
-
-if JUPYTER_TYPE == "notebook":
-    BUTTON_CLASS_NAME = "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
-    OUTPUT_CLASS_NAME = "lm-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-output"
-    TEXT_INPUT_CLASS_NAME = "widget-input"
-    CODE_MIRROR_CLASS_NAME = "CodeMirror-code"
-    MATPLOTLIB_CANVAS_CLASS_NAME = "jupyter-widgets.jupyter-matplotlib-canvas-container"
-    CUE_BOX_CLASS_NAME = (
-        "lm-Widget.lm-Panel.jupyter-widgets.widget-container"
-        ".widget-box.widget-vbox.scwidget-cue-box"
-    )
-elif JUPYTER_TYPE == "lab":
-    BUTTON_CLASS_NAME = (
-        "lm-Widget.p-Widget.jupyter-widgets.jupyter-button.widget-button"
-    )
-    OUTPUT_CLASS_NAME = (
-        "lm-Widget.p-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-output"
-    )
-    TEXT_INPUT_CLASS_NAME = "widget-input"
-    CODE_MIRROR_CLASS_NAME = "CodeMirror-code"
-
-    MATPLOTLIB_CANVAS_CLASS_NAME = "jupyter-widgets.jupyter-matplotlib-canvas-container"
-    CUE_BOX_CLASS_NAME = (
-        "lm-Widget.p-Widget.lm-Panel.p-Panel.jupyter-widgets."
-        "widget-container.widget-box.widget-vbox.scwidget-cue-box"
-    )
-else:
-    raise ValueError(
-        f"Tests do not support jupyter type {JUPYTER_TYPE!r}. Please use 'notebook' or"
-        " 'lab'."
-    )
-
-CUED_CUE_BOX_CLASS_NAME = f"{CUE_BOX_CLASS_NAME}.scwidget-cue-box--cue"
-
-RESET_CUE_BUTTON_CLASS_NAME = f"{BUTTON_CLASS_NAME}.scwidget-reset-cue-button"
-CUED_RESET_CUE_BUTTON_CLASS_NAME = (
-    f"{RESET_CUE_BUTTON_CLASS_NAME}.scwidget-reset-cue-button--cue"
-)
 
 
 def cue_box_class_name(cue_type: str, cued: bool):
@@ -116,18 +79,49 @@ def scwidget_reset_cue_button_class_name(cue_type: str, cued: bool):
     return class_name.replace("reset-cue-button", f"{cue_type}-reset-cue-button")
 
 
-def get_nb_cells(driver) -> List[WebElement]:
+class NotebookCellList(list):
     """
-    Filters out empty cells
+    List of notebook cells that scrolls them into the view when accessing it.  When a
+    cell is accessed it always goes to the top to scroll down cell by cell.  We can only
+    scroll to an element if it is partially visible, so this method works as long as a
+    cell is not larger than the view. We need to put the cells into the view because the
+    content of the cells in lab 4 is not loaded otherwise.
 
     :param driver: see conftest.py selenium_driver function
     """
-    # Each cell of the notebook, the cell number can be retrieved from the
-    # attribute "data-windowed-list-index"
-    nb_cells = driver.find_elements(
-        By.CLASS_NAME, "lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell"
-    )
-    return [nb_cell for nb_cell in nb_cells if nb_cell.text != ""]
+
+    def __init__(self, driver):
+        self._driver = driver
+
+        nb_cells = driver.find_elements(
+            By.CLASS_NAME, "lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell"
+        )
+        # we scroll through the notebook and remove the cells that are empty
+        ActionChains(driver).send_keys(Keys.HOME).perform()
+        time.sleep(0.1)
+        nb_cells_non_empty = []
+        for nb_cell in nb_cells:
+            driver.execute_script("arguments[0].scrollIntoView();", nb_cell)
+            time.sleep(0.05)
+            if nb_cell.text != "":
+                nb_cells_non_empty.append(nb_cell)
+
+        super().__init__(nb_cells_non_empty)
+
+    def __getitem__(self, key):
+        # have to retrieve from scratch as positions may have changed
+        ActionChains(self._driver).send_keys(Keys.HOME).perform()
+        time.sleep(0.1)
+        for i in range(key):
+            self._driver.execute_script(
+                "arguments[0].scrollIntoView();", super().__getitem__(i)
+            )
+            time.sleep(0.05)
+
+        nb_cell = super().__getitem__(key)
+        self._driver.execute_script("arguments[0].scrollIntoView();", nb_cell)
+        time.sleep(0.05)
+        return nb_cell
 
 
 #########
@@ -156,6 +150,82 @@ def test_notebook_running(notebook_service):
     assert response.status_code == 200
 
 
+def test_setup_globals():
+    from .conftest import JUPYTER_VERSION
+
+    # black formats this into one line which causes an error in the linter.
+    # fmt: off
+    global BUTTON_CLASS_NAME, OUTPUT_CLASS_NAME, TEXT_INPUT_CLASS_NAME, \
+        CODE_MIRROR_CLASS_NAME, MATPLOTLIB_CANVAS_CLASS_NAME, CUE_BOX_CLASS_NAME, \
+        PRIVACY_BUTTON
+    global CUED_CUE_BOX_CLASS_NAME, RESET_CUE_BUTTON_CLASS_NAME, \
+        CUED_RESET_CUE_BUTTON_CLASS_NAME
+    # fmt: on
+
+    if JUPYTER_TYPE == "notebook" and JUPYTER_VERSION >= Version("7.0.0"):
+        BUTTON_CLASS_NAME = "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
+        OUTPUT_CLASS_NAME = (
+            "lm-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-output"
+        )
+        TEXT_INPUT_CLASS_NAME = "widget-input"
+        CODE_MIRROR_CLASS_NAME = "cm-content"
+        MATPLOTLIB_CANVAS_CLASS_NAME = (
+            "jupyter-widgets.jupyter-matplotlib-canvas-container"
+        )
+        CUE_BOX_CLASS_NAME = (
+            "lm-Widget.lm-Panel.jupyter-widgets.widget-container"
+            ".widget-box.widget-vbox.scwidget-cue-box"
+        )
+        PRIVACY_BUTTON = "bp3-button.bp3-small.jp-toast-button.jp-Button"
+    elif JUPYTER_TYPE == "lab" and JUPYTER_VERSION < Version("4.0.0"):
+        BUTTON_CLASS_NAME = (
+            "lm-Widget.p-Widget.jupyter-widgets.jupyter-button.widget-button"
+        )
+        OUTPUT_CLASS_NAME = (
+            "lm-Widget.p-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-output"
+        )
+        TEXT_INPUT_CLASS_NAME = "widget-input"
+        CODE_MIRROR_CLASS_NAME = "cm-content"
+
+        MATPLOTLIB_CANVAS_CLASS_NAME = (
+            "jupyter-widgets.jupyter-matplotlib-canvas-container"
+        )
+        CUE_BOX_CLASS_NAME = (
+            "lm-Widget.p-Widget.lm-Panel.p-Panel.jupyter-widgets."
+            "widget-container.widget-box.widget-vbox.scwidget-cue-box"
+        )
+        PRIVACY_BUTTON = "bp3-button.bp3-small.jp-toast-button.jp-Button"
+    elif JUPYTER_TYPE == "lab" and JUPYTER_VERSION >= Version("4.0.0"):
+        BUTTON_CLASS_NAME = "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
+        OUTPUT_CLASS_NAME = (
+            "lm-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-output"
+        )
+
+        TEXT_INPUT_CLASS_NAME = "widget-input"
+        CODE_MIRROR_CLASS_NAME = "cm-content"
+
+        MATPLOTLIB_CANVAS_CLASS_NAME = (
+            "jupyter-widgets.jupyter-matplotlib-canvas-container"
+        )
+        CUE_BOX_CLASS_NAME = (
+            "lm-Widget.lm-Panel.jupyter-widgets.widget-container."
+            "widget-box.widget-vbox.scwidget-cue-box"
+        )
+        PRIVACY_BUTTON = "jp-toast-button.jp-mod-small.jp-Button"
+    else:
+        raise ValueError(
+            f"Tests do not support jupyter type {JUPYTER_TYPE!r} for version"
+            f"{JUPYTER_VERSION!r}."
+        )
+
+    CUED_CUE_BOX_CLASS_NAME = f"{CUE_BOX_CLASS_NAME}.scwidget-cue-box--cue"
+
+    RESET_CUE_BUTTON_CLASS_NAME = f"{BUTTON_CLASS_NAME}.scwidget-reset-cue-button"
+    CUED_RESET_CUE_BUTTON_CLASS_NAME = (
+        f"{RESET_CUE_BUTTON_CLASS_NAME}.scwidget-reset-cue-button--cue"
+    )
+
+
 def test_privacy_policy(selenium_driver):
     """
     The first time jupyter lab is started on a fresh installation a privacy popup
@@ -167,9 +237,7 @@ def test_privacy_policy(selenium_driver):
         driver = selenium_driver("tests/notebooks/widget_answers.ipynb")
         # we search for the button to appear so we can be sure that the privacy window
         # appeared
-        privacy_buttons = driver.find_elements(
-            By.CLASS_NAME, "bp3-button.bp3-small.jp-toast-button.jp-Button"
-        )
+        privacy_buttons = driver.find_elements(By.CLASS_NAME, PRIVACY_BUTTON)
         yes_button = None
         for button in privacy_buttons:
             if button.text == "Yes":
@@ -209,7 +277,7 @@ class TestExerciseWidgets:
 
         driver = selenium_driver("tests/notebooks/widget_answers.ipynb")
 
-        nb_cells = get_nb_cells(driver)
+        nb_cells = NotebookCellList(driver)
 
         # Test 1:
         # -------
@@ -361,7 +429,13 @@ class TestExerciseWidgets:
         #
         WebDriverWait(driver, 1).until(
             expected_conditions.element_to_be_clickable(save_button)
-        ).click()
+        )
+        from .conftest import JUPYTER_VERSION
+
+        if JUPYTER_TYPE == "lab" and JUPYTER_VERSION >= Version("4.0.0"):
+            # button is obscured so we need to click with action on the cell
+            ActionChains(driver).click(nb_cell).perform()
+        save_button.click()
         # wait for uncued box
         cue_box = nb_cell.find_element(By.CLASS_NAME, cue_box_class_name("save", False))
         assert "--cued" not in cue_box.get_attribute("class")
@@ -505,6 +579,7 @@ class TestExerciseWidgets:
         ("tests/notebooks/widget_cue_figure-inline.ipynb", "inline"),
     ],
 )
+@pytest.mark.matplotlib
 def test_widget_figure(selenium_driver, nb_filename, mpl_backend):
     """
     We separate the widget figure tests for different backends to different files
@@ -516,7 +591,7 @@ def test_widget_figure(selenium_driver, nb_filename, mpl_backend):
     # TODO for inline i need to get the image directly from the panel
     driver = selenium_driver(nb_filename)
 
-    nb_cells = get_nb_cells(driver)
+    nb_cells = NotebookCellList(driver)
 
     if "inline" == mpl_backend:
         by_type = By.TAG_NAME
@@ -640,7 +715,7 @@ def test_widgets_cue(selenium_driver):
     """
     driver = selenium_driver("tests/notebooks/widgets_cue.ipynb")
 
-    nb_cells = get_nb_cells(driver)
+    nb_cells = NotebookCellList(driver)
     # Test 1:
     # -------
     # Check if CueBox shows cue when changed
@@ -857,7 +932,7 @@ def test_widget_check_registry(selenium_driver):
     """
     driver = selenium_driver("tests/notebooks/widget_check_registry.ipynb")
 
-    nb_cells = get_nb_cells(driver)
+    nb_cells = NotebookCellList(driver)
 
     # Test 1:
     # -------
@@ -893,7 +968,13 @@ def test_widget_check_registry(selenium_driver):
 
         WebDriverWait(driver, 5).until(
             expected_conditions.element_to_be_clickable(check_all_widgets_button)
-        ).click()
+        )
+        from .conftest import JUPYTER_VERSION
+
+        if JUPYTER_TYPE == "lab" and JUPYTER_VERSION >= Version("4.0.0"):
+            # button is obscured so we need to click with action on the cell
+            ActionChains(driver).click(nb_cell).perform()
+        check_all_widgets_button.click()
         time.sleep(0.1)
         outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
         assert (
@@ -985,7 +1066,7 @@ def test_widgets_code(selenium_driver):
     """
     driver = selenium_driver("tests/notebooks/widget_code_exercise.ipynb")
 
-    nb_cells = get_nb_cells(driver)
+    nb_cells = NotebookCellList(driver)
     # Test 1:
     # -------
     WebDriverWait(driver, 5).until(
