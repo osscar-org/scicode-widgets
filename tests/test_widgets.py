@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 import requests
 from imageio.v3 import imread
+from packaging.version import Version
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
@@ -39,45 +40,6 @@ def crop_const_color_borders(image: np.ndarray, const_color: int = 255):
         if np.any(image[:, j2, :] != const_color):
             break
     return image[i1:i2, j1:j2, :]
-
-
-if JUPYTER_TYPE == "notebook":
-    BUTTON_CLASS_NAME = "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
-    OUTPUT_CLASS_NAME = "lm-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-output"
-    TEXT_INPUT_CLASS_NAME = "widget-input"
-    CODE_MIRROR_CLASS_NAME = "CodeMirror-code"
-    MATPLOTLIB_CANVAS_CLASS_NAME = "jupyter-widgets.jupyter-matplotlib-canvas-container"
-    CUE_BOX_CLASS_NAME = (
-        "lm-Widget.lm-Panel.jupyter-widgets.widget-container"
-        ".widget-box.widget-vbox.scwidget-cue-box"
-    )
-elif JUPYTER_TYPE == "lab":
-    BUTTON_CLASS_NAME = (
-        "lm-Widget.p-Widget.jupyter-widgets.jupyter-button.widget-button"
-    )
-    OUTPUT_CLASS_NAME = (
-        "lm-Widget.p-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-output"
-    )
-    TEXT_INPUT_CLASS_NAME = "widget-input"
-    CODE_MIRROR_CLASS_NAME = "CodeMirror-code"
-
-    MATPLOTLIB_CANVAS_CLASS_NAME = "jupyter-widgets.jupyter-matplotlib-canvas-container"
-    CUE_BOX_CLASS_NAME = (
-        "lm-Widget.p-Widget.lm-Panel.p-Panel.jupyter-widgets."
-        "widget-container.widget-box.widget-vbox.scwidget-cue-box"
-    )
-else:
-    raise ValueError(
-        f"Tests do not support jupyter type {JUPYTER_TYPE!r}. Please use 'notebook' or"
-        " 'lab'."
-    )
-
-CUED_CUE_BOX_CLASS_NAME = f"{CUE_BOX_CLASS_NAME}.scwidget-cue-box--cue"
-
-RESET_CUE_BUTTON_CLASS_NAME = f"{BUTTON_CLASS_NAME}.scwidget-reset-cue-button"
-CUED_RESET_CUE_BUTTON_CLASS_NAME = (
-    f"{RESET_CUE_BUTTON_CLASS_NAME}.scwidget-reset-cue-button--cue"
-)
 
 
 def cue_box_class_name(cue_type: str, cued: bool):
@@ -154,6 +116,62 @@ def test_notebook_running(notebook_service):
     response = requests.get(f"{url}/{nb_path}?token={token}")
     # status code 200 means it was successful
     assert response.status_code == 200
+
+
+def test_setup_globals():
+    from .conftest import JUPYTER_VERSION
+
+    # black formats this into one line which causes an error in the linter.
+    # fmt: off
+    global BUTTON_CLASS_NAME, OUTPUT_CLASS_NAME, TEXT_INPUT_CLASS_NAME, \
+        CODE_MIRROR_CLASS_NAME, MATPLOTLIB_CANVAS_CLASS_NAME, CUE_BOX_CLASS_NAME
+    global CUED_CUE_BOX_CLASS_NAME, RESET_CUE_BUTTON_CLASS_NAME, \
+        CUED_RESET_CUE_BUTTON_CLASS_NAME
+    # fmt: on
+
+    if JUPYTER_TYPE == "notebook" and JUPYTER_VERSION >= Version("7.0.0"):
+        BUTTON_CLASS_NAME = "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
+        OUTPUT_CLASS_NAME = (
+            "lm-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-output"
+        )
+        TEXT_INPUT_CLASS_NAME = "widget-input"
+        CODE_MIRROR_CLASS_NAME = "cm-content"
+        MATPLOTLIB_CANVAS_CLASS_NAME = (
+            "jupyter-widgets.jupyter-matplotlib-canvas-container"
+        )
+        CUE_BOX_CLASS_NAME = (
+            "lm-Widget.lm-Panel.jupyter-widgets.widget-container"
+            ".widget-box.widget-vbox.scwidget-cue-box"
+        )
+    elif JUPYTER_TYPE == "lab" and JUPYTER_VERSION < Version("4.0.0"):
+        BUTTON_CLASS_NAME = (
+            "lm-Widget.p-Widget.jupyter-widgets.jupyter-button.widget-button"
+        )
+        OUTPUT_CLASS_NAME = (
+            "lm-Widget.p-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-output"
+        )
+        TEXT_INPUT_CLASS_NAME = "widget-input"
+        CODE_MIRROR_CLASS_NAME = "cm-content"
+
+        MATPLOTLIB_CANVAS_CLASS_NAME = (
+            "jupyter-widgets.jupyter-matplotlib-canvas-container"
+        )
+        CUE_BOX_CLASS_NAME = (
+            "lm-Widget.p-Widget.lm-Panel.p-Panel.jupyter-widgets."
+            "widget-container.widget-box.widget-vbox.scwidget-cue-box"
+        )
+    else:
+        raise ValueError(
+            f"Tests do not support jupyter type {JUPYTER_TYPE!r} for version"
+            f"{JUPYTER_VERSION!r}."
+        )
+
+    CUED_CUE_BOX_CLASS_NAME = f"{CUE_BOX_CLASS_NAME}.scwidget-cue-box--cue"
+
+    RESET_CUE_BUTTON_CLASS_NAME = f"{BUTTON_CLASS_NAME}.scwidget-reset-cue-button"
+    CUED_RESET_CUE_BUTTON_CLASS_NAME = (
+        f"{RESET_CUE_BUTTON_CLASS_NAME}.scwidget-reset-cue-button--cue"
+    )
 
 
 def test_privacy_policy(selenium_driver):
