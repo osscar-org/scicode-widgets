@@ -65,7 +65,12 @@ class CueFigure(CueOutput):
             # we close the figure so the figure is only contained in this widget
             # and not shown using plt.show()
             plt.close(self.figure)
-        elif matplotlib.backends.backend == "module://ipympl.backend_nbagg":
+        elif (
+            matplotlib.backends.backend == "module://ipympl.backend_nbagg"
+            or matplotlib.backends.backend == "widget"
+        ):
+            # jupyter lab 3 uses "module://ipympl.backend_nbagg"
+            # jupyter lab 4 uses "widget"
             with self:
                 self.figure.canvas.show()
         else:
@@ -83,7 +88,12 @@ class CueFigure(CueOutput):
         if matplotlib.backends.backend == "module://matplotlib_inline.backend_inline":
             self.clear_figure()
             self.clear_output(wait=wait)
-        elif matplotlib.backends.backend == "module://ipympl.backend_nbagg":
+        elif (
+            matplotlib.backends.backend == "module://ipympl.backend_nbagg"
+            or matplotlib.backends.backend == "widget"
+        ):
+            # jupyter lab 3 uses "module://ipympl.backend_nbagg"
+            # jupyter lab 4 uses "widget"
             self.clear_figure()
             if not (wait):
                 self.figure.canvas.draw_idle()
@@ -100,7 +110,12 @@ class CueFigure(CueOutput):
         if matplotlib.backends.backend == "module://matplotlib_inline.backend_inline":
             with self:
                 display(self.figure)
-        elif matplotlib.backends.backend == "module://ipympl.backend_nbagg":
+        elif (
+            matplotlib.backends.backend == "module://ipympl.backend_nbagg"
+            or matplotlib.backends.backend == "widget"
+        ):
+            # jupyter lab 3 uses "module://ipympl.backend_nbagg"
+            # jupyter lab 4 uses "widget"
             self.figure.canvas.draw_idle()
             self.figure.canvas.flush_events()
         else:
