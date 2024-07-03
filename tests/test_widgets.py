@@ -160,6 +160,22 @@ def test_setup_globals():
             "lm-Widget.p-Widget.lm-Panel.p-Panel.jupyter-widgets."
             "widget-container.widget-box.widget-vbox.scwidget-cue-box"
         )
+    elif JUPYTER_TYPE == "lab" and JUPYTER_VERSION >= Version("4.0.0"):
+        BUTTON_CLASS_NAME = "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
+        OUTPUT_CLASS_NAME = (
+            "lm-Widget.jp-RenderedText.jp-mod-trusted.jp-OutputArea-output"
+        )
+
+        TEXT_INPUT_CLASS_NAME = "widget-input"
+        CODE_MIRROR_CLASS_NAME = "cm-content"
+
+        MATPLOTLIB_CANVAS_CLASS_NAME = (
+            "jupyter-widgets.jupyter-matplotlib-canvas-container"
+        )
+        CUE_BOX_CLASS_NAME = (
+            "lm-Widget.lm-Panel.jupyter-widgets.widget-container."
+            "widget-box.widget-vbox.scwidget-cue-box"
+        )
     else:
         raise ValueError(
             f"Tests do not support jupyter type {JUPYTER_TYPE!r} for version"

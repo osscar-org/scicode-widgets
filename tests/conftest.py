@@ -115,7 +115,10 @@ def selenium_driver(notebook_service, selenium):
                     "Restart Kernel and Run All Cells…"
                 )
             else:
-                raise ValueError("jupyter lab > 4.0.0 is not supported.")
+                restart_kernel_button_class_name = "jp-ToolbarButtonComponent"
+                restart_kernel_button_title_attribute = (
+                    "Restart the kernel and run all cells"
+                )
         elif JUPYTER_TYPE == "notebook":
             if get_jupyter_version() < Version("7.0.0"):
                 restart_kernel_button_class_name = "btn.btn-default"
@@ -176,7 +179,10 @@ def selenium_driver(notebook_service, selenium):
                 )
                 restart_button_text = "Restart"
             else:
-                raise ValueError("jupyter lab > 4.0.0 is not supported.")
+                restart_button_class_name = (
+                    "jp-Dialog-button.jp-mod-accept.jp-mod-warn.jp-mod-styled"
+                )
+                restart_button_text = "Restart"
         elif JUPYTER_TYPE == "notebook":
             if get_jupyter_version() < Version("7.0.0"):
                 restart_button_class_name = "btn.btn-default.btn-sm.btn-danger"
