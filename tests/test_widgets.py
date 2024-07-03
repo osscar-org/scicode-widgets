@@ -426,7 +426,13 @@ class TestExerciseWidgets:
         #
         WebDriverWait(driver, 1).until(
             expected_conditions.element_to_be_clickable(save_button)
-        ).click()
+        )
+        from .conftest import JUPYTER_VERSION
+
+        if JUPYTER_TYPE == "lab" and JUPYTER_VERSION >= Version("4.0.0"):
+            # button is obscured so we need to click with action on the cell
+            ActionChains(driver).click(nb_cell).perform()
+        save_button.click()
         # wait for uncued box
         cue_box = nb_cell.find_element(By.CLASS_NAME, cue_box_class_name("save", False))
         assert "--cued" not in cue_box.get_attribute("class")
@@ -958,7 +964,13 @@ def test_widget_check_registry(selenium_driver):
 
         WebDriverWait(driver, 5).until(
             expected_conditions.element_to_be_clickable(check_all_widgets_button)
-        ).click()
+        )
+        from .conftest import JUPYTER_VERSION
+
+        if JUPYTER_TYPE == "lab" and JUPYTER_VERSION >= Version("4.0.0"):
+            # button is obscured so we need to click with action on the cell
+            ActionChains(driver).click(nb_cell).perform()
+        check_all_widgets_button.click()
         time.sleep(0.1)
         outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
         assert (
