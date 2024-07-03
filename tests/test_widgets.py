@@ -576,6 +576,7 @@ class TestExerciseWidgets:
         ("tests/notebooks/widget_cue_figure-inline.ipynb", "inline"),
     ],
 )
+@pytest.mark.matplotlib
 def test_widget_figure(selenium_driver, nb_filename, mpl_backend):
     """
     We separate the widget figure tests for different backends to different files
