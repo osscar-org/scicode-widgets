@@ -9,6 +9,7 @@ import pytest
 import requests
 from imageio.v3 import imread
 from packaging.version import Version
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
@@ -78,18 +79,49 @@ def scwidget_reset_cue_button_class_name(cue_type: str, cued: bool):
     return class_name.replace("reset-cue-button", f"{cue_type}-reset-cue-button")
 
 
-def get_nb_cells(driver) -> List[WebElement]:
+class NotebookCellList(list):
     """
-    Filters out empty cells
+    List of notebook cells that scrolls them into the view when accessing it.  When a
+    cell is accessed it always goes to the top to scroll down cell by cell.  We can only
+    scroll to an element if it is partially visible, so this method works as long as a
+    cell is not larger than the view. We need to put the cells into the view because the
+    content of the cells in lab 4 is not loaded otherwise.
 
     :param driver: see conftest.py selenium_driver function
     """
-    # Each cell of the notebook, the cell number can be retrieved from the
-    # attribute "data-windowed-list-index"
-    nb_cells = driver.find_elements(
-        By.CLASS_NAME, "lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell"
-    )
-    return [nb_cell for nb_cell in nb_cells if nb_cell.text != ""]
+
+    def __init__(self, driver):
+        self._driver = driver
+
+        nb_cells = driver.find_elements(
+            By.CLASS_NAME, "lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell"
+        )
+        # we scroll through the notebook and remove the cells that are empty
+        ActionChains(driver).send_keys(Keys.HOME).perform()
+        time.sleep(0.1)
+        nb_cells_non_empty = []
+        for nb_cell in nb_cells:
+            driver.execute_script("arguments[0].scrollIntoView();", nb_cell)
+            time.sleep(0.05)
+            if nb_cell.text != "":
+                nb_cells_non_empty.append(nb_cell)
+
+        super().__init__(nb_cells_non_empty)
+
+    def __getitem__(self, key):
+        # have to retrieve from scratch as positions may have changed
+        ActionChains(self._driver).send_keys(Keys.HOME).perform()
+        time.sleep(0.1)
+        for i in range(key):
+            self._driver.execute_script(
+                "arguments[0].scrollIntoView();", super().__getitem__(i)
+            )
+            time.sleep(0.05)
+
+        nb_cell = super().__getitem__(key)
+        self._driver.execute_script("arguments[0].scrollIntoView();", nb_cell)
+        time.sleep(0.05)
+        return nb_cell
 
 
 #########
@@ -245,7 +277,7 @@ class TestExerciseWidgets:
 
         driver = selenium_driver("tests/notebooks/widget_answers.ipynb")
 
-        nb_cells = get_nb_cells(driver)
+        nb_cells = NotebookCellList(driver)
 
         # Test 1:
         # -------
@@ -552,7 +584,7 @@ def test_widget_figure(selenium_driver, nb_filename, mpl_backend):
     # TODO for inline i need to get the image directly from the panel
     driver = selenium_driver(nb_filename)
 
-    nb_cells = get_nb_cells(driver)
+    nb_cells = NotebookCellList(driver)
 
     if "inline" == mpl_backend:
         by_type = By.TAG_NAME
@@ -676,7 +708,7 @@ def test_widgets_cue(selenium_driver):
     """
     driver = selenium_driver("tests/notebooks/widgets_cue.ipynb")
 
-    nb_cells = get_nb_cells(driver)
+    nb_cells = NotebookCellList(driver)
     # Test 1:
     # -------
     # Check if CueBox shows cue when changed
@@ -893,7 +925,7 @@ def test_widget_check_registry(selenium_driver):
     """
     driver = selenium_driver("tests/notebooks/widget_check_registry.ipynb")
 
-    nb_cells = get_nb_cells(driver)
+    nb_cells = NotebookCellList(driver)
 
     # Test 1:
     # -------
@@ -1021,7 +1053,7 @@ def test_widgets_code(selenium_driver):
     """
     driver = selenium_driver("tests/notebooks/widget_code_exercise.ipynb")
 
-    nb_cells = get_nb_cells(driver)
+    nb_cells = NotebookCellList(driver)
     # Test 1:
     # -------
     WebDriverWait(driver, 5).until(
