@@ -124,7 +124,8 @@ def test_setup_globals():
     # black formats this into one line which causes an error in the linter.
     # fmt: off
     global BUTTON_CLASS_NAME, OUTPUT_CLASS_NAME, TEXT_INPUT_CLASS_NAME, \
-        CODE_MIRROR_CLASS_NAME, MATPLOTLIB_CANVAS_CLASS_NAME, CUE_BOX_CLASS_NAME
+        CODE_MIRROR_CLASS_NAME, MATPLOTLIB_CANVAS_CLASS_NAME, CUE_BOX_CLASS_NAME, \
+        PRIVACY_BUTTON
     global CUED_CUE_BOX_CLASS_NAME, RESET_CUE_BUTTON_CLASS_NAME, \
         CUED_RESET_CUE_BUTTON_CLASS_NAME
     # fmt: on
@@ -143,6 +144,7 @@ def test_setup_globals():
             "lm-Widget.lm-Panel.jupyter-widgets.widget-container"
             ".widget-box.widget-vbox.scwidget-cue-box"
         )
+        PRIVACY_BUTTON = "bp3-button.bp3-small.jp-toast-button.jp-Button"
     elif JUPYTER_TYPE == "lab" and JUPYTER_VERSION < Version("4.0.0"):
         BUTTON_CLASS_NAME = (
             "lm-Widget.p-Widget.jupyter-widgets.jupyter-button.widget-button"
@@ -160,6 +162,7 @@ def test_setup_globals():
             "lm-Widget.p-Widget.lm-Panel.p-Panel.jupyter-widgets."
             "widget-container.widget-box.widget-vbox.scwidget-cue-box"
         )
+        PRIVACY_BUTTON = "bp3-button.bp3-small.jp-toast-button.jp-Button"
     elif JUPYTER_TYPE == "lab" and JUPYTER_VERSION >= Version("4.0.0"):
         BUTTON_CLASS_NAME = "lm-Widget.jupyter-widgets.jupyter-button.widget-button"
         OUTPUT_CLASS_NAME = (
@@ -176,6 +179,7 @@ def test_setup_globals():
             "lm-Widget.lm-Panel.jupyter-widgets.widget-container."
             "widget-box.widget-vbox.scwidget-cue-box"
         )
+        PRIVACY_BUTTON = "jp-toast-button.jp-mod-small.jp-Button"
     else:
         raise ValueError(
             f"Tests do not support jupyter type {JUPYTER_TYPE!r} for version"
@@ -201,9 +205,7 @@ def test_privacy_policy(selenium_driver):
         driver = selenium_driver("tests/notebooks/widget_answers.ipynb")
         # we search for the button to appear so we can be sure that the privacy window
         # appeared
-        privacy_buttons = driver.find_elements(
-            By.CLASS_NAME, "bp3-button.bp3-small.jp-toast-button.jp-Button"
-        )
+        privacy_buttons = driver.find_elements(By.CLASS_NAME, PRIVACY_BUTTON)
         yes_button = None
         for button in privacy_buttons:
             if button.text == "Yes":
