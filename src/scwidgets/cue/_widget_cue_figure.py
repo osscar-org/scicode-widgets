@@ -32,6 +32,8 @@ class CueFigure(CueOutput):
         Specify `traitlets.All` to observe all traits.
     :param cued:
         Specifies if it is cued on initialization
+    :param no_toolbars:
+        Hide toolbars and headers when using widget mode
     :param css_syle:
         - **base**: the css style of the box during initialization
         - **cue**: the css style that is added when :param
@@ -48,6 +50,7 @@ class CueFigure(CueOutput):
             None, str, List[str], List[List[str]], Sentinel
         ] = None,
         cued: bool = True,
+        no_toolbars: bool = True,
         css_style: Optional[dict] = None,
         **kwargs,
     ):
@@ -77,6 +80,14 @@ class CueFigure(CueOutput):
             raise NotImplementedError(
                 f"matplotlib backend " f"{matplotlib.backends.backend!r} not supported."
             )
+
+        if no_toolbars:
+            # hides unnecessary elements shown with %matplotlib widget
+            self.figure.canvas.header_visible = False
+            self.figure.canvas.footer_visible = False
+            self.figure.canvas.toolbar_visible = False
+            self.figure.canvas.resizable = False
+
         self.draw_display()
 
     def clear_display(self, wait=False):
