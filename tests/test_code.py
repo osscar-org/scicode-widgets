@@ -67,6 +67,12 @@ class TestCodeInput:
         ):
             CodeInput.get_code(lambda x: x)
 
+    def test_invalid_code_theme_raises_error(self):
+        with pytest.raises(
+            ValueError, match=r"Given code_theme 'invalid_theme' invalid.*"
+        ):
+            CodeInput(TestCodeInput.mock_function_1, code_theme="invalid_theme")
+
 
 def get_code_exercise(
     checks: List[Check],
