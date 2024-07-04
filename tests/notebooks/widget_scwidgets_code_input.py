@@ -14,6 +14,8 @@
 # ---
 
 # +
+import time
+
 import scwidgets
 from scwidgets.code import CodeInput
 
@@ -35,4 +37,5 @@ ci = CodeInput(foo)
 ci
 # -
 
+time.sleep(1)
 ci.function_body = """return 'change'"""

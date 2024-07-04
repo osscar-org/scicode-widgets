@@ -262,6 +262,7 @@ def test_scwidgets_code_input(selenium_driver):
     # -------
 
     # Tests if change in function_body changed the widget view
+    time.sleep(2)
     code_input_lines = nb_cells[2].find_elements(By.CLASS_NAME, CODE_MIRROR_CLASS_NAME)
     assert "return 'change'" in code_input_lines[-1].text
 
