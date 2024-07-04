@@ -143,7 +143,7 @@ def selenium_driver(notebook_service, selenium):
         #    )
         # )
         restart_kernel_button = None
-        waiting_time = 10
+        waiting_time = 20
         start = time.time()
 
         while restart_kernel_button is None and time.time() - start < waiting_time:
@@ -219,6 +219,7 @@ def selenium_driver(notebook_service, selenium):
                 (By.CLASS_NAME, "jp-Notebook-ExecutionIndicator"), "data-status", "idle"
             )
         )
+        time.sleep(1)
 
         return selenium
 
