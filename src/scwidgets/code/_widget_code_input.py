@@ -13,6 +13,8 @@ class CodeInput(WidgetCodeInput):
     Small wrapper around WidgetCodeInput that controls the output
     """
 
+    valid_code_themes = ["nord", "solarizedLight", "basicLight"]
+
     def __init__(
         self,
         function: Optional[types.FunctionType] = None,
@@ -20,7 +22,7 @@ class CodeInput(WidgetCodeInput):
         function_parameters: Optional[str] = None,
         docstring: Optional[str] = None,
         function_body: Optional[str] = None,
-        code_theme: str = "default",
+        code_theme: str = "basicLight",
     ):
         if function is not None:
             function_name = (
@@ -45,6 +47,14 @@ class CodeInput(WidgetCodeInput):
         super().__init__(
             function_name, function_parameters, docstring, function_body, code_theme
         )
+
+        # this list is retrieved from
+        # https://github.com/osscar-org/widget-code-input/blob/eb10ca0baee65dd3bf62c9ec5d9cb2f152932ff5/js/widget.js#L249-L253
+        if code_theme not in CodeInput.valid_code_themes:
+            raise ValueError(
+                f"Given code_theme {code_theme!r} invalid. Please use one of "
+                f"the values {CodeInput.valid_code_themes}"
+            )
 
     @property
     def function(self) -> types.FunctionType:
