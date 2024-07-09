@@ -327,21 +327,28 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             self._load_button = None
             self._save_cue_box = None
         else:
-            save_widgets_to_observe = [self._code]
-            save_traits_to_observe = ["function_body"]
+            save_widgets_to_observe = []
+            save_traits_to_observe = []
+
+            if self._cue_code is not None:
+                save_widgets_to_observe.append(self._code)
+                save_traits_to_observe.append("function_body")
+
             if self._parameter_panel is not None:
                 save_widgets_to_observe.extend(self._parameter_panel.parameters_widget)
                 save_traits_to_observe.extend(self._parameter_panel.parameters_trait)
-            self._cue_code = SaveCueBox(
-                save_widgets_to_observe,
-                save_traits_to_observe,
-                self._cue_code,
-                cued=True,
-            )
+
+            if self._cue_code is not None:
+                self._cue_code = SaveCueBox(
+                    save_widgets_to_observe,
+                    save_traits_to_observe,
+                    self._cue_code,
+                    cued=True,
+                )
 
             self._save_cue_box = self._cue_code
             self._save_button = SaveResetCueButton(
-                self._cue_code,
+                SaveCueBox(Box()),  # dummy cue box, because we set cues later on
                 self._on_click_save_action,
                 cued=True,
                 disable_on_successful_action=kwargs.pop(
@@ -354,7 +361,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                 button_tooltip="Loads your code and parameters from the loaded file",
             )
             self._load_button = SaveResetCueButton(
-                self._cue_code,
+                SaveCueBox(Box()),  # dummy cue box, because we set cues later on
                 self._on_click_load_action,
                 cued=True,
                 disable_on_successful_action=kwargs.pop(

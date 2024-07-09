@@ -1,4 +1,5 @@
-from typing import Callable, List
+import os
+from typing import Callable, List, Optional
 
 import numpy as np
 import pytest
@@ -8,7 +9,7 @@ from widget_code_input.utils import CodeValidationError
 from scwidgets.check import Check, CheckRegistry, ChecksResult
 from scwidgets.code import CodeInput
 from scwidgets.cue import CueObject
-from scwidgets.exercise import CodeExercise
+from scwidgets.exercise import CodeExercise, ExerciseRegistry
 
 from .test_check import multi_param_check, single_param_check
 
@@ -76,7 +77,7 @@ class TestCodeInput:
 
 def get_code_exercise(
     checks: List[Check],
-    code: Callable = None,
+    code: Optional[Callable] = None,
     include_checks=True,
     include_params=True,
     tunable_params=False,
@@ -221,3 +222,35 @@ class TestCodeExercise:
             match="NameError in code input: name 'bug' is not defined.*",
         ):
             code_ex.run_code(**code_ex.parameters)
+
+    @pytest.mark.parametrize(
+        "function",
+        [
+            None,
+            TestCodeInput.mock_function_1,
+        ],
+    )
+    def test_save_registry(self, function):
+        """
+        Verifies that the CodeExercise works with an answer_registry.
+        """
+
+        def print_success(code_ex: CodeExercise | None):
+            code_ex.cue_outputs[0].display_object = "Success"
+
+        cue_output = CueObject("Not initialized")
+        exercise_registry = ExerciseRegistry()
+
+        code_ex = CodeExercise(
+            code=function,
+            parameters={"parameter": fixed(5)},
+            exercise_registry=exercise_registry,
+            exercise_key="test_save_registry_ex",
+            cue_outputs=[cue_output],
+            update_func=print_success,
+        )
+
+        exercise_registry._student_name_text.value = "test_save_registry-student_name"
+        exercise_registry.create_new_file()
+        code_ex._save_button.click()
+        os.remove("test_save_registry-student_name.json")
