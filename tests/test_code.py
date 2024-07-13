@@ -1,5 +1,5 @@
 import os
-from typing import Callable, List, Optional
+from typing import Callable, List, Literal, Union
 
 import numpy as np
 import pytest
@@ -86,21 +86,31 @@ class TestCodeInput:
 
 def get_code_exercise(
     checks: List[Check],
-    code: Optional[Callable] = None,
+    code: Union[None, Literal["from_first_check"], Callable] = "from_first_check",
     include_checks=True,
     include_params=True,
     tunable_params=False,
     update_func_argless=False,
     update_mode="manual",
 ):
+    """
+    :param code: "from_first_check" uses the `function_to_check` from the first
+        check for the construction of a code input
+    """
     # Important:
     # we take the the function_to_check from the first check as code input
-    if len(checks) == 0 and code is None:
-        raise ValueError("Either nonempty checks must given or code")
-    if code is None:
+    if code == "from_first_check":
+        if len(checks) == 0:
+            raise ValueError(
+                "For option 'from_first_check' either nonempty "
+                "checks must given or code"
+            )
         code_input = CodeInput(checks[0].function_to_check)
+    elif code is None:
+        code_input = None
     else:
         code_input = CodeInput(code)
+
     if len(checks) > 0 and tunable_params:
         # convert single value arrays to tuples
         for value in checks[0].inputs_parameters[0].values():
@@ -116,19 +126,27 @@ def get_code_exercise(
         parameters = {
             key: fixed(value) for key, value in checks[0].inputs_parameters[0].items()
         }
+    elif tunable_params:
+        parameters = {"x": (2, 5, 1)}
     else:
         parameters = None
 
     if update_func_argless:
 
         def update_print():
-            output = code_ex.run_code(**code_ex.params)
+            if code_input is None:
+                output = code_ex.params
+            else:
+                output = code_ex.run_code(**code_ex.params)
             code_ex.output.display_object = f"Output:\n{output}"
 
     else:
 
         def update_print(code_ex: CodeExercise):
-            output = code_ex.run_code(**code_ex.params)
+            if code_input is None:
+                output = code_ex.params
+            else:
+                output = code_ex.run_code(**code_ex.params)
             code_ex.output.display_object = f"Output:\n{output}"
 
     code_ex = CodeExercise(
