@@ -657,6 +657,11 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                 raised_error = True
                 raise e
 
+            # The clear_output command at the beginning of the function waits till
+            # something is printed. If nothing is printed it, it is not cleared. We
+            # enforce it to be invoked by printing an empty string
+            print('', end='')
+
         return not (raised_error)
 
     def run_update(self):
