@@ -244,6 +244,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                         [],
                         [],
                         self._parameter_panel,
+                        cued = False,
                     )
                 else:
                     widgets_to_observe = None
@@ -295,30 +296,34 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             if self._cue_outputs is not None:
                 reset_update_cue_widgets.extend(self._cue_outputs)
 
-            if self._code is not None:
-                description = "Run Code"
-                button_tooltip = (
-                    "Runs the code and updates outputs with the specified parameters"
+            if self._code is not None or self._update_mode == "manual":
+                if self._code is not None:
+                    description = "Run Code"
+                    button_tooltip = (
+                        "Runs the code and updates outputs with the specified parameters"
+                    )
+                else:
+                    description = "Update"
+                    button_tooltip = "Updates outputs with the specified parameters"
+
+                self._update_button = UpdateResetCueButton(
+                    reset_update_cue_widgets,  # type: ignore[arg-type]
+                    self._on_click_update_action,
+                    disable_on_successful_action=kwargs.pop(
+                        "disable_update_button_on_successful_action", False
+                    ),
+                    disable_during_action=kwargs.pop(
+                        "disable_update_button_during_action",
+                        update_button_disable_during_action,
+                    ),
+                    widgets_to_observe=widgets_to_observe,
+                    traits_to_observe=traits_to_observe,
+                    description=description,
+                    button_tooltip=button_tooltip,
                 )
             else:
-                description = "Update"
-                button_tooltip = "Updates outputs with the specified parameters"
+                self._update_button = None
 
-            self._update_button = UpdateResetCueButton(
-                reset_update_cue_widgets,  # type: ignore[arg-type]
-                self._on_click_update_action,
-                disable_on_successful_action=kwargs.pop(
-                    "disable_update_button_on_successful_action", False
-                ),
-                disable_during_action=kwargs.pop(
-                    "disable_update_button_during_action",
-                    update_button_disable_during_action,
-                ),
-                widgets_to_observe=widgets_to_observe,
-                traits_to_observe=traits_to_observe,
-                description=description,
-                button_tooltip=button_tooltip,
-            )
 
         if self._exercise_registry is None or (
             self._code is None and self._parameter_panel is None
@@ -447,6 +452,11 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             *args,
             **kwargs,
         )
+        # In this case there is no code to be written by the student, so the code
+        # exercise should work out of the box. Since the cues for the parameters
+        # are also disabled, we update at the beginning once.
+        if self._update_mode in ["release", "continuous"] and self._code is None:
+            self.run_update()
 
     @property
     def answer(self) -> dict:
@@ -511,16 +521,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         return self._exercise_description
 
     def _on_trait_parameters_changed(self, change: dict):
-        if self._update_button is None:
-            self._output.clear_output(wait=True)
-            error = ValueError(
-                "Invalid state: _on_trait_parameters_changed was "
-                "invoked but no update button was defined"
-            )
-            with self._output:
-                raise error
-            raise error
-        self._update_button.click()
+        self.run_update()
 
     def _on_click_check_action(self) -> bool:
         self._output.clear_output(wait=True)
