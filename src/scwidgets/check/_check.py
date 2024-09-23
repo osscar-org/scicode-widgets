@@ -218,7 +218,9 @@ class Check:
             if self._fingerprint is not None:
                 try:
                     output = self._fingerprint(*output)
-                except Exception as exception:
+                except (  # we do not raise here since it is passed to widget output # noqa B040
+                    Exception
+                ) as exception:
                     if python_version() >= "3.11":
                         exception.add_note(
                             "An error was raised in fingerprint function, "
