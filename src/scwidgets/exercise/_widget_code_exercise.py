@@ -11,7 +11,7 @@ from widget_code_input import WidgetCodeInput
 from widget_code_input.utils import CodeValidationError
 
 from .._utils import Formatter
-from ..check import Check, CheckableWidget, CheckRegistry, ChecksResult
+from ..check import Check, CheckableWidget, CheckRegistry, CheckResult
 from ..code._widget_code_input import CodeInput
 from ..code._widget_parameter_panel import ParameterPanel
 from ..cue import (
@@ -527,7 +527,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         raised_error = False
         with self._output:
             try:
-                self.check()
+                self._check()
             except Exception as e:
                 raised_error = True
                 if python_version() >= "3.11":
@@ -571,29 +571,35 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                 raise e
         return not (raised_error)
 
-    def check(self) -> Union[ChecksResult, Exception]:
-        self._output.clear_output(wait=True)
+    def _check(self) -> List[Union[CheckResult, Exception]]:
         return CheckableWidget.check(self)
+
+    def run_check(self) -> None:
+        if self._check_button is not None:
+            self._check_button.click()
+        else:
+            self._on_click_check_action()
 
     def compute_output_to_check(self, *args, **kwargs) -> Check.FunOutParamsT:
         return self.run_code(*args, **kwargs)
 
-    def handle_checks_result(self, result: Union[ChecksResult, Exception]):
+    def handle_checks_result(self, results: List[Union[CheckResult, Exception]]):
         self._output.clear_output(wait=True)
         with self._output:
-            if isinstance(result, Exception):
-                raise result
-            elif isinstance(result, ChecksResult):
-                if result.successful:
-                    print(Formatter.color_success_message("Check was successful"))
-                    print(Formatter.color_success_message("--------------------"))
-                    print(result.message())
+            for result in results:
+                if isinstance(result, Exception):
+                    raise result
+                elif isinstance(result, CheckResult):
+                    if result.successful:
+                        print(Formatter.color_success_message("Check was successful"))
+                        print(Formatter.color_success_message("--------------------"))
+                        print(result.message())
+                    else:
+                        print(Formatter.color_error_message("Check failed"))
+                        print(Formatter.color_error_message("------------"))
+                        print(result.message())
                 else:
-                    print(Formatter.color_error_message("Check failed"))
-                    print(Formatter.color_error_message("------------"))
-                    print(result.message())
-            else:
-                print(result)
+                    print(result)
 
     def handle_save_result(self, result: Union[str, Exception]):
         self._output.clear_output(wait=True)
@@ -671,6 +677,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         parameter is changed
         """
         if self._update_button is not None:
+            # to also invoke the reset cue action, we click the cued button
             self._update_button.click()
         else:
             # we might be in update_mode "release" or "continuous" where no button is

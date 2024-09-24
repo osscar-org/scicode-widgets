@@ -6,7 +6,7 @@ import pytest
 from ipywidgets import fixed
 from widget_code_input.utils import CodeValidationError
 
-from scwidgets.check import Check, CheckRegistry, ChecksResult
+from scwidgets.check import Check, CheckRegistry, CheckResult
 from scwidgets.code import CodeInput
 from scwidgets.cue import CueObject
 from scwidgets.exercise import CodeExercise, ExerciseRegistry
@@ -157,10 +157,13 @@ class TestCodeExercise:
         ],
     )
     def test_successful_check_widget(self, code_ex):
-        result = code_ex.check()
-        assert isinstance(result, ChecksResult)
-        assert result.successful
-        assert len(result.assert_results) == code_ex.nb_conducted_asserts
+        results = code_ex.check()
+        nb_assert_results = 0
+        for result in results:
+            assert isinstance(result, CheckResult)
+            assert result.successful
+            nb_assert_results += len(result.assert_results)
+        assert nb_assert_results == code_ex.nb_conducted_asserts
 
     @pytest.mark.parametrize(
         "code_ex",
@@ -183,10 +186,13 @@ class TestCodeExercise:
     def test_compute_and_set_references(self, code_ex):
         code_ex.compute_and_set_references()
 
-        result = code_ex.check()
-        assert isinstance(result, ChecksResult)
-        assert result.successful
-        assert len(result.assert_results) == code_ex.nb_conducted_asserts
+        results = code_ex.check()
+        nb_assert_results = 0
+        for result in results:
+            assert isinstance(result, CheckResult)
+            assert result.successful
+            nb_assert_results += len(result.assert_results)
+        assert nb_assert_results == code_ex.nb_conducted_asserts
 
     @pytest.mark.parametrize(
         "code_ex",

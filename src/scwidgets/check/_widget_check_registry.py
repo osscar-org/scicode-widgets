@@ -8,7 +8,7 @@ from typing import Callable, List, Optional, Union
 from ipywidgets import Button, HBox, Layout, Output, VBox, Widget
 
 from .._utils import Formatter
-from ._check import Check, ChecksResult
+from ._check import Check, CheckResult
 
 
 class CheckableWidget:
@@ -38,7 +38,9 @@ class CheckableWidget:
         """
         raise NotImplementedError("compute_output_to_check has not been implemented")
 
-    def handle_checks_result(self, result: Union[ChecksResult, Exception]) -> None:
+    def handle_checks_result(
+        self, results: List[Union[CheckResult, Exception]]
+    ) -> None:
         """
         Function that controls how results of the checks are handled.
         """
@@ -102,7 +104,7 @@ class CheckableWidget:
 
         self._check_registry.compute_and_set_references(self)
 
-    def check(self) -> Union[ChecksResult, Exception]:
+    def check(self) -> List[Union[CheckResult, Exception]]:
         if self._check_registry is None:
             raise ValueError(
                 "No check registry given on initialization, " "check cannot be used"
@@ -220,7 +222,7 @@ class CheckRegistry(VBox):
             try:
                 check.compute_and_set_references()
             except Exception as exception:
-                widget.handle_checks_result(exception)
+                widget.handle_checks_result([exception])
                 raise exception
 
     def compute_outputs(self, widget: CheckableWidget):
@@ -228,36 +230,39 @@ class CheckRegistry(VBox):
             try:
                 return check.compute_outputs()
             except Exception as exception:
-                widget.handle_checks_result(exception)
+                widget.handle_checks_result([exception])
                 raise exception
 
     def compute_and_set_all_references(self):
         for widget in self._checks.keys():
             self.compute_and_set_references(widget)
 
-    def check_widget(self, widget: CheckableWidget) -> Union[ChecksResult, Exception]:
+    def check_widget(
+        self, widget: CheckableWidget
+    ) -> List[Union[CheckResult, Exception]]:
+        checks_result = []
         try:
-            results = ChecksResult()
             for check in self._checks[widget]:
                 result = check.check_function()
-                results.extend(result)
-                widget.handle_checks_result(result)
-            return results
+                checks_result.append(result)
+            widget.handle_checks_result(checks_result)
+            return checks_result
         except Exception as exception:
-            widget.handle_checks_result(exception)
-            return exception
+            checks_result.append(exception)
+            widget.handle_checks_result(checks_result)
+            return checks_result
 
     def check_all_widgets(
         self,
-    ) -> OrderedDict[CheckableWidget, Union[ChecksResult, Exception]]:
-        messages: OrderedDict[CheckableWidget, Union[ChecksResult, Exception]] = (
+    ) -> OrderedDict[CheckableWidget, List[Union[CheckResult, Exception]]]:
+        messages: OrderedDict[CheckableWidget, List[Union[CheckResult, Exception]]] = (
             OrderedDict()
         )
         for widget in self._checks.keys():
             try:
                 messages[widget] = self.check_widget(widget)
             except Exception as exception:
-                messages[widget] = exception
+                messages[widget] = [exception]
         return messages
 
     def _on_click_set_all_references_button(self, change: dict):
@@ -276,47 +281,60 @@ class CheckRegistry(VBox):
             widgets_results = self.check_all_widgets()
             for widget, widget_results in widgets_results.items():
                 with self._output:
-                    if isinstance(widget_results, Exception):
+                    if wrong_types := [
+                        result
+                        for result in widget_results
+                        if not (
+                            isinstance(result, Exception)
+                            or isinstance(result, CheckResult)
+                        )
+                    ]:
+                        raise ValueError(
+                            f"Not supported result type {type(wrong_types[0])}. "
+                            "Only results of type `Exception` and `CheckResult` "
+                            "are supported."
+                        )
+                    elif [
+                        result
+                        for result in widget_results
+                        if isinstance(result, Exception)
+                    ]:
                         print(
                             Formatter.color_error_message(
                                 Formatter.format_title_message(
-                                    f"Widget {self._names[widget]} " f"raised error:"
+                                    f"Widget {self._names[widget]} raised error."
                                 )
                             )
                         )
-                        raise widget_results
-                    elif isinstance(widget_results, ChecksResult):
-                        if widget_results.successful:
-                            print(
-                                Formatter.color_success_message(
-                                    Formatter.format_title_message(
-                                        f"Widget {self._names[widget]} all checks "
-                                        f"were successful"
-                                    )
+
+                    elif not [
+                        result
+                        for result in widget_results
+                        if isinstance(result, CheckResult) and not result.successful
+                    ]:
+                        print(
+                            Formatter.color_success_message(
+                                Formatter.format_title_message(
+                                    f"Widget {self._names[widget]} all checks "
+                                    f"were successful."
                                 )
                             )
-                            print(widget_results.message())
-                        else:
-                            print(
-                                Formatter.color_error_message(
-                                    Formatter.format_title_message(
-                                        f"Widget {self._names[widget]} not all checks "
-                                        "were successful:"
-                                    )
-                                )
-                            )
-                            print(widget_results.message())
+                        )
                     else:
-                        raise ValueError(
-                            f"Not supported result type {type(widget_results)}. "
-                            "Only results of type `Exception` and `CheckResult` "
-                            "are supported."
+                        print(
+                            Formatter.color_error_message(
+                                Formatter.format_title_message(
+                                    f"Widget {self._names[widget]} not all checks "
+                                    "were successful."
+                                )
+                            )
                         )
         except Exception as exception:
             with self._output:
                 print(
                     Formatter.color_error_message(
                         "Error raised while checking widgets:"
-                    )
+                    ),
+                    exception,
                 )
                 raise exception

@@ -181,7 +181,7 @@ class Check:
     def compute_and_set_references(self):
         self._outputs_references = self.compute_outputs()
 
-    def check_function(self) -> ChecksResult:
+    def check_function(self) -> CheckResult:
         """
         Returns for each input (first depth list) the result message for each assert
         (second depth list).  If a result message is empty, the assert was successful,
@@ -199,7 +199,7 @@ class Check:
                 f"[{len(self._inputs_parameters)} != {len(self._outputs_references)}]."
             )
 
-        check_result = ChecksResult()
+        check_result = CheckResult()
         for i, input_parameters in enumerate(self._inputs_parameters):
             output = self._function_to_check(**input_parameters)
             if not (isinstance(output, tuple)):
@@ -265,7 +265,7 @@ class Check:
         return check_result
 
 
-class ChecksResult:
+class CheckResult:
     def __init__(self):
         self._assert_results = []
         self._assert_names = []
@@ -287,12 +287,6 @@ class ChecksResult:
 
         self._inputs_parameters.append(input_parameters)
         self._suppress_assert_messages.append(suppress_assert_message)
-
-    def extend(self, check_results: ChecksResult):
-        self._assert_results.extend(check_results._assert_results)
-        self._assert_names.extend(check_results._assert_names)
-        self._inputs_parameters.extend(check_results._inputs_parameters)
-        self._suppress_assert_messages.extend(check_results._suppress_assert_messages)
 
     @property
     def successful(self):
