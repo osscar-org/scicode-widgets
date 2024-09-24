@@ -111,11 +111,24 @@ def assert_numpy_allclose(
         )
 
         if not (is_allclose):
-            diff = np.abs(
-                np.asarray(output_parameters[i]) - np.asarray(output_references[i])
-            )
+            output_parameters_i_arr = np.asarray(output_parameters[i])
+            output_references_i_arr = np.asarray(output_references[i])
+
+            diff = np.abs(output_parameters_i_arr - output_references_i_arr)
             abs_diff = np.sum(diff)
-            rel_diff = np.sum(diff / np.abs(output_references[i]))
+            rel_diff_dividend = np.max(
+                np.vstack(
+                    (
+                        np.abs(output_parameters_i_arr),
+                        np.abs(output_references_i_arr),
+                    )
+                ),
+                axis=0,
+            )
+            # when both are zero the diff is also zero, so we set it to 1
+            # so no division by zero error is raised
+            rel_diff_dividend[rel_diff_dividend == 0.0] = 1.0
+            rel_diff = np.sum(diff / rel_diff_dividend)
 
             message = (
                 f"Output is not close to reference absolute difference "
