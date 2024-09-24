@@ -7,7 +7,7 @@ from scwidgets.check import (
     Check,
     CheckableWidget,
     CheckRegistry,
-    ChecksResult,
+    CheckResult,
     assert_numpy_allclose,
     assert_numpy_floating_sub_dtype,
     assert_shape,
@@ -186,7 +186,7 @@ class TestCheck:
         check.compute_and_set_references()
         # now checks should be successful again
         result = check.check_function()
-        assert isinstance(result, ChecksResult)
+        assert isinstance(result, CheckResult)
         assert result.successful
 
     @pytest.mark.parametrize(
@@ -200,7 +200,7 @@ class TestCheck:
     )
     def test_failing_check_all_widgets(self, check):
         result = check.check_function()
-        assert isinstance(result, ChecksResult)
+        assert isinstance(result, CheckResult)
         assert not (result.successful)
 
     def test_invalid_asserts_arguments_count(self):
@@ -247,7 +247,7 @@ def mock_checkable_widget(check_registry, compute_output_to_check, checks=None):
             pass
 
         def handle_checks_result(self, result):
-            self.results.append(result)
+            self.results.extend(result)
 
     checkable_widget = MockCheckableWidget(check_registry)
     checkable_widget.compute_output_to_check = compute_output_to_check
@@ -285,18 +285,20 @@ class TestCheckRegistry:
 
         widgets_results = check_registry.check_all_widgets()
         nb_conducted_asserts = 0
-        for result in widgets_results.values():
-            assert isinstance(result, ChecksResult)
-            assert result.successful
-            nb_conducted_asserts += len(result.assert_results)
+        for results in widgets_results.values():
+            for result in results:
+                assert isinstance(result, CheckResult)
+                assert result.successful
+                nb_conducted_asserts += len(result.assert_results)
         assert nb_conducted_asserts == checkable_widget.nb_conducted_asserts
 
         assert len(checkable_widget.results) == len(checks)
         nb_conducted_asserts = 0
-        for result in checkable_widget.results:
-            assert isinstance(result, ChecksResult)
-            assert result.successful
-            nb_conducted_asserts += len(result.assert_results)
+        for results in widgets_results.values():
+            for result in results:
+                assert isinstance(result, CheckResult)
+                assert result.successful
+                nb_conducted_asserts += len(result.assert_results)
         assert nb_conducted_asserts == checkable_widget.nb_conducted_asserts
 
     @pytest.mark.parametrize(
@@ -323,16 +325,17 @@ class TestCheckRegistry:
         widgets_results = check_registry.check_all_widgets()
 
         nb_conducted_asserts = 0
-        for result in widgets_results.values():
-            assert isinstance(result, ChecksResult)
-            assert result.successful
-            nb_conducted_asserts += len(result.assert_results)
+        for results in widgets_results.values():
+            for result in results:
+                assert isinstance(result, CheckResult)
+                assert result.successful
+                nb_conducted_asserts += len(result.assert_results)
         assert nb_conducted_asserts == checkable_widget.nb_conducted_asserts
 
         nb_conducted_asserts = 0
         assert len(checkable_widget.results) == len(checks)
         for result in checkable_widget.results:
-            assert isinstance(result, ChecksResult)
+            assert isinstance(result, CheckResult)
             assert result.successful
             nb_conducted_asserts += len(result.assert_results)
         assert nb_conducted_asserts == checkable_widget.nb_conducted_asserts
@@ -356,11 +359,12 @@ class TestCheckRegistry:
         )
 
         widgets_results = check_registry.check_all_widgets()
-        for result in widgets_results.values():
-            assert isinstance(result, ChecksResult)
-            assert not (result.successful)
+        for results in widgets_results.values():
+            for result in results:
+                assert isinstance(result, CheckResult)
+                assert not (result.successful)
 
         assert len(checkable_widget.results) == len(checks)
         for result in checkable_widget.results:
-            assert isinstance(result, ChecksResult)
+            assert isinstance(result, CheckResult)
             assert not (result.successful)
