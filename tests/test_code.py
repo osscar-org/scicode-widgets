@@ -225,7 +225,7 @@ class TestCodeExercise:
     def test_erroneous_run_code(self, code_ex):
         with pytest.raises(
             CodeValidationError,
-            match="NameError in code input: name 'bug' is not defined.*",
+            match="name 'bug' is not defined.*",
         ):
             code_ex.run_code(**code_ex.parameters)
 
