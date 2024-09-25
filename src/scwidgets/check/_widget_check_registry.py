@@ -146,10 +146,19 @@ class CheckRegistry(VBox):
         self._check_all_widgets_button = Button(description="Check all widgets")
         self._output = Output()
         kwargs["layout"] = kwargs.pop("layout", Layout(width="100%"))
+
+        self._display_set_all_references_button=kwargs.pop(
+            "display_set_all_references_button", False
+        )
+
+        buttons = []
+        if self._display_set_all_references_button:
+            buttons.append(self._set_all_references_button)
+        buttons.append(self._check_all_widgets_button)
         VBox.__init__(
             self,
             [
-                HBox([self._set_all_references_button, self._check_all_widgets_button]),
+                HBox(buttons),
                 self._output,
             ],
             *args,
