@@ -17,6 +17,8 @@ class ParameterPanel(VBox):
         by CodeExercise.
 
     """
+    invalid_parameter_names = {'_trait_values', '_trait_notifiers', '_trait_validators', '_cross_validation_lock', '_interactive_widget', '_parameters_widget', '_model_id', '__module__', '__doc__', '__init__', 'parameters_widget', 'parameters_trait', 'parameters', 'panel_parameters', 'observe_parameters', 'unobserve_parameters', 'set_parameters_widget_attr', '_trait_default_generators', '_all_trait_default_generators', '_traits', '_static_immutable_initial_values', '_descriptors', '_instance_inits', '__annotations__', '_model_name', '_view_name', 'children', 'box_style', '_dom_classes', 'tabbable', 'tooltip', 'layout', 'add_class', 'remove_class', 'focus', 'blur', '_repr_keys', '_widget_construction_callback', '_control_comm', 'widgets', '_active_widgets', '_widget_types', 'widget_types', 'close_all', 'on_widget_constructed', '_call_widget_constructed', 'handle_control_comm_opened', '_handle_control_comm_msg', 'handle_comm_opened', 'get_manager_state', '_get_embed_state', 'get_view_spec', '_model_module', '_model_module_version', '_view_module', '_view_module_version', '_view_count', 'comm', 'keys', '_default_keys', '_property_lock', '_holding_sync', '_states_to_send', '_msg_callbacks', '__copy__', '__deepcopy__', '__del__', 'open', '_comm_changed', 'model_id', 'close', 'send_state', 'get_state', '_is_numpy', '_compare', 'set_state', 'send', 'on_msg', 'add_traits', 'notify_change', '__repr__', '_lock_property', 'hold_sync', '_should_send_property', '_handle_msg', '_handle_custom_msg', '_trait_to_json', '_trait_from_json', '_repr_mimebundle_', '_send', '_gen_repr_from_keys', 'log', '_log_default', 'setup_instance', '__getstate__', '__setstate__', 'cross_validation_lock', 'hold_trait_notifications', '_notify_trait', '_notify_observers', '_add_notifiers', '_remove_notifiers', 'on_trait_change', 'observe', 'unobserve', 'unobserve_all', '_register_validator', 'set_trait', 'class_trait_names', 'class_traits', 'class_own_traits', 'has_trait', 'trait_has_value', 'trait_values', '_get_trait_default_generator', 'trait_defaults', 'trait_names', 'traits', 'trait_metadata', 'class_own_trait_events', 'trait_events', '__new__', '__dict__', '__weakref__', '__hash__', '__str__', '__getattribute__', '__setattr__', '__delattr__', '__lt__', '__le__', '__eq__', '__ne__', '__gt__', '__ge__', '__reduce_ex__', '__reduce__', '__subclasshook__', '__init_subclass__', '__format__', '__sizeof__', '__dir__', '__class__'}
+
 
     def __init__(
         self,
@@ -38,7 +40,11 @@ class ParameterPanel(VBox):
         assert isinstance(self._interactive_widget.children[-1], Output), (
             "Assumed that interactive returns an output as last child. "
             "Parameter will be wrongly initialized if this is not True."
+            "Please contact a developer."
         )
+        for key in self._interactive_widget.kwargs.keys():
+            if key in self.invalid_parameter_names:
+                raise ValueError(f"Parameter {key} conflicts with internal attributes. Please choose another name.")
         self._parameters_widget = list(self._interactive_widget.children[:-1])
         super().__init__(self._parameters_widget)
 
@@ -56,7 +62,11 @@ class ParameterPanel(VBox):
         :return: All parameters that were given on input are returned. Including also
             fixed parameters.
         """
-        return self._interactive_widget.kwargs.copy()
+        #return self._interactive_widget.kwargs.copy()
+        return {
+            key: self._interactive_widget.kwargs_widgets[i].value
+            for i, key in enumerate(self._interactive_widget.kwargs.keys())
+        }
 
     @parameters.setter
     def parameters(self, parameters: dict):
@@ -98,3 +108,8 @@ class ParameterPanel(VBox):
         for widget in self._parameters_widget:
             if hasattr(widget, name):
                 setattr(widget, name, value)
+
+    def __getattr__(self, value):
+        if value in self.parameters.keys():
+            return self.parameters[value]
+        super().__getattr___(value)

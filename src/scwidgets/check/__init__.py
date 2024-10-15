@@ -4,6 +4,7 @@ from ._asserts import (
     assert_numpy_sub_dtype,
     assert_shape,
     assert_type,
+    assert_equal,
 )
 from ._check import AssertResult, Check, CheckResult
 from ._widget_check_registry import CheckableWidget, CheckRegistry
@@ -14,6 +15,7 @@ __all__ = [
     "AssertResult",
     "CheckRegistry",
     "CheckableWidget",
+    "assert_equal",
     "assert_shape",
     "assert_numpy_allclose",
     "assert_type",
