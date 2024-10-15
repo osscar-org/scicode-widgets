@@ -2,6 +2,7 @@
 # see https://stackoverflow.com/a/33533514
 from __future__ import annotations
 
+import inspect
 import types
 from platform import python_version
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -67,7 +68,10 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         update_mode: str = "release",
         cue_outputs: Union[None, CueOutput, List[CueOutput]] = None,
         update_func: Optional[
-            Callable[[CodeExercise], Union[Any, Check.FunOutParamsT]]
+            Union[
+              Callable[[CodeExercise], Union[Any, Check.FunOutParamsT]],
+              Callable[[], Union[Any, Check.FunOutParamsT]]
+            ]
         ] = None,
         exercise_description: Optional[str] = None,
         exercise_title: Optional[str] = None,
@@ -82,6 +86,14 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             )
         self._update_mode = update_mode
 
+        if update_func is not None:
+            self._update_func_nb_empty_args = len([
+                    value for value in inspect.signature(update_func).parameters.values()
+                            if isinstance(value.default, inspect._empty)])
+            if self._update_func_nb_empty_args > 1:
+                raise ValueError(f"The given update_func has {self._update_func_nb_empty_args} parameters without defaults, but only zero or one are supported.")
+        else:
+            self._update_func_nb_empty_args = None
         self._update_func = update_func
 
         self._exercise_description = exercise_description
@@ -143,13 +155,19 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                     "Code and parameters do no match:  " + compatibility_result
                 )
 
+        # We allow to provide exercise_key even without providing an exercise_registry
+        # to use it as name for the CheckableWidget
         if cue_outputs is None:
             cue_outputs = []
         elif not (isinstance(cue_outputs, list)):
             cue_outputs = [cue_outputs]
-
-        CheckableWidget.__init__(self, check_registry, exercise_key)
-        ExerciseWidget.__init__(self, exercise_registry, exercise_key)
+        name = kwargs.get("name", exercise_key) 
+        CheckableWidget.__init__(self, check_registry, name)
+        if exercise_registry is not None:
+            ExerciseWidget.__init__(self, exercise_registry, exercise_key)
+        else:
+            # otherwise ExerciseWidget constructor will raise an error
+            ExerciseWidget.__init__(self, exercise_registry, None)
 
         self._code = code
         self._output = CueOutput()
@@ -492,15 +510,11 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         return {}
 
     @property
-    def parameters(self) -> Dict[str, Check.FunInParamT]:
+    def parameters(self) -> Union[ParameterPanel, None]:
         """
-        :return: All parameters that were given on input are returned. Including also
-            fixed parameters.
+        :return: The parameter created on initalization
         """
-        if self._parameter_panel is not None:
-            parameter_panel = self._parameter_panel
-            return parameter_panel.parameters
-        return {}
+        return self._parameter_panel
 
     @property
     def exercise_title(self) -> Union[str, None]:
@@ -648,7 +662,10 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                         cue_output.clear_display(wait=True)
 
                 if self._update_func is not None:
-                    self._update_func(self)
+                    if self._update_func_nb_empty_args == 0: 
+                        self._update_func()
+                    else:
+                        self._update_func(self)
                 elif self._code is not None:
                     self.run_code(**self.parameters)
 

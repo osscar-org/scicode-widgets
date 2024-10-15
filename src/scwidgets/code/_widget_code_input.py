@@ -136,7 +136,7 @@ class CodeInput(WidgetCodeInput):
             )
 
         return source
-
+    
     def get_function_object(self):
         """
         Return the compiled function object.
@@ -188,6 +188,10 @@ class CodeInput(WidgetCodeInput):
             return wrapper
 
         return catch_exceptions(function_object)
+
+    @property
+    def function(self):
+        return self.get_function_object()
 
 
 # Temporary fix until https://github.com/osscar-org/widget-code-input/pull/26
