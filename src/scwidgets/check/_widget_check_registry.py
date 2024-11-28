@@ -7,6 +7,7 @@ from typing import Callable, List, Optional, Union
 
 from ipywidgets import Button, HBox, Layout, Output, VBox, Widget
 
+from .._css_style import CssStyle
 from .._utils import Formatter
 from ._check import Check, CheckResult
 
@@ -149,6 +150,7 @@ class CheckRegistry(VBox):
         VBox.__init__(
             self,
             [
+                CssStyle(),
                 HBox([self._set_all_references_button, self._check_all_widgets_button]),
                 self._output,
             ],

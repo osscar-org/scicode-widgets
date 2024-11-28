@@ -12,6 +12,7 @@ from matplotlib.figure import Figure
 from widget_code_input import WidgetCodeInput
 from widget_code_input.utils import CodeValidationError
 
+from .._css_style import CssStyle
 from .._utils import Formatter
 from ..check import Check, CheckableWidget, CheckRegistry, CheckResult
 from ..code._widget_code_input import CodeInput
@@ -443,7 +444,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                 ]
             )
 
-        demo_children = []
+        demo_children = [CssStyle()]
         if self._exercise_title_html is not None:
             demo_children.append(self._exercise_title_html)
         if self._exercise_description_html is not None:

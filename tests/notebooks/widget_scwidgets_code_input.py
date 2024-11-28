@@ -16,12 +16,10 @@
 # +
 import time
 
-import scwidgets
 from scwidgets.code import CodeInput
 
 # -
 
-scwidgets.get_css_style()
 
 # Test 1:
 # -------

@@ -11,6 +11,7 @@ from typing import Hashable, Optional, Union
 from IPython.display import display
 from ipywidgets import Button, Dropdown, HBox, Label, Layout, Output, Text, VBox
 
+from .._css_style import CssStyle
 from .._utils import Formatter
 
 
@@ -222,6 +223,7 @@ class ExerciseRegistry(VBox):
         VBox.__init__(
             self,
             [
+                CssStyle(),
                 self._upper_panel_box,
                 self._lower_panel_output,
                 self._output,

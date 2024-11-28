@@ -2,6 +2,7 @@ from typing import Optional, Union
 
 from ipywidgets import HTML, HBox, HTMLMath, Layout, Output, Textarea, VBox
 
+from .._css_style import CssStyle
 from .._utils import Formatter
 from ..cue import SaveCueBox, SaveResetCueButton
 from ._widget_exercise_registry import ExerciseRegistry, ExerciseWidget
@@ -99,7 +100,7 @@ class TextExercise(VBox, ExerciseWidget):
 
         ExerciseWidget.__init__(self, exercise_registry, exercise_key)
 
-        widget_children = []
+        widget_children = [CssStyle()]
         if self._exercise_title_html is not None:
             widget_children.append(self._exercise_title_html)
         if self._exercise_description_html is not None:

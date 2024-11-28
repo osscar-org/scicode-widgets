@@ -17,7 +17,6 @@
 import os
 import sys
 
-import scwidgets
 from scwidgets.check import CheckRegistry
 
 sys.path.insert(0, os.path.abspath("../.."))
@@ -25,8 +24,6 @@ from tests.test_check import mock_checkable_widget  # noqa: E402
 from tests.test_check import single_param_check  # noqa: E402
 
 # -
-
-scwidgets.get_css_style()
 
 
 def create_check_registry(use_fingerprint, failing, buggy):
