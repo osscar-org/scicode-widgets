@@ -2,6 +2,7 @@
 # see https://stackoverflow.com/a/33533514
 from __future__ import annotations
 
+import inspect
 import types
 from platform import python_version
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -67,7 +68,10 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         update_mode: str = "release",
         cue_outputs: Union[None, CueOutput, List[CueOutput]] = None,
         update_func: Optional[
-            Callable[[CodeExercise], Union[Any, Check.FunOutParamsT]]
+            Union[
+                Callable[[CodeExercise], Union[Any, Check.FunOutParamsT]],
+                Callable[[], Union[Any, Check.FunOutParamsT]],
+            ]
         ] = None,
         exercise_description: Optional[str] = None,
         exercise_title: Optional[str] = None,
@@ -82,7 +86,30 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             )
         self._update_mode = update_mode
 
-        self._update_func = update_func
+        self._update_func: Optional[
+            Union[
+                Callable[[CodeExercise], Union[Any, Check.FunOutParamsT]],
+                Callable[[], Union[Any, Check.FunOutParamsT]],
+            ]
+        ] = update_func
+
+        self._update_func_nb_nondefault_args: Optional[int]
+        if update_func is not None:
+            self._update_func_nb_nondefault_args = len(
+                [
+                    value
+                    for value in inspect.signature(update_func).parameters.values()
+                    if not isinstance(value.default, inspect._empty)
+                ]
+            )
+            if self._update_func_nb_nondefault_args > 1:
+                raise ValueError(
+                    f"The given update_func has "
+                    f"{self._update_func_nb_nondefault_args} parameters without "
+                    "defaults, but only zero or one are supported."
+                )
+        else:
+            self._update_func_nb_nondefault_args = None
 
         self._exercise_description = exercise_description
         if exercise_description is None:
@@ -639,7 +666,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
 
     def _on_click_update_action(self) -> bool:
         self._output.clear_output(wait=True)
-        raised_error = False
+        self._raised_error = False
         # runs code and displays output
         with self._output:
             try:
@@ -648,7 +675,10 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                         cue_output.clear_display(wait=True)
 
                 if self._update_func is not None:
-                    self._update_func(self)
+                    if self._update_func_nb_nondefault_args == 0:
+                        self._update_func()  # type: ignore[call-arg]
+                    else:
+                        self._update_func(self)  # type: ignore[call-arg]
                 elif self._code is not None:
                     self.run_code(**self.parameters)
 
@@ -657,10 +687,10 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                         cue_output.draw_display()
 
             except CodeValidationError as e:
-                raised_error = True
+                self._raised_error = True
                 raise e
             except Exception as e:
-                raised_error = True
+                self._raised_error = True
                 raise e
 
             # The clear_output command at the beginning of the function waits till
@@ -668,7 +698,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             # enforce it to be invoked by printing an empty string
             print("", end="")
 
-        return not (raised_error)
+        return not (self._raised_error)
 
     def run_update(self):
         """
