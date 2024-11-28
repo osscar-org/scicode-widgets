@@ -8,11 +8,24 @@ from scwidgets.check import (
     CheckableWidget,
     CheckRegistry,
     CheckResult,
+    assert_equal,
     assert_numpy_allclose,
     assert_numpy_floating_sub_dtype,
     assert_shape,
     assert_type,
 )
+
+
+def test_assert_equal():
+    output_parameters = (42,)
+    output_references = (42,)
+    result = assert_equal(output_parameters, output_references)
+    assert result.successful
+
+    output_parameters = (42,)
+    output_references = (41,)
+    result = assert_equal(output_parameters, output_references)
+    assert not result.successful
 
 
 def test_assert_shape():

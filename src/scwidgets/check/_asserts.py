@@ -9,6 +9,51 @@ from ._check import AssertResult, Check
 AssertFunctionOutputT = Union[str, AssertResult]
 
 
+def assert_equal(
+    output_parameters: Check.FunOutParamsT,
+    output_references: Check.FunOutParamsT,
+    parameters_to_check: Union[Iterable[int], str] = "all",
+) -> AssertResult:
+    assert len(output_parameters) == len(
+        output_references
+    ), "output_parameters and output_references have to have the same length"
+
+    parameter_indices: Iterable[int]
+    if isinstance(parameters_to_check, str):
+        if parameters_to_check == "all":
+            parameter_indices = range(len(output_parameters))
+        else:
+            raise ValueError(
+                f'Got parameters_to_check="{parameters_to_check}" but only "all" '
+                "is accepted as string"
+            )
+    elif isinstance(parameters_to_check, abc.Iterable):
+        parameter_indices = parameters_to_check  # type: ignore[assignment]
+    else:
+        raise TypeError(
+            "Only str and Iterable are accepted for parameters_to_check, "
+            f"but got type {type(parameters_to_check)}."
+        )
+
+    failed_parameter_indices = []
+    failed_parameter_values = []
+    messages = []
+    for i in parameter_indices:
+        if not output_parameters[i] == output_references[i]:
+            message = (
+                f"Expected {output_references[i]} " f"but got {output_parameters[i]}."
+            )
+            failed_parameter_indices.append(i)
+            failed_parameter_values.append(output_parameters[i])
+            messages.append(message)
+    return AssertResult(
+        assert_name="assert_equal",
+        parameter_indices=failed_parameter_indices,
+        parameter_values=failed_parameter_values,
+        messages=messages,
+    )
+
+
 def assert_shape(
     output_parameters: Check.FunOutParamsT,
     output_references: Check.FunOutParamsT,
