@@ -72,7 +72,7 @@ class CheckableWidget:
     def _add_check_from_check_parameters(
         self,
         asserts: Union[List[Check.AssertFunT], Check.AssertFunT],
-        inputs_parameters: Union[List[dict], dict],
+        inputs_parameters: Optional[Union[List[dict], dict]] = None,
         outputs_references: Optional[
             Union[List[Check.FunOutParamsT], Check.FunOutParamsT]
         ] = None,
@@ -192,7 +192,7 @@ class CheckRegistry(VBox):
         self,
         widget: CheckableWidget,
         asserts: Union[List[Check.AssertFunT], Check.AssertFunT],
-        inputs_parameters: Union[List[dict], dict],
+        inputs_parameters: Optional[Union[List[dict], dict]] = None,
         outputs_references: Optional[
             Union[List[Check.FunOutParamsT], Check.FunOutParamsT]
         ] = None,

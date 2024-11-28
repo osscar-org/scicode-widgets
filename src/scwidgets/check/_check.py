@@ -67,13 +67,16 @@ class Check:
         Callable[[FunOutParamsT, FunOutParamsT], str],
         Callable[[FingerprintT, FingerprintT], str],
         Callable[[FunOutParamsT], str],
+        Callable[[], str],
     ]
 
     def __init__(
         self,
         function_to_check: Callable[..., FunOutParamsT],
         asserts: Union[List[AssertFunT], AssertFunT],
-        inputs_parameters: Union[List[Dict[str, FunInParamT]], Dict[str, FunInParamT]],
+        inputs_parameters: Optional[
+            Union[List[Dict[str, FunInParamT]], Dict[str, FunInParamT]]
+        ] = None,
         outputs_references: Optional[Union[List[tuple], tuple]] = None,
         fingerprint: Optional[
             Callable[[Check.FunOutParamsT], Check.FingerprintT]
@@ -83,13 +86,14 @@ class Check:
     ):
         self._function_to_check = function_to_check
         self._asserts = []
+        self._nullvariate_asserts: List[Callable[[], str]] = []
         self._univariate_asserts: List[Callable[[tuple], str]] = []
         self._bivariate_asserts = []
         if not (isinstance(asserts, list)):
             asserts = [asserts]
 
         for i, assert_f in enumerate(asserts):
-            n_positional_arguments = len(
+            nb_positional_arguments = len(
                 [
                     parameters
                     for parameters in inspect.signature(assert_f).parameters.values()
@@ -97,15 +101,27 @@ class Check:
                 ]
             )
             self._asserts.append(assert_f)
-            if n_positional_arguments == 1:
+            if nb_positional_arguments == 0:
+                self._nullvariate_asserts.append(assert_f)  # type: ignore[arg-type]
+            elif nb_positional_arguments == 1:
+                if inputs_parameters is None:
+                    raise ValueError(
+                        "For functions taking two input arguments we need "
+                        "inputs_parameters."
+                    )
                 # type checker cannot infer type change
                 self._univariate_asserts.append(assert_f)  # type: ignore[arg-type]
-            elif n_positional_arguments == 2:
+            elif nb_positional_arguments == 2:
+                if inputs_parameters is None or outputs_references is None:
+                    raise ValueError(
+                        "For functions taking two input arguments we need "
+                        "inputs_parameters and outputs_references."
+                    )
                 self._bivariate_asserts.append(assert_f)
             else:
                 raise ValueError(
                     f"Only assert function with 1 or 2 positional arguments are allowed"
-                    f"but assert function {i} has {n_positional_arguments} positional"
+                    f"but assert function {i} has {nb_positional_arguments} positional"
                     f"arguments"
                 )
 
@@ -114,7 +130,7 @@ class Check:
         if isinstance(inputs_parameters, dict):
             inputs_parameters = [inputs_parameters]
 
-        if outputs_references is not None:
+        if inputs_parameters is not None and outputs_references is not None:
             if isinstance(outputs_references, tuple):
                 outputs_references = [outputs_references]
             assert len(inputs_parameters) == len(outputs_references), (
@@ -123,8 +139,10 @@ class Check:
                 f"[{len(inputs_parameters)} != {len(outputs_references)}]."
             )
 
-        self._inputs_parameters = inputs_parameters
-        self._outputs_references = outputs_references
+        self._inputs_parameters = [] if inputs_parameters is None else inputs_parameters
+        self._outputs_references = (
+            [] if outputs_references is None else outputs_references
+        )
         self._fingerprint = fingerprint
         self._suppress_fingerprint_asserts = suppress_fingerprint_asserts
         self._stop_on_assert_error_raised = stop_on_assert_error_raised
@@ -146,6 +164,10 @@ class Check:
         return deepcopy(self._asserts)
 
     @property
+    def nullvariate_asserts(self):
+        return deepcopy(self._nullvariate_asserts)
+
+    @property
     def univariate_asserts(self):
         return deepcopy(self._univariate_asserts)
 
@@ -163,7 +185,9 @@ class Check:
 
     @property
     def nb_conducted_asserts(self):
-        return len(self._asserts) * len(self._inputs_parameters)
+        return len(self._asserts) * len(self._inputs_parameters) + len(
+            self._nullvariate_asserts
+        )
 
     def compute_outputs(self):
         outputs = []
@@ -200,20 +224,31 @@ class Check:
             )
 
         check_result = CheckResult()
+
+        for assert_f in self._nullvariate_asserts:
+            try:
+                assert_result = assert_f()
+                check_result.append(assert_result, assert_f, {})
+            except Exception:
+                excution_info = sys.exc_info()
+                check_result.append(excution_info, assert_f, {})
+                if self._stop_on_assert_error_raised:
+                    return check_result
+
         for i, input_parameters in enumerate(self._inputs_parameters):
             output = self._function_to_check(**input_parameters)
             if not (isinstance(output, tuple)):
                 output = (output,)
 
-            for assert_f in self._univariate_asserts:
+            for uni_assert_f in self._univariate_asserts:
                 try:
-                    assert_result = assert_f(output)
+                    assert_result = uni_assert_f(output)
+                    check_result.append(assert_result, uni_assert_f, input_parameters)
                 except Exception:
                     excution_info = sys.exc_info()
-                    check_result.append(excution_info, assert_f, input_parameters)
+                    check_result.append(excution_info, uni_assert_f, input_parameters)
                     if self._stop_on_assert_error_raised:
                         return check_result
-                check_result.append(assert_result, assert_f, input_parameters)
 
             if self._fingerprint is not None:
                 try:
@@ -227,7 +262,9 @@ class Check:
                             " most likely because your output type is wrong."
                         )
                     excution_info = sys.exc_info()
-                    check_result.append(excution_info, assert_f, input_parameters)
+                    check_result.append(
+                        excution_info, self._fingerprint, input_parameters
+                    )
                     return check_result
 
                 if not (isinstance(output, tuple)):
