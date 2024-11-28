@@ -163,7 +163,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                 )
             elif isinstance(parameters, ParameterPanel):
                 compatibility_result = code.compatible_with_signature(
-                    list(parameters.parameters.keys())
+                    list(parameters.params.keys())
                 )
             if compatibility_result != "":
                 raise ValueError(
@@ -480,9 +480,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         return {
             "code": None if self._code is None else self._code.function_body,
             "parameter_panel": (
-                None
-                if self._parameter_panel is None
-                else self._parameter_panel.parameters
+                None if self._parameter_panel is None else self._parameter_panel.params
             ),
         }
 
@@ -498,7 +496,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         if answer["code"] is not None and self._code is not None:
             self._code.function_body = answer["code"]
         if answer["parameter_panel"] is not None and self._parameter_panel is not None:
-            self._parameter_panel.parameters = answer["parameter_panel"]
+            self._parameter_panel.params = answer["parameter_panel"]
 
         if self._save_cue_box is not None:
             self._save_cue_box.observe_widgets()
@@ -519,14 +517,14 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         return {}
 
     @property
-    def parameters(self) -> Dict[str, Check.FunInParamT]:
+    def params(self) -> Dict[str, Check.FunInParamT]:
         """
-        :return: All parameters that were given on input are returned. Including also
-            fixed parameters.
+        :return: All parameters that were given on initialization are returned,
+            also including also fixed parameters.
         """
         if self._parameter_panel is not None:
             parameter_panel = self._parameter_panel
-            return parameter_panel.parameters
+            return parameter_panel.params
         return {}
 
     @property
@@ -680,7 +678,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                     else:
                         self._update_func(self)  # type: ignore[call-arg]
                 elif self._code is not None:
-                    self.run_code(**self.parameters)
+                    self.run_code(**self.params)
 
                 for cue_output in self.cue_outputs:
                     if hasattr(cue_output, "draw_display"):

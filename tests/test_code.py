@@ -117,13 +117,13 @@ def get_code_exercise(
     if update_func_argless:
 
         def update_print():
-            output = code_ex.run_code(**code_ex.parameters)
+            output = code_ex.run_code(**code_ex.params)
             code_ex.cue_outputs[0].display_object = f"Output:\n{output}"
 
     else:
 
         def update_print(code_ex: CodeExercise):
-            output = code_ex.run_code(**code_ex.parameters)
+            output = code_ex.run_code(**code_ex.params)
             code_ex.cue_outputs[0].display_object = f"Output:\n{output}"
 
     code_ex = CodeExercise(
@@ -224,7 +224,7 @@ class TestCodeExercise:
         ],
     )
     def test_run_code(self, code_ex):
-        output = code_ex.run_code(**code_ex.parameters)
+        output = code_ex.run_code(**code_ex.params)
         assert np.allclose((output,), code_ex.checks[0].outputs_references[0])
 
     @pytest.mark.parametrize(
@@ -240,7 +240,7 @@ class TestCodeExercise:
             CodeValidationError,
             match="name 'bug' is not defined.*",
         ):
-            code_ex.run_code(**code_ex.parameters)
+            code_ex.run_code(**code_ex.params)
 
     @pytest.mark.parametrize(
         "function",
