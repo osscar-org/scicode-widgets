@@ -1,4 +1,5 @@
 from ._asserts import (
+    assert_equal,
     assert_numpy_allclose,
     assert_numpy_floating_sub_dtype,
     assert_numpy_sub_dtype,
@@ -14,6 +15,7 @@ __all__ = [
     "AssertResult",
     "CheckRegistry",
     "CheckableWidget",
+    "assert_equal",
     "assert_shape",
     "assert_numpy_allclose",
     "assert_type",
