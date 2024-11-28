@@ -123,19 +123,19 @@ def get_code_exercise(
 
         def update_print():
             output = code_ex.run_code(**code_ex.params)
-            code_ex.cue_outputs[0].display_object = f"Output:\n{output}"
+            code_ex.output.display_object = f"Output:\n{output}"
 
     else:
 
         def update_print(code_ex: CodeExercise):
             output = code_ex.run_code(**code_ex.params)
-            code_ex.cue_outputs[0].display_object = f"Output:\n{output}"
+            code_ex.output.display_object = f"Output:\n{output}"
 
     code_ex = CodeExercise(
         code=code_input,
         check_registry=CheckRegistry() if include_checks is True else None,
         parameters=parameters if include_params is True else None,
-        cue_outputs=[CueObject("Not initialized")],
+        outputs=[CueObject("Not initialized")],
         update_func=update_print,
         update_mode=update_mode,
     )
@@ -260,7 +260,7 @@ class TestCodeExercise:
         """
 
         def print_success(code_ex: CodeExercise | None):
-            code_ex.cue_outputs[0].display_object = "Success"
+            code_ex.output.display_object = "Success"
 
         cue_output = CueObject("Not initialized")
         exercise_registry = ExerciseRegistry()
@@ -310,7 +310,7 @@ class TestCodeExercise:
         # Be aware that the raised error is captured in the code_ex._output
         # To debug failures in the test you have to manually run it in debug
         # mode and execute `code_ex._update_button.click()` Redirecting stderr
-        # does des not workc
+        # does des not work
         code_ex.run_update()
         assert "Output:\n0" in buffer.getvalue()
 
