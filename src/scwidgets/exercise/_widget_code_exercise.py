@@ -8,6 +8,7 @@ from platform import python_version
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from ipywidgets import HTML, Box, HBox, HTMLMath, Layout, VBox, Widget
+from matplotlib.figure import Figure
 from widget_code_input import WidgetCodeInput
 from widget_code_input.utils import CodeValidationError
 
@@ -18,6 +19,8 @@ from ..code._widget_parameter_panel import ParameterPanel
 from ..cue import (
     CheckCueBox,
     CheckResetCueButton,
+    CueFigure,
+    CueObject,
     CueOutput,
     SaveCueBox,
     SaveResetCueButton,
@@ -47,8 +50,8 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         Determines how the parameters are refreshed on changes of the code input
         or parameters
 
-    :param cue_outputs:
-        List of CueOuputs that are drawn an refreshed
+    :param outputs:
+        List of CueOuputs that are drawn and refreshed
 
     :param update_func:
         A function that is run during the update process. The function takes as argument
@@ -66,7 +69,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             Union[Dict[str, Union[Check.FunInParamT, Widget]], ParameterPanel]
         ] = None,
         update_mode: str = "release",
-        cue_outputs: Union[None, CueOutput, List[CueOutput]] = None,
+        outputs: Union[None, Figure, CueOutput, List[CueOutput]] = None,
         update_func: Optional[
             Union[
                 Callable[[CodeExercise], Union[Any, Check.FunOutParamsT]],
@@ -170,11 +173,6 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                     "Code and parameters do no match:  " + compatibility_result
                 )
 
-        if cue_outputs is None:
-            cue_outputs = []
-        elif not (isinstance(cue_outputs, list)):
-            cue_outputs = [cue_outputs]
-
         CheckableWidget.__init__(self, check_registry, exercise_key)
         ExerciseWidget.__init__(self, exercise_registry, exercise_key)
 
@@ -190,7 +188,20 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             self._parameter_panel = None
 
         self._cue_code = self._code
-        self._cue_outputs = cue_outputs
+
+        if outputs is None:
+            outputs = []
+        elif not (isinstance(outputs, list)):
+            outputs = [outputs]
+
+        self._cue_outputs: List[CueOutput] = []
+        for output in outputs:
+            if isinstance(output, Figure):
+                self._cue_outputs.append(CueFigure(output))
+            elif isinstance(output, CueOutput):
+                self._cue_outputs.append(output)
+            else:
+                self._cue_outputs.append(CueObject(output))
 
         if self._check_registry is None or self._code is None:
             self._check_button = None
@@ -289,9 +300,16 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                             cue_output._widgets_to_observe = [
                                 self._code
                             ] + self._parameter_panel.parameters_widget
-                            cue_output._traits_to_observe = [
-                                "function_body"
-                            ] + self._parameter_panel.parameters_trait
+                            # fmt: off
+                            cue_output._traits_to_observe = (
+
+                                [  # type: ignore[assignment]
+                                    "function_body"
+                                ]
+                                + self._parameter_panel.parameters_trait
+                            )
+                            # fmt: on
+
                             cue_output.observe_widgets()
                         else:
                             # TODO this has to be made public
@@ -299,7 +317,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                                 self._parameter_panel.parameters_widget
                             )
                             cue_output._traits_to_observe = (
-                                self._parameter_panel.parameters_trait
+                                self._parameter_panel.parameters_trait  # type: ignore[assignment] # noqa: E501
                             )
                             cue_output.observe_widgets()
             elif self._code is not None:
@@ -659,7 +677,11 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         return self._code
 
     @property
-    def cue_outputs(self):
+    def output(self) -> CueOutput | None:
+        return self._cue_outputs[0] if len(self._cue_outputs) > 0 else None
+
+    @property
+    def outputs(self) -> List[CueOutput]:
         return self._cue_outputs
 
     def _on_click_update_action(self) -> bool:
@@ -668,7 +690,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         # runs code and displays output
         with self._output:
             try:
-                for cue_output in self.cue_outputs:
+                for cue_output in self.outputs:
                     if hasattr(cue_output, "clear_display"):
                         cue_output.clear_display(wait=True)
 
@@ -680,7 +702,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                 elif self._code is not None:
                     self.run_code(**self.params)
 
-                for cue_output in self.cue_outputs:
+                for cue_output in self.outputs:
                     if hasattr(cue_output, "draw_display"):
                         cue_output.draw_display()
 
