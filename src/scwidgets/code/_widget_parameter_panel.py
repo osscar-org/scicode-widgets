@@ -51,15 +51,15 @@ class ParameterPanel(VBox):
         return ["value"] * len(self._parameters_widget)
 
     @property
-    def parameters(self) -> dict:
+    def params(self) -> dict:
         """
-        :return: All parameters that were given on input are returned. Including also
-            fixed parameters.
+        :return: All parameters that were given on initialization are returned,
+            also including also fixed parameters.
         """
         return self._interactive_widget.kwargs.copy()
 
-    @parameters.setter
-    def parameters(self, parameters: dict):
+    @params.setter
+    def params(self, parameters: dict):
         for i, key in enumerate(self._interactive_widget.kwargs.keys()):
             self._interactive_widget.kwargs_widgets[i].value = parameters[key]
 
