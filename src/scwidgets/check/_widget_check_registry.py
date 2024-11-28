@@ -301,9 +301,7 @@ class CheckRegistry(VBox):
                     ]:
                         print(
                             Formatter.color_error_message(
-                                Formatter.format_title_message(
-                                    f"Widget {self._names[widget]} raised error."
-                                )
+                                f"Widget {self._names[widget]}: ‼ (error)"
                             )
                         )
 
@@ -314,19 +312,13 @@ class CheckRegistry(VBox):
                     ]:
                         print(
                             Formatter.color_success_message(
-                                Formatter.format_title_message(
-                                    f"Widget {self._names[widget]} all checks "
-                                    f"were successful."
-                                )
+                                f"Widget {self._names[widget]}: ✓ (success)"
                             )
                         )
                     else:
                         print(
                             Formatter.color_error_message(
-                                Formatter.format_title_message(
-                                    f"Widget {self._names[widget]} not all checks "
-                                    "were successful."
-                                )
+                                f"Widget {self._names[widget]}: 𐄂 (failed)"
                             )
                         )
         except Exception as exception:

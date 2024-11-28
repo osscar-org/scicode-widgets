@@ -1003,6 +1003,9 @@ def test_widget_check_registry(selenium_driver):
                 ]
             )
             == 1
+        ), (
+            f"Expected: {expected_text_on_check_all_widgets} to be found in "
+            f"{[output.text for output in outputs]}"
         )
 
         WebDriverWait(driver, 5).until(
@@ -1018,6 +1021,9 @@ def test_widget_check_registry(selenium_driver):
                 ]
             )
             == 1
+        ), (
+            f"Expected: {expected_text_on_set_all_references} to be found in "
+            f"{[output.text for output in outputs]}"
         )
 
         WebDriverWait(driver, 5).until(
@@ -1033,46 +1039,49 @@ def test_widget_check_registry(selenium_driver):
                 ]
             )
             == 1
+        ), (
+            f"Expected: {expected_text_on_set_all_references_and_check} to be found in "
+            f"{[output.text for output in outputs]}"
         )
 
     # Test 1.1 use_fingerprint=False, failing=False, buggy=False
     test_button_clicks(
         nb_cells[3],
-        "Widget 1 all checks were successful",
+        "Widget 1: ✓ (success)",
         "Successfully set all references",
-        "Widget 1 all checks were successful",
+        "Widget 1: ✓ (success)",
     )
 
     # Test 1.2 use_fingerprint=True, failing=False, buggy=False
     test_button_clicks(
         nb_cells[4],
-        "Widget 1 all checks were successful",
+        "Widget 1: ✓ (success)",
         "Successfully set all references",
-        "Widget 1 all checks were successful",
+        "Widget 1: ✓ (success)",
     )
 
     # Test 1.3 use_fingerprint=False, failing=False, buggy=False
     test_button_clicks(
         nb_cells[5],
-        "Widget 1 not all checks were successful",
+        "Widget 1: 𐄂 (failed)",
         "Successfully set all references",
-        "Widget 1 all checks were successful",
+        "Widget 1: ✓ (success)",
     )
 
     # Test 1.4 use_fingerprint=False, failing=False, buggy=False
     test_button_clicks(
         nb_cells[6],
-        "Widget 1 not all checks were successful",
+        "Widget 1: 𐄂 (failed)",
         "Successfully set all references",
-        "Widget 1 all checks were successful",
+        "Widget 1: ✓ (success)",
     )
 
     # Test 1.5 use_fingerprint=False, failing=False, buggy=True
     test_button_clicks(
         nb_cells[7],
-        "Widget 1 raised error",
+        "Widget 1: ‼ (error)",
         "NameError: name 'bug' is not defined",
-        "Widget 1 raised error",
+        "Widget 1: ‼ (error)",
     )
 
 
