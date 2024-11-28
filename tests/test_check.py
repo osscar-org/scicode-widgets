@@ -70,6 +70,24 @@ def test_assert_invalid_output_parameter_dtype():
     ) in result.message()
 
 
+def no_param_check(failing):
+
+    def function_to_check(parameter):
+        print("SomeText")
+        return parameter * 2
+
+    def custom_assert() -> str:
+        # property-based tests with the student code
+        if failing:
+            return "Check does not fulfill property"
+        return ""
+
+    return Check(
+        function_to_check=function_to_check,
+        asserts=[custom_assert],
+    )
+
+
 def single_param_check(use_fingerprint=False, failing=False, buggy=False):
     if buggy:
 
@@ -175,6 +193,7 @@ class TestCheck:
     @pytest.mark.parametrize(
         "check",
         [
+            no_param_check(failing=False),
             single_param_check(use_fingerprint=False, failing=False),
             multi_param_check(use_fingerprint=False, failing=False),
             single_param_check(use_fingerprint=True, failing=False),
@@ -205,6 +224,7 @@ class TestCheck:
     @pytest.mark.parametrize(
         "check",
         [
+            no_param_check(failing=True),
             single_param_check(use_fingerprint=False, failing=True),
             multi_param_check(use_fingerprint=False, failing=True),
             single_param_check(use_fingerprint=True, failing=True),
@@ -281,6 +301,7 @@ class TestCheckRegistry:
     @pytest.mark.parametrize(
         "checks",
         [
+            [no_param_check(failing=False)],
             [
                 single_param_check(use_fingerprint=False, failing=False),
                 single_param_check(use_fingerprint=True, failing=False),
@@ -356,6 +377,7 @@ class TestCheckRegistry:
     @pytest.mark.parametrize(
         "checks",
         [
+            [no_param_check(failing=True)],
             [
                 single_param_check(use_fingerprint=False, failing=True),
                 single_param_check(use_fingerprint=True, failing=True),
