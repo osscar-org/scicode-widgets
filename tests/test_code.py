@@ -78,6 +78,11 @@ class TestCodeInput:
         ):
             CodeInput(TestCodeInput.mock_function_1, code_theme="invalid_theme")
 
+    def test_call(self):
+        code = CodeInput(self.mock_function_1)
+        assert code(1, 1) == 2
+        assert code(0, 1) == 1
+
 
 def get_code_exercise(
     checks: List[Check],

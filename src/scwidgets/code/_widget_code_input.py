@@ -5,7 +5,7 @@ import traceback
 import types
 import warnings
 from functools import wraps
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from widget_code_input import WidgetCodeInput
 from widget_code_input.utils import (
@@ -71,6 +71,9 @@ class CodeInput(WidgetCodeInput):
         Returns the unwrapped function object
         """
         return inspect.unwrap(self.get_function_object())
+
+    def __call__(self, *args, **kwargs) -> Any:
+        return self.function(*args, **kwargs)
 
     def compatible_with_signature(self, parameters: List[str]) -> str:
         """
