@@ -17,6 +17,10 @@ from .test_check import multi_param_check, single_param_check
 class TestCodeInput:
     # fmt: off
     @staticmethod
+    def mock_function_0():
+        return 0
+
+    @staticmethod
     def mock_function_1(x, y):
         """
         This is an example function.
@@ -81,6 +85,7 @@ def get_code_exercise(
     include_checks=True,
     include_params=True,
     tunable_params=False,
+    update_func_argless=False,
     update_mode="manual",
 ):
     # Important:
@@ -109,9 +114,17 @@ def get_code_exercise(
     else:
         parameters = None
 
-    def update_print(code_ex: CodeExercise):
-        output = code_ex.run_code(**code_ex.parameters)
-        code_ex.cue_outputs[0].display_object = f"Output:\n{output}"
+    if update_func_argless:
+
+        def update_print():
+            output = code_ex.run_code(**code_ex.parameters)
+            code_ex.cue_outputs[0].display_object = f"Output:\n{output}"
+
+    else:
+
+        def update_print(code_ex: CodeExercise):
+            output = code_ex.run_code(**code_ex.parameters)
+            code_ex.cue_outputs[0].display_object = f"Output:\n{output}"
 
     code_ex = CodeExercise(
         code=code_input,
@@ -198,7 +211,7 @@ class TestCodeExercise:
         "code_ex",
         [
             get_code_exercise(
-                [single_param_check(use_fingerprint=False, failing=False, buggy=False)]
+                [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
             ),
             get_code_exercise(
                 [multi_param_check(use_fingerprint=False, failing=False)]
@@ -260,3 +273,52 @@ class TestCodeExercise:
         exercise_registry.create_new_file()
         code_ex._save_button.click()
         os.remove("test_save_registry-student_name.json")
+
+    @pytest.mark.parametrize(
+        "code_ex",
+        [
+            get_code_exercise(
+                [],
+                code=TestCodeInput.mock_function_0,
+                update_func_argless=False,
+            ),
+            get_code_exercise(
+                [],
+                code=TestCodeInput.mock_function_0,
+                update_func_argless=True,
+            ),
+        ],
+    )
+    def test_run_update(self, code_ex):
+        """Test run_update"""
+        import io
+        from contextlib import redirect_stdout
+
+        buffer = io.StringIO()
+        code_ex._output = redirect_stdout(buffer)
+
+        def mock_clear_output(wait):
+            pass
+
+        code_ex._output.clear_output = mock_clear_output
+
+        # Be aware that the raised error is captured in the code_ex._output
+        # To debug failures in the test you have to manually run it in debug
+        # mode and execute `code_ex._update_button.click()` Redirecting stderr
+        # does des not workc
+        code_ex.run_update()
+        assert "Output:\n0" in buffer.getvalue()
+
+    def test_invalid_update_func(self):
+        """Test run_update for wrong input"""
+
+        def failing_update(a, b):
+            pass
+
+        with pytest.raises(
+            ValueError, match=r".*The given update_func has 2 parameters .*"
+        ):
+            CodeExercise(
+                code=TestCodeInput.mock_function_0,
+                update_func=failing_update,
+            )
