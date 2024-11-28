@@ -17,15 +17,12 @@
 import os
 import sys
 
-import scwidgets
-
 sys.path.insert(0, os.path.abspath("../.."))
 from tests.test_check import single_param_check  # noqa: E402
 from tests.test_code import get_code_exercise  # noqa: E402
 
 # -
 
-scwidgets.get_css_style()
 
 # Test 1:
 # -------

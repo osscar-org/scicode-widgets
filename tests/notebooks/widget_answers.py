@@ -17,14 +17,11 @@
 import os
 import sys
 
-import scwidgets
 from scwidgets.exercise import CodeExercise, ExerciseRegistry, TextExercise
 
 sys.path.insert(0, os.path.abspath("../.."))
 
 # -
-
-scwidgets.get_css_style()
 
 
 # Test 1:

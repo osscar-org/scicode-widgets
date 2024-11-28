@@ -263,7 +263,7 @@ def test_scwidgets_code_input(selenium_driver):
 
     # Tests if change in function_body changed the widget view
     time.sleep(2)
-    code_input_lines = nb_cells[2].find_elements(By.CLASS_NAME, CODE_MIRROR_CLASS_NAME)
+    code_input_lines = nb_cells[1].find_elements(By.CLASS_NAME, CODE_MIRROR_CLASS_NAME)
     assert "return 'change'" in code_input_lines[-1].text
 
 
@@ -299,7 +299,7 @@ class TestExerciseWidgets:
 
         # Test 1:
         # -------
-        nb_cell = nb_cells[2]
+        nb_cell = nb_cells[1]
 
         nb_cell.find_elements(By.CLASS_NAME, BUTTON_CLASS_NAME)
         answer_registry_buttons = nb_cell.find_elements(
@@ -415,7 +415,7 @@ class TestExerciseWidgets:
         # -------
         # Test if TextExercise shows correct output
 
-        nb_cell = nb_cells[3]
+        nb_cell = nb_cells[2]
 
         text_inputs = nb_cell.find_elements(By.CLASS_NAME, TEXT_INPUT_CLASS_NAME)
         assert len(text_inputs) == 1
@@ -519,7 +519,7 @@ class TestExerciseWidgets:
         # -------
         # Test if CodeExercise shows correct output
 
-        nb_cell = nb_cells[4]
+        nb_cell = nb_cells[3]
 
         answer_buttons = nb_cell.find_elements(
             By.CLASS_NAME, reset_cue_button_class_name("save", False)
@@ -1046,7 +1046,7 @@ def test_widget_check_registry(selenium_driver):
 
     # Test 1.1 use_fingerprint=False, failing=False, buggy=False
     test_button_clicks(
-        nb_cells[3],
+        nb_cells[2],
         "Widget 1: ✓ (success)",
         "Successfully set all references",
         "Widget 1: ✓ (success)",
@@ -1054,7 +1054,7 @@ def test_widget_check_registry(selenium_driver):
 
     # Test 1.2 use_fingerprint=True, failing=False, buggy=False
     test_button_clicks(
-        nb_cells[4],
+        nb_cells[3],
         "Widget 1: ✓ (success)",
         "Successfully set all references",
         "Widget 1: ✓ (success)",
@@ -1062,7 +1062,7 @@ def test_widget_check_registry(selenium_driver):
 
     # Test 1.3 use_fingerprint=False, failing=False, buggy=False
     test_button_clicks(
-        nb_cells[5],
+        nb_cells[4],
         "Widget 1: 𐄂 (failed)",
         "Successfully set all references",
         "Widget 1: ✓ (success)",
@@ -1070,7 +1070,7 @@ def test_widget_check_registry(selenium_driver):
 
     # Test 1.4 use_fingerprint=False, failing=False, buggy=False
     test_button_clicks(
-        nb_cells[6],
+        nb_cells[5],
         "Widget 1: 𐄂 (failed)",
         "Successfully set all references",
         "Widget 1: ✓ (success)",
@@ -1078,7 +1078,7 @@ def test_widget_check_registry(selenium_driver):
 
     # Test 1.5 use_fingerprint=False, failing=False, buggy=True
     test_button_clicks(
-        nb_cells[7],
+        nb_cells[6],
         "Widget 1: ‼ (error)",
         "NameError: name 'bug' is not defined",
         "Widget 1: ‼ (error)",
@@ -1273,7 +1273,7 @@ def test_widgets_code(selenium_driver):
 
     # Test 1.1
     test_code_exercise(
-        nb_cells[2],
+        nb_cells[1],
         ["SomeText", "Output"],
         ["Check was successful"],
         include_checks=True,
@@ -1284,7 +1284,7 @@ def test_widgets_code(selenium_driver):
 
     # Test 1.2
     test_code_exercise(
-        nb_cells[3],
+        nb_cells[2],
         ["SomeText", "Output"],
         ["Check failed"],
         include_checks=True,
@@ -1295,7 +1295,7 @@ def test_widgets_code(selenium_driver):
 
     # Test 1.3
     test_code_exercise(
-        nb_cells[4],
+        nb_cells[3],
         ["SomeText", "NameError: name 'bug' is not defined"],
         ["NameError: name 'bug' is not defined"],
         include_checks=True,
@@ -1305,7 +1305,7 @@ def test_widgets_code(selenium_driver):
     )
     # Test 1.4
     test_code_exercise(
-        nb_cells[5],
+        nb_cells[4],
         ["SomeText", "Output"],
         ["Check was successful"],
         include_checks=True,
@@ -1316,7 +1316,7 @@ def test_widgets_code(selenium_driver):
 
     # Test 1.5
     test_code_exercise(
-        nb_cells[6],
+        nb_cells[5],
         ["SomeText", "Output"],
         ["Check was successful"],
         include_checks=True,
@@ -1327,7 +1327,7 @@ def test_widgets_code(selenium_driver):
 
     # Test 1.6
     test_code_exercise(
-        nb_cells[7],
+        nb_cells[6],
         ["SomeText", "Output"],
         ["Check was successful"],
         include_checks=True,
@@ -1342,7 +1342,7 @@ def test_widgets_code(selenium_driver):
     # Test 2.1
     # Test if update button is shown even if params are None
     test_code_exercise(
-        nb_cells[8],
+        nb_cells[7],
         ["SomeText", "Output"],
         [],
         include_checks=False,
