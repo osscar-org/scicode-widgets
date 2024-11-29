@@ -627,7 +627,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             self._on_click_check_action()
 
     def compute_output_to_check(self, *args, **kwargs) -> Check.FunOutParamsT:
-        return self.run_code(*args, **kwargs)
+        return self.call_code(*args, **kwargs)
 
     def handle_checks_result(self, results: List[Union[CheckResult, Exception]]):
         self._output.clear_output(wait=True)
@@ -712,7 +712,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                     else:
                         self._update_func(self)  # type: ignore[call-arg]
                 elif self._code is not None:
-                    self.run_code(**self.params)
+                    self.call_code(**self.params)
 
                 for cue_output in self.outputs:
                     if hasattr(cue_output, "draw_display"):
@@ -732,7 +732,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
 
         return not (raised_error)
 
-    def run_update(self):
+    def run_code(self):
         """
         Invokes an update run, the same that is invoked by a click on the update button
         or for :param update_mode: "release" and "continuous" when a parameter panel
@@ -746,7 +746,14 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             # displayed
             self._on_click_update_action()
 
-    def run_code(self, *args, **kwargs) -> Check.FunOutParamsT:
+    def update(self):
+        """
+        Does the same as `run_code`. In case no `code` was provided on
+        initialization the button name is "Update".
+        """
+        self.run_code()
+
+    def call_code(self, *args, **kwargs) -> Check.FunOutParamsT:
         """
         Runs the `code` with the given (keyword) arguments and returns the output of the
         `code`. If no `code` was given on intialization, then a `ValueError` is raised.
@@ -754,7 +761,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         try:
             if self._code is None:
                 raise ValueError(
-                    "run_code was invoked, but no code was given on initializaion"
+                    "call_code was invoked, but no code was given on initializaion"
                 )
             return self._code.run(*args, **kwargs)
         except CodeValidationError as e:
