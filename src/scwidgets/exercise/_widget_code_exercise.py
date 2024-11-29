@@ -727,8 +727,8 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
 
             # The clear_output command at the beginning of the function waits till
             # something is printed. If nothing is printed, it is not cleared. We
-            # enforce it to be invoked by printing an empty string
-            print("", end="")
+            # enforce it to be invoked by printing an empty char
+            print("\0", end="")
 
         return not (raised_error)
 
