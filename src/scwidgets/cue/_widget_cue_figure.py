@@ -64,7 +64,10 @@ class CueFigure(CueOutput):
         )
         self.figure = figure
 
-        if matplotlib.backends.backend == "module://matplotlib_inline.backend_inline":
+        if matplotlib.backends.backend in [
+            "module://matplotlib_inline.backend_inline",
+            "macosx",
+        ]:
             # we close the figure so the figure is only contained in this widget
             # and not shown using plt.show()
             plt.close(self.figure)
@@ -78,7 +81,9 @@ class CueFigure(CueOutput):
                 self.figure.canvas.show()
         else:
             raise NotImplementedError(
-                f"matplotlib backend " f"{matplotlib.backends.backend!r} not supported."
+                f"matplotlib backend {matplotlib.backends.backend!r} not supported. "
+                "Please change backend to 'widget' by running `%matplotlib widget` "
+                "that should be supported on all systems."
             )
 
         if no_toolbars:
@@ -96,7 +101,10 @@ class CueFigure(CueOutput):
             same meaning as for the `wait` parameter in the ipywidgets.clear_output
             function
         """
-        if matplotlib.backends.backend == "module://matplotlib_inline.backend_inline":
+        if matplotlib.backends.backend in [
+            "module://matplotlib_inline.backend_inline",
+            "macosx",
+        ]:
             self.clear_figure()
             self.clear_output(wait=wait)
         elif (
@@ -111,14 +119,19 @@ class CueFigure(CueOutput):
                 self.figure.canvas.flush_events()
         else:
             raise NotImplementedError(
-                f"matplotlib backend " f"{matplotlib.backends.backend!r} not supported."
+                f"matplotlib backend {matplotlib.backends.backend!r} not supported. "
+                "Please change backend to 'widget' by running `%matplotlib widget` "
+                "that should be supported on all systems."
             )
 
     def draw_display(self):
         """
         Enforces redrawing the figure
         """
-        if matplotlib.backends.backend == "module://matplotlib_inline.backend_inline":
+        if matplotlib.backends.backend in [
+            "module://matplotlib_inline.backend_inline",
+            "macosx",
+        ]:
             with self:
                 display(self.figure)
         elif (
@@ -131,7 +144,9 @@ class CueFigure(CueOutput):
             self.figure.canvas.flush_events()
         else:
             raise NotImplementedError(
-                f"matplotlib backend " f"{matplotlib.backends.backend!r} not supported."
+                f"matplotlib backend {matplotlib.backends.backend!r} not supported. "
+                "Please change backend to 'widget' by running `%matplotlib widget` "
+                "that should be supported on all systems."
             )
 
     def clear_figure(self):
