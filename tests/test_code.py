@@ -1,4 +1,5 @@
 import os
+from os.path import exists
 from typing import Callable, List, Literal, Union
 
 import matplotlib.pyplot as plt
@@ -278,26 +279,31 @@ class TestCodeExercise:
         """
         Verifies that the CodeExercise works with an answer_registry.
         """
+        name = "test_save_registry-student_name"
+        try:
 
-        def print_success(code_ex: CodeExercise | None):
-            code_ex.output.display_object = "Success"
+            def print_success(code_ex: CodeExercise | None):
+                code_ex.output.display_object = "Success"
 
-        cue_output = CueObject("Not initialized")
-        exercise_registry = ExerciseRegistry()
+            cue_output = CueObject("Not initialized")
+            exercise_registry = ExerciseRegistry()
 
-        code_ex = CodeExercise(
-            code=function,
-            parameters={"parameter": fixed(5)},
-            exercise_registry=exercise_registry,
-            exercise_key="test_save_registry_ex",
-            outputs=[cue_output],
-            update_func=print_success,
-        )
+            code_ex = CodeExercise(
+                code=function,
+                parameters={"parameter": fixed(5)},
+                exercise_registry=exercise_registry,
+                exercise_key="test_save_registry_ex",
+                outputs=[cue_output],
+                update_func=print_success,
+            )
 
-        exercise_registry._student_name_text.value = "test_save_registry-student_name"
-        exercise_registry.create_new_file()
-        code_ex._save_button.click()
-        os.remove("test_save_registry-student_name.json")
+            exercise_registry._student_name_text.value = name
+            exercise_registry.create_new_file()
+            code_ex._save_button.click()
+        finally:
+            file_name = f"{name}.json"
+            if os.path.exists(file_name):
+                os.remove(file_name)
 
     @pytest.mark.parametrize(
         "code_ex",
