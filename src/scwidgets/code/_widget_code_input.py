@@ -7,7 +7,7 @@ import traceback
 import types
 import warnings
 from functools import wraps
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Union
 
 from widget_code_input import WidgetCodeInput
 from widget_code_input.utils import (
@@ -67,7 +67,6 @@ class CodeInput(WidgetCodeInput):
         if function_name is None:
             raise ValueError("function_name must be given if no function is given.")
         function_parameters = "" if function_parameters is None else function_parameters
-        docstring = "\n" if docstring is None else docstring
         function_body = "" if function_body is None else function_body
         super().__init__(
             function_name, function_parameters, docstring, function_body, code_theme
@@ -81,8 +80,9 @@ class CodeInput(WidgetCodeInput):
                 f"the values {CodeInput.valid_code_themes}"
             )
 
-    @property
-    def function(self) -> types.FunctionType:
+    def get_function(
+        self, builtins: Union[dict[str, Any], None] = None
+    ) -> types.FunctionType:
         """
         Return the compiled function object.
 
@@ -91,14 +91,16 @@ class CodeInput(WidgetCodeInput):
           func = widget.wrapped_function # This can raise a SyntaxError
           retval = func(parameters)
 
+        :param builtins: A dict of variable name and value that is added to the
+          globals __builtins__ and thus avaialable on initialization
         :raise SyntaxError: if the function code has syntax errors (or if
           the function name is not a valid identifier)
         """
-        return inspect.unwrap(self.wrapped_function)
+        return inspect.unwrap(self.get_wrapped_function(builtins))
 
     def __call__(self, *args, **kwargs) -> Check.FunOutParamsT:
         """Calls the wrapped function"""
-        return self.wrapped_function(*args, **kwargs)
+        return self.get_wrapped_function()(*args, **kwargs)
 
     def compatible_with_signature(self, parameters: List[str]) -> str:
         """
@@ -121,9 +123,9 @@ class CodeInput(WidgetCodeInput):
         return self.function_parameters.replace(",", "").split(" ")
 
     @staticmethod
-    def get_docstring(function: types.FunctionType) -> str:
+    def get_docstring(function: types.FunctionType) -> str | None:
         docstring = function.__doc__
-        return "" if docstring is None else textwrap.dedent(docstring)
+        return None if docstring is None else textwrap.dedent(docstring)
 
     @staticmethod
     def _get_function_source_and_def(
@@ -220,10 +222,11 @@ class CodeInput(WidgetCodeInput):
                 line[leading_indent:] if line.strip() else "" for line in lines
             )
 
-        return source
+        return source.strip()
 
-    @property
-    def wrapped_function(self) -> types.FunctionType:
+    def get_wrapped_function(
+        self, builtins: Union[dict[str, Any], None] = None
+    ) -> types.FunctionType:
         """
         Return the compiled function object wrapped by an try-catch block
         raising a `CodeValidationError`.
@@ -233,6 +236,8 @@ class CodeInput(WidgetCodeInput):
           func = widget.wrapped_function # This can raise a SyntaxError
           retval = func(parameters)
 
+        :param builtins: A dict of variable name and value that is added to the
+          globals __builtins__ and thus avaialable on initialization
         :raise SyntaxError: if the function code has syntax errors (or if
           the function name is not a valid identifier)
         """
@@ -242,6 +247,9 @@ class CodeInput(WidgetCodeInput):
             "__doc__": None,
             "__package__": None,
         }
+
+        if builtins is not None:
+            globals_dict["__builtins__"].update(builtins)
 
         if not is_valid_variable_name(self.function_name):
             raise SyntaxError("Invalid function name '{}'".format(self.function_name))

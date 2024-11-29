@@ -187,16 +187,6 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         self._code = code
         self._output = CueOutput()
 
-        self._parameter_panel: Union[ParameterPanel, None]
-        if isinstance(params, dict):
-            self._parameter_panel = ParameterPanel(**params)
-        elif isinstance(params, ParameterPanel):
-            self._parameter_panel = params
-        else:
-            self._parameter_panel = None
-
-        self._cue_code = self._code
-
         if outputs is None:
             outputs = []
         elif not (isinstance(outputs, list)):
@@ -205,11 +195,23 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         self._cue_outputs: List[CueOutput] = []
         for output in outputs:
             if isinstance(output, Figure):
+                # This needs to happen before the creation of the
+                # ParameterPanel otherwise the figure is not properly closed. I
+                # am not sure why, I guess it is something related to interact
                 self._cue_outputs.append(CueFigure(output))
             elif isinstance(output, CueOutput):
                 self._cue_outputs.append(output)
             else:
                 self._cue_outputs.append(CueObject(output))
+
+        if isinstance(params, dict):
+            self._parameter_panel = ParameterPanel(**params)
+        elif isinstance(params, ParameterPanel):
+            self._parameter_panel = params
+        else:
+            self._parameter_panel = None
+
+        self._cue_code = self._code
 
         if self._check_registry is None or self._code is None:
             self._check_button = None
