@@ -42,7 +42,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
     :param check_registry:
         a check registry that is used to register checks
 
-    :param parameters:
+    :param params:
         Input parameters for the :py:class:`ParameterPanel` class or an initialized
         :py:class:`ParameterPanel` object. Specifies the arguments in the parameter
         panel.
@@ -66,7 +66,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         check_registry: Optional[CheckRegistry] = None,
         exercise_registry: Optional[ExerciseRegistry] = None,
         exercise_key: Optional[str] = None,
-        parameters: Optional[
+        params: Optional[
             Union[Dict[str, Union[Check.FunInParamT, Widget]], ParameterPanel]
         ] = None,
         update_mode: str = "manual",
@@ -137,15 +137,15 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             self._exercise_title_html.add_class("exercise-title")
 
         # verify if input argument `parameter` is valid
-        if parameters is not None:
+        if params is not None:
             allowed_parameter_types = [dict, ParameterPanel]
             parameter_type_allowed = False
             for allowed_parameter_type in allowed_parameter_types:
-                if isinstance(parameters, allowed_parameter_type):
+                if isinstance(params, allowed_parameter_type):
                     parameter_type_allowed = True
             if not (parameter_type_allowed):
                 raise TypeError(
-                    f"Got parameter {type(parameters)!r} but only "
+                    f"Got parameter {type(params)!r} but only "
                     f"{allowed_parameter_types} are allowed."
                 )
 
@@ -158,20 +158,20 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                 f"WidgetCodeInput but got {type(code)!r}"
             )
 
-        # check compability between code and parameters, can only be checked if
+        # check compability between code and params, can only be checked if
         # update_func is not used because we cannot know how the code input is used
-        if update_func is None and code is not None and parameters is not None:
-            if isinstance(parameters, dict):
+        if update_func is None and code is not None and params is not None:
+            if isinstance(params, dict):
                 compatibility_result = code.compatible_with_signature(
-                    list(parameters.keys())
+                    list(params.keys())
                 )
-            elif isinstance(parameters, ParameterPanel):
+            elif isinstance(params, ParameterPanel):
                 compatibility_result = code.compatible_with_signature(
-                    list(parameters.params.keys())
+                    list(params.params.keys())
                 )
             if compatibility_result != "":
                 raise ValueError(
-                    "Code and parameters do no match:  " + compatibility_result
+                    "code and params do no match:  " + compatibility_result
                 )
 
         CheckableWidget.__init__(self, check_registry, exercise_key)
@@ -181,10 +181,10 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         self._output = CueOutput()
 
         self._parameter_panel: Union[ParameterPanel, None]
-        if isinstance(parameters, dict):
-            self._parameter_panel = ParameterPanel(**parameters)
-        elif isinstance(parameters, ParameterPanel):
-            self._parameter_panel = parameters
+        if isinstance(params, dict):
+            self._parameter_panel = ParameterPanel(**params)
+        elif isinstance(params, ParameterPanel):
+            self._parameter_panel = params
         else:
             self._parameter_panel = None
 
