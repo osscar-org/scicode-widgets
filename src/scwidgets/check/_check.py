@@ -148,11 +148,11 @@ class Check:
         self._stop_on_assert_error_raised = stop_on_assert_error_raised
 
     @property
-    def function_to_check(self):
+    def function_to_check(self) -> Callable[..., FunOutParamsT]:
         return self._function_to_check
 
     @function_to_check.setter
-    def function_to_check(self, function_to_check):
+    def function_to_check(self, function_to_check: Callable[..., FunOutParamsT]):
         self._function_to_check = function_to_check
 
     @property
