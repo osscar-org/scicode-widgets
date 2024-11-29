@@ -1,9 +1,11 @@
 import os
 from typing import Callable, List, Literal, Union
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from ipywidgets import fixed
+from matplotlib.figure import Figure
 from widget_code_input.utils import CodeValidationError
 
 from scwidgets.check import Check, CheckRegistry, CheckResult
@@ -345,3 +347,11 @@ class TestCodeExercise:
                 code=TestCodeInput.mock_function_0,
                 update_func=failing_update,
             )
+
+    def test_figure(self):
+        """Test figure"""
+
+        code_ex = CodeExercise(outputs=plt.figure())
+        assert isinstance(code_ex.figure, Figure)
+        assert code_ex.output.figure is code_ex.figure
+        assert code_ex.outputs[0] is code_ex.output
