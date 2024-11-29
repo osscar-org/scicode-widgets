@@ -687,6 +687,15 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
     def outputs(self) -> List[CueOutput]:
         return self._cue_outputs
 
+    @property
+    def figure(self) -> Figure | None:
+        return (
+            self._cue_outputs[0].figure
+            if len(self._cue_outputs) > 0
+            and isinstance(self._cue_outputs[0], CueFigure)
+            else None
+        )
+
     def _on_click_update_action(self) -> bool:
         self._output.clear_output(wait=True)
         raised_error = False
