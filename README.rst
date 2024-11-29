@@ -1,19 +1,41 @@
-Important
-=========
-
-So far scicode-widget has been created by prototyping without much concern about the code quality. This resulted in faster development time but in cost of readability and maintanability of the code. Since we finished now the prototype phase and have converged on a set of functionalities we are satisfied with, we are in the process of refactoring the resulting code in this branch. While we are refactoring we recommend the usage of the `vertical-slice branch <https://github.com/osscar-org/scicode-widgets/tree/vertical-slice>`_ till all features have been implemented in the refactor.
-
-
 scicode-widgets
 ===============
 
 .. marker-package-description
 
-A collection of ipywidgets for the creation of interactive code demos and educational notebooks with exercises that can be checked and exported.
+*scicode-widgets* is a widget library for the purpose of creating computational
+experiments for educational content. It is targeted to teach students how to
+code and interpret computational experiments while hiding technical details and
+boiler plate code that are not essential for the learning experience. The logic
+is purely written in Python to simplify the development process for scientific
+researchers as they usually are more capable in writing Python code than
+JavaScript. It therefore builds on top of widgets provided by ipywidgets to
+creating a framework out of it.
 
-Installation
-------------
+Features
+--------
 
-.. code-block:: bash
+The core features of scicode-widgets are:
 
-  pip install .
+**Customizable coding exercises and demos**
+
+TODO gif
+
+**Checks for students to verify their solution**
+
+TODO gif
+
+**Automatic grading using nbgrader**
+
+TODO gif
+
+Please continue with our `getting started page <getting_started.html>`_  
+for a more detailed overview of our features.
+
+Supportde jupyter environments
+------------------------------
+
+We support the following widget environments
+
+* jupyterlab
+* notebook < 7
