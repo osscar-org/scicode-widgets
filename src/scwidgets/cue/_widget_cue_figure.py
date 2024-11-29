@@ -67,6 +67,7 @@ class CueFigure(CueOutput):
         if matplotlib.backends.backend in [
             "module://matplotlib_inline.backend_inline",
             "macosx",
+            "agg",
         ]:
             # we close the figure so the figure is only contained in this widget
             # and not shown using plt.show()
@@ -104,6 +105,7 @@ class CueFigure(CueOutput):
         if matplotlib.backends.backend in [
             "module://matplotlib_inline.backend_inline",
             "macosx",
+            "agg",
         ]:
             self.clear_figure()
             self.clear_output(wait=wait)
@@ -131,6 +133,7 @@ class CueFigure(CueOutput):
         if matplotlib.backends.backend in [
             "module://matplotlib_inline.backend_inline",
             "macosx",
+            "agg",
         ]:
             with self:
                 display(self.figure)
