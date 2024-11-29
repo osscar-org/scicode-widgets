@@ -270,7 +270,7 @@ class TestCodeExercise:
             parameters={"parameter": fixed(5)},
             exercise_registry=exercise_registry,
             exercise_key="test_save_registry_ex",
-            cue_outputs=[cue_output],
+            outputs=[cue_output],
             update_func=print_success,
         )
 
