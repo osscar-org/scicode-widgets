@@ -124,6 +124,50 @@ get_code_exercise(
 #    tunable_params=True,
 # )
 
+# Test 2.4.1 No code
+# Test if no update button and no cue is shown because the update_mode is "release"
+get_code_exercise(
+    [],
+    code=None,
+    include_checks=False,
+    include_params=True,
+    tunable_params=True,
+    update_mode="release",
+)
+
+# Test 2.4.2 No code
+# Test if no update button and no cue is shown because the update_mode is "continuous"
+get_code_exercise(
+    [],
+    code=None,
+    include_checks=False,
+    include_params=True,
+    tunable_params=True,
+    update_mode="continuous",
+)
+
+# Test 2.4.3 No code
+# Test if an update button and cue is shown because the update_mode is "manual"
+get_code_exercise(
+    [],
+    code=None,
+    include_checks=False,
+    include_params=False,
+    tunable_params=False,
+    update_mode="manual",
+)
+
+# Test 2.4.4 No code
+# Test if an update button and cue is shown because the update_mode is "manual"
+get_code_exercise(
+    [],
+    code=None,
+    include_checks=False,
+    include_params=True,
+    tunable_params=True,
+    update_mode="manual",
+)
+
 
 # Test 3:
 # -------
