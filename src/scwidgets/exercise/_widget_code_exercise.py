@@ -687,7 +687,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
 
     def _on_click_update_action(self) -> bool:
         self._output.clear_output(wait=True)
-        self._raised_error = False
+        raised_error = False
         # runs code and displays output
         with self._output:
             try:
@@ -708,10 +708,10 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                         cue_output.draw_display()
 
             except CodeValidationError as e:
-                self._raised_error = True
+                raised_error = True
                 raise e
             except Exception as e:
-                self._raised_error = True
+                raised_error = True
                 raise e
 
             # The clear_output command at the beginning of the function waits till
@@ -719,7 +719,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             # enforce it to be invoked by printing an empty string
             print("", end="")
 
-        return not (self._raised_error)
+        return not (raised_error)
 
     def run_update(self):
         """
