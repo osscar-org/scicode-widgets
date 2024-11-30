@@ -156,7 +156,7 @@ def get_code_exercise(
         check_registry=CheckRegistry() if include_checks is True else None,
         params=parameters if include_params is True else None,
         outputs=[CueObject("Not initialized")],
-        update_func=update_print,
+        update=update_print,
         update_mode=update_mode,
     )
 
@@ -291,7 +291,7 @@ class TestCodeExercise:
             exercise_registry=exercise_registry,
             exercise_key="test_save_registry_ex",
             outputs=[cue_output],
-            update_func=print_success,
+            update=print_success,
         )
 
         exercise_registry._student_name_text.value = "test_save_registry-student_name"
@@ -341,11 +341,11 @@ class TestCodeExercise:
             pass
 
         with pytest.raises(
-            ValueError, match=r".*The given update_func has 2 parameters .*"
+            ValueError, match=r".*The given update function has 2 parameters .*"
         ):
             CodeExercise(
                 code=TestCodeInput.mock_function_0,
-                update_func=failing_update,
+                update=failing_update,
             )
 
     def test_figure(self):

@@ -54,7 +54,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
     :param outputs:
         List of CueOuputs that are drawn and refreshed
 
-    :param update_func:
+    :param update:
         A function that is run during the update process. The function takes as argument
         the CodeExercise, so it can update all cue_ouputs
 
@@ -71,7 +71,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         ] = None,
         update_mode: str = "manual",
         outputs: Union[None, Figure, CueOutput, List[CueOutput]] = None,
-        update_func: Optional[
+        update: Optional[
             Union[
                 Callable[[CodeExercise], Union[Any, Check.FunOutParamsT]],
                 Callable[[], Union[Any, Check.FunOutParamsT]],
@@ -95,20 +95,22 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                 Callable[[CodeExercise], Union[Any, Check.FunOutParamsT]],
                 Callable[[], Union[Any, Check.FunOutParamsT]],
             ]
-        ] = update_func
+        ] = update
 
+        # We test update instead of self._update_func because self._update_func
+        # has one additional argument because of self
         self._update_func_nb_nondefault_args: Optional[int]
-        if update_func is not None:
+        if update is not None:
             self._update_func_nb_nondefault_args = len(
                 [
                     value
-                    for value in inspect.signature(update_func).parameters.values()
+                    for value in inspect.signature(update).parameters.values()
                     if not isinstance(value.default, inspect._empty)
                 ]
             )
             if self._update_func_nb_nondefault_args > 1:
                 raise ValueError(
-                    f"The given update_func has "
+                    f"The given update function has "
                     f"{self._update_func_nb_nondefault_args} parameters without "
                     "defaults, but only zero or one are supported."
                 )
@@ -160,7 +162,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
 
         # check compability between code and params, can only be checked if
         # update_func is not used because we cannot know how the code input is used
-        if update_func is None and code is not None and params is not None:
+        if update is None and code is not None and params is not None:
             if isinstance(params, dict):
                 compatibility_result = code.compatible_with_signature(
                     list(params.keys())
