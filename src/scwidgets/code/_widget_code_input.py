@@ -1,11 +1,12 @@
+import ast
 import inspect
-import re
 import sys
+import textwrap
 import traceback
 import types
 import warnings
 from functools import wraps
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Tuple
 
 from widget_code_input import WidgetCodeInput
 from widget_code_input.utils import (
@@ -38,13 +39,16 @@ class CodeInput(WidgetCodeInput):
                 function.__name__ if function_name is None else function_name
             )
             function_parameters = (
-                ", ".join(inspect.getfullargspec(function).args)
+                self.get_function_parameters(function)
                 if function_parameters is None
                 else function_parameters
             )
-            docstring = inspect.getdoc(function) if docstring is None else docstring
+            docstring = function.__doc__  # get_docstring
+            # function.__doc__ if docstring is None else docstring
             function_body = (
-                self.get_code(function) if function_body is None else function_body
+                self.get_function_body(function)
+                if function_body is None
+                else function_body
             )
 
         # default parameters from WidgetCodeInput
@@ -99,46 +103,60 @@ class CodeInput(WidgetCodeInput):
         return self.get_function_object()(*args, **kwargs)
 
     @staticmethod
-    def get_code(func: types.FunctionType) -> str:
-        source_lines, _ = inspect.getsourcelines(func)
-
-        found_def = False
-        def_index = 0
-        for i, line in enumerate(source_lines):
-            if "def" in line:
-                found_def = True
-                def_index = i
-                break
-        if not (found_def):
+    def _get_function_source_and_def(
+        function: types.FunctionType,
+    ) -> Tuple[str, ast.FunctionDef]:
+        function_source = inspect.getsource(function)
+        function_source = textwrap.dedent(function_source)
+        module = ast.parse(function_source)
+        if len(module.body) != 1:
+            raise ValueError(f"Expected code with one function but found {module.body}")
+        function_definition = module.body[0]
+        if not isinstance(function_definition, ast.FunctionDef):
             raise ValueError(
-                "Did not find any def definition. Only functions with a "
-                "defition are supported"
+                f"When parsing code found {module.body[0]} but only ast.FunctionDef is supported."
             )
+        return function_source, function_definition
 
-        # Remove function definition
-        line = re.sub(r"^\s*def\s+[^\(]*\(.*\)(.*?):\n?", "", line)
-        source_lines[def_index] = line
-        # Remove any potential wrappers
-        source_lines = source_lines[i:]
-
-        source = "".join(source_lines)
-        # Remove docstrings
-        source = re.sub(
-            r"((.*?)\'\'\'(.*?)\'\'\'.*?[;\n]|(.*?)\"\"\"(.*?)\"\"\"(.*?)[;\n])",
-            "",
-            source,
-            flags=re.DOTALL,
+    @staticmethod
+    def get_function_parameters(function: types.FunctionType) -> str:
+        function_parameters = []
+        function_source, function_definition = CodeInput._get_function_source_and_def(
+            function
         )
 
-        # Adjust indentation
-        lines = source.split("\n")
-        if lines:
-            leading_indent = len(lines[0]) - len(lines[0].lstrip())
-            source = "\n".join(
-                line[leading_indent:] if line.strip() else "" for line in lines
-            )
+        idx_start_defaults = len(function_definition.args.args) - len(
+            function_definition.args.defaults
+        )
+        for i, arg in enumerate(function_definition.args.args):
+            # gives argument with annotation
+            function_parameter = ast.get_source_segment(function_source, arg)
+            if i >= idx_start_defaults:
+                default_val = ast.get_source_segment(
+                    function_source,
+                    function_definition.args.defaults[i - idx_start_defaults],
+                )
+                function_parameter = f"{function_parameter} = {default_val}"
+            function_parameters.append(function_parameter)
 
-        return source
+        return ", ".join(function_parameters)
+
+    @staticmethod
+    def get_function_body(function: types.FunctionType) -> str:
+        function_source, function_definition = CodeInput._get_function_source_and_def(
+            function
+        )
+
+        ast_functon_body = function_definition.body[-1]
+
+        source_function_body = ast.get_source_segment(
+            function_source, ast_functon_body, padded=True
+        )
+        breakpoint()
+        if source_function_body is None:
+            raise ValueError("Could not extract function body.")
+        source_function_body = textwrap.dedent(source_function_body)
+        return source_function_body
 
     def get_function_object(self):
         """
