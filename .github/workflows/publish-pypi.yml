@@ -1,0 +1,34 @@
+# This workflow will upload a Python Package using hatch when a release is created
+
+name: Publish Python Package
+
+on:
+  push:
+    tags:
+    - v[0-9]+.[0-9]+.[0-9]+*
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.12'
+    - name: Install dependencies and build package
+      run: |
+        pip install --upgrade pip build twine
+        python -m build
+    - name: Publish package
+      env:
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        TWINE_USERNAME: __token__
+        TWINE_REPOSITORY: pypi
+      run: |
+        python -m twine upload dist/*
