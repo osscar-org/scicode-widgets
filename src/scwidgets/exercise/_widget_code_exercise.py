@@ -176,8 +176,13 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                     "code and params do no match:  " + compatibility_result
                 )
 
-        CheckableWidget.__init__(self, check_registry, exercise_key)
-        ExerciseWidget.__init__(self, exercise_registry, exercise_key)
+        name = kwargs.get("name", exercise_key)
+        CheckableWidget.__init__(self, check_registry, name)
+        if exercise_registry is not None:
+            ExerciseWidget.__init__(self, exercise_registry, exercise_key)
+        else:
+            # otherwise ExerciseWidget constructor will raise an error
+            ExerciseWidget.__init__(self, None, None)
 
         self._code = code
         self._output = CueOutput()
