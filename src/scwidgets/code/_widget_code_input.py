@@ -37,11 +37,7 @@ class CodeInput(WidgetCodeInput):
             function_name = (
                 function.__name__ if function_name is None else function_name
             )
-            function_parameters = (
-                ", ".join(inspect.getfullargspec(function).args)
-                if function_parameters is None
-                else function_parameters
-            )
+            function_parameters = self.get_function_parameters(function)  if function_parameters is None else function_parameters
             docstring = inspect.getdoc(function) if docstring is None else docstring
             function_body = (
                 self.get_code(function) if function_body is None else function_body
@@ -53,6 +49,7 @@ class CodeInput(WidgetCodeInput):
         function_parameters = "" if function_parameters is None else function_parameters
         docstring = "\n" if docstring is None else docstring
         function_body = "" if function_body is None else function_body
+        breakpoint()
         super().__init__(
             function_name, function_parameters, docstring, function_body, code_theme
         )
@@ -99,6 +96,19 @@ class CodeInput(WidgetCodeInput):
         return self.get_function_object()(*args, **kwargs)
 
     @staticmethod
+    def get_function_parameters(function: types.FunctionType) -> str:
+        full_arg_spec = inspect.getfullargspec(function)
+        function_parameters = []
+        for arg in full_arg_spec.args:
+            if (annotation := full_arg_spec.annotations.get(arg, None)) is not None:
+                breakpoint()
+                function_parameters.append( f"{arg}: {annotation}" )
+            else:
+                function_parameters.append( f"{arg}" )
+
+        return ", ".join(function_parameters)
+
+    @staticmethod
     def get_code(func: types.FunctionType) -> str:
         source_lines, _ = inspect.getsourcelines(func)
 
@@ -137,7 +147,6 @@ class CodeInput(WidgetCodeInput):
             source = "\n".join(
                 line[leading_indent:] if line.strip() else "" for line in lines
             )
-
         return source
 
     def get_function_object(self):
