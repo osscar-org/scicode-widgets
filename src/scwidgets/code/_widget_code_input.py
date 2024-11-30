@@ -5,7 +5,7 @@ import traceback
 import types
 import warnings
 from functools import wraps
-from typing import Any, List, Optional
+from typing import List, Optional
 
 from widget_code_input import WidgetCodeInput
 from widget_code_input.utils import (
@@ -68,12 +68,21 @@ class CodeInput(WidgetCodeInput):
     @property
     def function(self) -> types.FunctionType:
         """
-        Returns the unwrapped function object
-        """
-        return inspect.unwrap(self.get_function_object())
+        Return the compiled function object.
 
-    def __call__(self, *args, **kwargs) -> Any:
-        return self.function(*args, **kwargs)
+        This can be assigned to a variable and then called, for instance::
+
+          func = widget.wrapped_function # This can raise a SyntaxError
+          retval = func(parameters)
+
+        :raise SyntaxError: if the function code has syntax errors (or if
+          the function name is not a valid identifier)
+        """
+        return inspect.unwrap(self.wrapped_function)
+
+    def __call__(self, *args, **kwargs) -> Check.FunOutParamsT:
+        """Calls the wrapped function"""
+        return self.wrapped_function(*args, **kwargs)
 
     def compatible_with_signature(self, parameters: List[str]) -> str:
         """
@@ -94,9 +103,6 @@ class CodeInput(WidgetCodeInput):
     @property
     def function_parameters_name(self) -> List[str]:
         return self.function_parameters.replace(",", "").split(" ")
-
-    def run(self, *args, **kwargs) -> Check.FunOutParamsT:
-        return self.get_function_object()(*args, **kwargs)
 
     @staticmethod
     def get_code(func: types.FunctionType) -> str:
@@ -140,13 +146,15 @@ class CodeInput(WidgetCodeInput):
 
         return source
 
-    def get_function_object(self):
+    @property
+    def wrapped_function(self) -> types.FunctionType:
         """
-        Return the compiled function object.
+        Return the compiled function object wrapped by an try-catch block
+        raising a `CodeValidationError`.
 
         This can be assigned to a variable and then called, for instance::
 
-          func = widget.get_function_object() # This can raise a SyntaxError
+          func = widget.wrapped_function # This can raise a SyntaxError
           retval = func(parameters)
 
         :raise SyntaxError: if the function code has syntax errors (or if

@@ -756,7 +756,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                 raise ValueError(
                     "run_code was invoked, but no code was given on initializaion"
                 )
-            return self._code.run(*args, **kwargs)
+            return self._code(*args, **kwargs)
         except CodeValidationError as e:
             raise e
         except Exception as e:
