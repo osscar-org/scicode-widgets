@@ -355,3 +355,21 @@ class TestCodeExercise:
         assert isinstance(code_ex.figure, Figure)
         assert code_ex.output.figure is code_ex.figure
         assert code_ex.outputs[0] is code_ex.output
+
+    def test_consrtuction_with_registries(self):
+        """Because the exercise key is used for the `ExerciseRegistry` and the
+        `CheckRegistry` we need to ensure the `CodeExercise` can be run with
+        each individual one and both"""
+        CodeExercise(
+            exercise_key="some_key",
+            check_registry=CheckRegistry(),
+        )
+        CodeExercise(
+            exercise_key="some_key",
+            exercise_registry=ExerciseRegistry(),
+        )
+        CodeExercise(
+            exercise_key="some_key",
+            check_registry=CheckRegistry(),
+            exercise_registry=ExerciseRegistry(),
+        )
