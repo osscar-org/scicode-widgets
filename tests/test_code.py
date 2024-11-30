@@ -154,7 +154,7 @@ def get_code_exercise(
     code_ex = CodeExercise(
         code=code_input,
         check_registry=CheckRegistry() if include_checks is True else None,
-        parameters=parameters if include_params is True else None,
+        params=parameters if include_params is True else None,
         outputs=[CueObject("Not initialized")],
         update_func=update_print,
         update_mode=update_mode,
@@ -287,7 +287,7 @@ class TestCodeExercise:
 
         code_ex = CodeExercise(
             code=function,
-            parameters={"parameter": fixed(5)},
+            params={"parameter": fixed(5)},
             exercise_registry=exercise_registry,
             exercise_key="test_save_registry_ex",
             outputs=[cue_output],
