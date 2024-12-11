@@ -23,7 +23,7 @@ class TestCodeInput:
         return 0
 
     @staticmethod
-    def mock_function_1(x, y):
+    def mock_function_1(x: int, y: int = 5, z=lambda: 0):
         """
         This is an example function.
         It adds two numbers.
@@ -31,7 +31,7 @@ class TestCodeInput:
         if x > 0:
             return x + y
         else:
-            return y
+            return y + z()
 
     @staticmethod
     def mock_function_2(x):
@@ -53,26 +53,56 @@ class TestCodeInput:
     @staticmethod
     def mock_function_6(x: List[int]) -> List[int]:
         return x
+
+    @staticmethod
+    def mock_function_7(x, **kwargs):
+        return kwargs
     # fmt: on
 
-    def test_get_code(self):
+    def test_get_function_paramaters(self):
         assert (
-            CodeInput.get_code(self.mock_function_1)
-            == "if x > 0:\n    return x + y\nelse:\n    return y\n"
+            CodeInput.get_function_parameters(self.mock_function_1)
+            == "x: int, y: int = 5, z=lambda: 0"
         )
-        assert CodeInput.get_code(self.mock_function_2) == "return x\n"
-        assert CodeInput.get_code(self.mock_function_3) == "return x\n"
-        assert CodeInput.get_code(self.mock_function_4) == "return x  # noqa: E702\n"
+        assert CodeInput.get_function_parameters(self.mock_function_2) == "x"
+        assert CodeInput.get_function_parameters(self.mock_function_6) == "x: List[int]"
+        assert CodeInput.get_function_parameters(self.mock_function_7) == "x, **kwargs"
+
+    def test_get_docstring(self):
         assert (
-            CodeInput.get_code(self.mock_function_5)
+            CodeInput.get_docstring(self.mock_function_1)
+            == "\nThis is an example function.\nIt adds two numbers.\n"
+        )
+        assert (
+            CodeInput.get_docstring(self.mock_function_2)
+            == "This is an example function. It adds two numbers."
+        )
+        assert (
+            CodeInput.get_docstring(self.mock_function_2)
+            == "This is an example function. It adds two numbers."
+        )
+
+    def test_get_function_body(self):
+        assert (
+            CodeInput.get_function_body(self.mock_function_1)
+            == "if x > 0:\n    return x + y\nelse:\n    return y + z()\n"
+        )
+        assert CodeInput.get_function_body(self.mock_function_2) == "return x\n"
+        assert CodeInput.get_function_body(self.mock_function_3) == "return x\n"
+        assert (
+            CodeInput.get_function_body(self.mock_function_4)
+            == "return x  # noqa: E702\n"
+        )
+        assert (
+            CodeInput.get_function_body(self.mock_function_5)
             == "def x():\n    return 5\nreturn x()\n"
         )
-        assert CodeInput.get_code(self.mock_function_6) == "return x\n"
+        assert CodeInput.get_function_body(self.mock_function_6) == "return x\n"
         with pytest.raises(
             ValueError,
             match=r"Did not find any def definition. .*",
         ):
-            CodeInput.get_code(lambda x: x)
+            CodeInput.get_function_body(lambda x: x)
 
     def test_invalid_code_theme_raises_error(self):
         with pytest.raises(
