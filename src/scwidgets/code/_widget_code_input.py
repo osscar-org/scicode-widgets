@@ -8,7 +8,7 @@ import traceback
 import types
 import warnings
 from functools import wraps
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Union
 
 from widget_code_input import WidgetCodeInput
 from widget_code_input.utils import (
@@ -71,7 +71,6 @@ class CodeInput(WidgetCodeInput):
         if function_name is None:
             raise ValueError("function_name must be given if no function is given.")
         function_parameters = "" if function_parameters is None else function_parameters
-        docstring = "\n" if docstring is None else docstring
         function_body = "" if function_body is None else function_body
         self._builtins = {} if builtins is None else builtins
         super().__init__(
@@ -152,9 +151,13 @@ class CodeInput(WidgetCodeInput):
         return self.function_parameters.replace(",", "").split(" ")
 
     @staticmethod
-    def get_docstring(function: types.FunctionType) -> str:
+    def get_docstring(function: types.FunctionType) -> Union[str, None]:
         docstring = function.__doc__
-        return "" if docstring is None else textwrap.dedent(docstring)
+        return (
+            None
+            if docstring is None
+            else textwrap.dedent(docstring).strip('"""')  # noqa: B005
+        )
 
     @staticmethod
     def _get_function_source_and_def(

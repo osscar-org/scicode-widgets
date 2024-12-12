@@ -30,7 +30,7 @@ classifiers = [
 dependencies = [
   "ipywidgets>=8.0.0",
   "numpy<2.0.0",
-  "widget_code_input>=4.0.13",
+  "widget_code_input @ git+https://github.com/agoscinski/widget-code-input.git@flexi-docstring",
   "matplotlib",
   "termcolor"
 ]
