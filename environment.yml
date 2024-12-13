@@ -7,7 +7,7 @@ dependencies:
 - pip
 - pip:
   - ipywidgets>=8.0.0
-  - numpy<2.0.0"
+  - numpy<2.0.0
   - widget_code_input @ git+https://github.com/agoscinski/widget-code-input@remove-docstring
   - matplotlib
   - termcolor
