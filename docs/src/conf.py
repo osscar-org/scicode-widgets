@@ -1,5 +1,7 @@
 # Sphinx documentation build configuration file
 
+import sphinx_material
+
 import scwidgets
 
 extensions = [
@@ -14,7 +16,6 @@ extensions = [
     "nbsphinx",
 ]
 
-import sphinx_material
 
 html_theme = "sphinx_material"
 html_theme_path = sphinx_material.html_theme_path()
