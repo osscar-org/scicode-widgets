@@ -139,7 +139,7 @@ rfc3986-validator = "==0.1.1"
 rpds-py = "==0.20.0"
 scikit-image = "==0.24.0"
 scipy = "==1.14.1"
-scwidgets = {editable = true, ref = "c9d034fd183c479057ba945e5de858f749a8fe01", git = "ssh://****@github.com/osscar-org/scicode-widgets.git"}
+scwidgets = {editable = true, ref = "c9d034fd183c479057ba945e5de858f749a8fe01", git = "https://github.com/osscar-org/scicode-widgets.git"}
 selenium = "==4.9.0"
 send2trash = "==1.8.3"
 six = "==1.16.0"
