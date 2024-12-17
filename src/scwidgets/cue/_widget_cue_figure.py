@@ -47,7 +47,7 @@ class CueFigure(CueOutput):
         figure: Figure,
         widgets_to_observe: Union[None, List[Widget], Widget] = None,
         traits_to_observe: Union[
-            None, str, List[str], List[List[str]], Sentinel
+            None, str, Sentinel, List[Union[str, Sentinel, List[str]]]
         ] = None,
         cued: bool = True,
         show_toolbars: bool = False,

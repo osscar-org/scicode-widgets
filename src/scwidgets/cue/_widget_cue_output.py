@@ -33,7 +33,7 @@ class CueOutput(Output, CueWidget):
         self,
         widgets_to_observe: Union[None, List[Widget], Widget] = None,
         traits_to_observe: Union[
-            None, str, List[str], List[List[str]], Sentinel
+            None, str, Sentinel, List[Union[str, Sentinel, List[str]]]
         ] = None,
         cued: bool = True,
         css_style: Optional[dict] = None,

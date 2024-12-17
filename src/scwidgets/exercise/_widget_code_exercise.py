@@ -302,7 +302,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
 
                     self._cue_parameter_panel = UpdateCueBox(
                         self._parameter_panel.parameters_widget,
-                        self._parameter_panel.parameters_trait,
+                        self._parameter_panel.parameters_trait,  # type: ignore
                         self._parameter_panel,
                     )
 
@@ -362,7 +362,6 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                 else:
                     description = "Update"
                     button_tooltip = "Updates outputs with the specified parameters"
-
                 self._update_button = UpdateResetCueButton(
                     reset_update_cue_widgets,  # type: ignore[arg-type]
                     self._on_click_update_action,
@@ -374,7 +373,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                         update_button_disable_during_action,
                     ),
                     widgets_to_observe=widgets_to_observe,
-                    traits_to_observe=traits_to_observe,
+                    traits_to_observe=traits_to_observe,  # type: ignore[arg-type]
                     description=description,
                     button_tooltip=button_tooltip,
                     cued=True,
@@ -403,7 +402,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             if self._cue_code is not None:
                 self._cue_code = SaveCueBox(
                     save_widgets_to_observe,
-                    save_traits_to_observe,
+                    save_traits_to_observe,  # type: ignore[arg-type]
                     self._cue_code,
                     cued=True,
                 )
