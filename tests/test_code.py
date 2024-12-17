@@ -69,6 +69,7 @@ class TestCodeInput:
         assert CodeInput.get_function_parameters(self.mock_function_7) == "x, **kwargs"
 
     def test_get_docstring(self):
+        assert CodeInput.get_docstring(self.mock_function_0) is None
         assert (
             CodeInput.get_docstring(self.mock_function_1)
             == "\nThis is an example function.\nIt adds two numbers.\n"
