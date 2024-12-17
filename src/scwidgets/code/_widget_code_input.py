@@ -1,4 +1,5 @@
 import ast
+import copy
 import inspect
 import re
 import sys
@@ -7,7 +8,7 @@ import traceback
 import types
 import warnings
 from functools import wraps
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 from widget_code_input import WidgetCodeInput
 from widget_code_input.utils import (
@@ -34,6 +35,8 @@ class CodeInput(WidgetCodeInput):
         `"x, y = 5"`
     :param docstring: The docstring of the function
     :param function_body: The function definition without indentation
+    :param builtins: A dict of variable name and value that is added to the
+      globals __builtins__ and thus available on initialization
     """
 
     valid_code_themes = ["nord", "solarizedLight", "basicLight"]
@@ -45,6 +48,7 @@ class CodeInput(WidgetCodeInput):
         function_parameters: Optional[str] = None,
         docstring: Optional[str] = None,
         function_body: Optional[str] = None,
+        builtins: Optional[dict[str, Any]] = None,
         code_theme: str = "basicLight",
     ):
         if function is not None:
@@ -69,6 +73,7 @@ class CodeInput(WidgetCodeInput):
         function_parameters = "" if function_parameters is None else function_parameters
         docstring = "\n" if docstring is None else docstring
         function_body = "" if function_body is None else function_body
+        self._builtins = {} if builtins is None else builtins
         super().__init__(
             function_name, function_parameters, docstring, function_body, code_theme
         )
@@ -94,12 +99,16 @@ class CodeInput(WidgetCodeInput):
         :raise SyntaxError: if the function code has syntax errors (or if
           the function name is not a valid identifier)
         """
+        # we shallow copy the builtins to be able to overwrite it
+        # if self.builtins changes
         globals_dict = {
-            "__builtins__": globals()["__builtins__"],
+            "__builtins__": copy.copy(globals()["__builtins__"]),
             "__name__": "__main__",
             "__doc__": None,
             "__package__": None,
         }
+
+        globals_dict["__builtins__"].update(self._builtins)
 
         if not is_valid_variable_name(self.function_name):
             raise SyntaxError("Invalid function name '{}'".format(self.function_name))
@@ -274,6 +283,14 @@ class CodeInput(WidgetCodeInput):
             return wrapper
 
         return catch_exceptions(self.unwrapped_function)
+
+    @property
+    def builtins(self) -> dict[str, Any]:
+        return self._builtins
+
+    @builtins.setter
+    def builtins(self, value: dict[str, Any]):
+        self._builtins = value
 
 
 # Temporary fix until https://github.com/osscar-org/widget-code-input/pull/26

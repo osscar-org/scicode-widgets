@@ -115,6 +115,25 @@ class TestCodeInput:
         assert code(1, 1) == 2
         assert code(0, 1) == 1
 
+    def test_builtins(self):
+        """Tests if import work when they are specified by builtins."""
+        import numpy as np
+
+        # to check if annotation works
+        def function(arr: np.ndarray):
+            return arr + builtins_variable  # noqa: F821
+
+        code_input = CodeInput(function, builtins={"np": np, "builtins_variable": 0})
+        code_input.unwrapped_function(np.array([0]))
+
+        # check if builtins is overwritten,
+        # the builtins_variable should not be there anymore afterwards
+        code_input.builtins = {"np": np}
+        with pytest.raises(
+            NameError, match=r".*name 'builtins_variable' is not defined.*"
+        ):
+            code_input.unwrapped_function(np.array([0]))
+
 
 def get_code_exercise(
     checks: List[Check],
