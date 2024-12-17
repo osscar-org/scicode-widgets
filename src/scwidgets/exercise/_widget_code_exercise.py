@@ -690,7 +690,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         return self._code
 
     @property
-    def output(self) -> CueOutput | None:
+    def output(self) -> Union[CueOutput, None]:
         return self._cue_outputs[0] if len(self._cue_outputs) > 0 else None
 
     @property
@@ -698,7 +698,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         return self._cue_outputs
 
     @property
-    def figure(self) -> Figure | None:
+    def figure(self) -> Union[Figure, None]:
         return (
             self._cue_outputs[0].figure
             if len(self._cue_outputs) > 0
