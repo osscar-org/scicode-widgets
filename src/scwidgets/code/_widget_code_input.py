@@ -82,7 +82,7 @@ class CodeInput(WidgetCodeInput):
             )
 
     @property
-    def function(self) -> types.FunctionType:
+    def unwrapped_function(self) -> types.FunctionType:
         """
         Return the compiled function object.
 
@@ -94,11 +94,33 @@ class CodeInput(WidgetCodeInput):
         :raise SyntaxError: if the function code has syntax errors (or if
           the function name is not a valid identifier)
         """
-        return inspect.unwrap(self.wrapped_function)
+        globals_dict = {
+            "__builtins__": globals()["__builtins__"],
+            "__name__": "__main__",
+            "__doc__": None,
+            "__package__": None,
+        }
+
+        if not is_valid_variable_name(self.function_name):
+            raise SyntaxError("Invalid function name '{}'".format(self.function_name))
+
+        # Optionally one could do a ast.parse here already, to check syntax
+        # before execution
+        try:
+            exec(
+                compile(self.full_function_code, __name__, "exec", dont_inherit=True),
+                globals_dict,
+            )
+        except SyntaxError as exc:
+            raise CodeValidationError(
+                format_syntax_error_msg(exc), orig_exc=exc
+            ) from exc
+
+        return globals_dict[self.function_name]
 
     def __call__(self, *args, **kwargs) -> Check.FunOutParamsT:
         """Calls the wrapped function"""
-        return self.wrapped_function(*args, **kwargs)
+        return self.function(*args, **kwargs)
 
     def compatible_with_signature(self, parameters: List[str]) -> str:
         """
@@ -223,7 +245,7 @@ class CodeInput(WidgetCodeInput):
         return source
 
     @property
-    def wrapped_function(self) -> types.FunctionType:
+    def function(self) -> types.FunctionType:
         """
         Return the compiled function object wrapped by an try-catch block
         raising a `CodeValidationError`.
@@ -236,29 +258,6 @@ class CodeInput(WidgetCodeInput):
         :raise SyntaxError: if the function code has syntax errors (or if
           the function name is not a valid identifier)
         """
-        globals_dict = {
-            "__builtins__": globals()["__builtins__"],
-            "__name__": "__main__",
-            "__doc__": None,
-            "__package__": None,
-        }
-
-        if not is_valid_variable_name(self.function_name):
-            raise SyntaxError("Invalid function name '{}'".format(self.function_name))
-
-        # Optionally one could do a ast.parse here already, to check syntax
-        # before execution
-        try:
-            exec(
-                compile(self.full_function_code, __name__, "exec", dont_inherit=True),
-                globals_dict,
-            )
-        except SyntaxError as exc:
-            raise CodeValidationError(
-                format_syntax_error_msg(exc), orig_exc=exc
-            ) from exc
-
-        function_object = globals_dict[self.function_name]
 
         def catch_exceptions(func):
             @wraps(func)
@@ -274,7 +273,7 @@ class CodeInput(WidgetCodeInput):
 
             return wrapper
 
-        return catch_exceptions(function_object)
+        return catch_exceptions(self.unwrapped_function)
 
 
 # Temporary fix until https://github.com/osscar-org/widget-code-input/pull/26
