@@ -85,19 +85,19 @@ class TestCodeInput:
     def test_get_function_body(self):
         assert (
             CodeInput.get_function_body(self.mock_function_1)
-            == "if x > 0:\n    return x + y\nelse:\n    return y + z()\n"
+            == "if x > 0:\n    return x + y\nelse:\n    return y + z()"
         )
-        assert CodeInput.get_function_body(self.mock_function_2) == "return x\n"
-        assert CodeInput.get_function_body(self.mock_function_3) == "return x\n"
+        assert CodeInput.get_function_body(self.mock_function_2) == "return x"
+        assert CodeInput.get_function_body(self.mock_function_3) == "return x"
         assert (
             CodeInput.get_function_body(self.mock_function_4)
-            == "return x  # noqa: E702\n"
+            == "return x  # noqa: E702"
         )
         assert (
             CodeInput.get_function_body(self.mock_function_5)
-            == "def x():\n    return 5\nreturn x()\n"
+            == "def x():\n    return 5\nreturn x()"
         )
-        assert CodeInput.get_function_body(self.mock_function_6) == "return x\n"
+        assert CodeInput.get_function_body(self.mock_function_6) == "return x"
         with pytest.raises(
             ValueError,
             match=r"Did not find any def definition. .*",
