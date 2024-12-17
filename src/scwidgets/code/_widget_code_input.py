@@ -1,4 +1,5 @@
 import ast
+import copy
 import inspect
 import re
 import sys
@@ -7,7 +8,7 @@ import traceback
 import types
 import warnings
 from functools import wraps
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple 
 
 from widget_code_input import WidgetCodeInput
 from widget_code_input.utils import (
@@ -34,6 +35,8 @@ class CodeInput(WidgetCodeInput):
         `"x, y = 5"`
     :param docstring: The docstring of the function
     :param function_body: The function definition without indentation
+    :param builtins: A dict of variable name and value that is added to the
+      globals __builtins__ and thus available on initialization
     """
 
     valid_code_themes = ["nord", "solarizedLight", "basicLight"]
@@ -45,6 +48,7 @@ class CodeInput(WidgetCodeInput):
         function_parameters: Optional[str] = None,
         docstring: Optional[str] = None,
         function_body: Optional[str] = None,
+        builtins: Optional[dict[str, Any]] = None,
         code_theme: str = "basicLight",
     ):
         if function is not None:
@@ -67,8 +71,8 @@ class CodeInput(WidgetCodeInput):
         if function_name is None:
             raise ValueError("function_name must be given if no function is given.")
         function_parameters = "" if function_parameters is None else function_parameters
-        docstring = "\n" if docstring is None else docstring
         function_body = "" if function_body is None else function_body
+        self._builtins = {} if builtins is None else builtins
         super().__init__(
             function_name, function_parameters, docstring, function_body, code_theme
         )
@@ -81,8 +85,7 @@ class CodeInput(WidgetCodeInput):
                 f"the values {CodeInput.valid_code_themes}"
             )
 
-    @property
-    def function(self) -> types.FunctionType:
+    def get_unwrapped_function(self) -> types.FunctionType:
         """
         Return the compiled function object.
 
@@ -94,11 +97,37 @@ class CodeInput(WidgetCodeInput):
         :raise SyntaxError: if the function code has syntax errors (or if
           the function name is not a valid identifier)
         """
-        return inspect.unwrap(self.wrapped_function)
+        # we copy the shallow copy the builtins to be able to overwrite
+        # if self._builtins has changed
+        globals_dict = {
+            "__builtins__": copy.copy(globals()["__builtins__"]),
+            "__name__": "__main__",
+            "__doc__": None,
+            "__package__": None,
+        }
+
+        globals_dict["__builtins__"].update(self._builtins)
+
+        if not is_valid_variable_name(self.function_name):
+            raise SyntaxError("Invalid function name '{}'".format(self.function_name))
+
+        # Optionally one could do a ast.parse here already, to check syntax
+        # before execution
+        try:
+            exec(
+                compile(self.full_function_code, __name__, "exec", dont_inherit=True),
+                globals_dict,
+            )
+        except SyntaxError as exc:
+            raise CodeValidationError(
+                format_syntax_error_msg(exc), orig_exc=exc
+            ) from exc
+
+        return globals_dict[self.function_name]
 
     def __call__(self, *args, **kwargs) -> Check.FunOutParamsT:
         """Calls the wrapped function"""
-        return self.wrapped_function(*args, **kwargs)
+        return self.get_function()(*args, **kwargs)
 
     def compatible_with_signature(self, parameters: List[str]) -> str:
         """
@@ -108,7 +137,7 @@ class CodeInput(WidgetCodeInput):
         if "**" in self.function_parameters:
             # function has keyword arguments so it is compatible
             return ""
-        for parameter_name in inspect.signature(self.function).parameters.keys():
+        for parameter_name in inspect.signature(self.get_function()).parameters.keys():
             if not (parameter_name in parameters):
                 return (
                     f"The input parameter {parameter_name} is not compatible with "
@@ -121,9 +150,9 @@ class CodeInput(WidgetCodeInput):
         return self.function_parameters.replace(",", "").split(" ")
 
     @staticmethod
-    def get_docstring(function: types.FunctionType) -> str:
+    def get_docstring(function: types.FunctionType) -> str | None:
         docstring = function.__doc__
-        return "" if docstring is None else textwrap.dedent(docstring)
+        return None if docstring is None else textwrap.dedent(docstring)
 
     @staticmethod
     def _get_function_source_and_def(
@@ -220,10 +249,9 @@ class CodeInput(WidgetCodeInput):
                 line[leading_indent:] if line.strip() else "" for line in lines
             )
 
-        return source
+        return source.strip()
 
-    @property
-    def wrapped_function(self) -> types.FunctionType:
+    def get_function(self) -> types.FunctionType:
         """
         Return the compiled function object wrapped by an try-catch block
         raising a `CodeValidationError`.
@@ -236,29 +264,6 @@ class CodeInput(WidgetCodeInput):
         :raise SyntaxError: if the function code has syntax errors (or if
           the function name is not a valid identifier)
         """
-        globals_dict = {
-            "__builtins__": globals()["__builtins__"],
-            "__name__": "__main__",
-            "__doc__": None,
-            "__package__": None,
-        }
-
-        if not is_valid_variable_name(self.function_name):
-            raise SyntaxError("Invalid function name '{}'".format(self.function_name))
-
-        # Optionally one could do a ast.parse here already, to check syntax
-        # before execution
-        try:
-            exec(
-                compile(self.full_function_code, __name__, "exec", dont_inherit=True),
-                globals_dict,
-            )
-        except SyntaxError as exc:
-            raise CodeValidationError(
-                format_syntax_error_msg(exc), orig_exc=exc
-            ) from exc
-
-        function_object = globals_dict[self.function_name]
 
         def catch_exceptions(func):
             @wraps(func)
@@ -274,7 +279,15 @@ class CodeInput(WidgetCodeInput):
 
             return wrapper
 
-        return catch_exceptions(function_object)
+        return catch_exceptions(self.get_unwrapped_function())
+
+    @property
+    def builtins(self) -> dict[str, Any]:
+        return self._builtins
+
+    @builtins.setter
+    def builtins(self, value: dict[str, Any]):
+        self._builtins = value
 
 
 # Temporary fix until https://github.com/osscar-org/widget-code-input/pull/26

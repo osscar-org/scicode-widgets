@@ -16,7 +16,7 @@ class CueObject(CueOutput):
     A cued displayable ipywidget.Output for any Python object.  Provides utilities to
     clear and redraw the object, for example after an update.
 
-    :param display_object:
+    :param object:
         The object to display
     :param widgets_to_observe:
         The widget to observe if the :param traits_to_observe: has changed.
@@ -35,7 +35,7 @@ class CueObject(CueOutput):
 
     def __init__(
         self,
-        display_object: Any = None,
+        object: Any = None,
         widgets_to_observe: Union[None, List[Widget], Widget] = None,
         traits_to_observe: Union[
             None, str, List[str], List[List[str]], Sentinel
@@ -54,23 +54,23 @@ class CueObject(CueOutput):
             **kwargs,
         )
 
-        self._display_object = display_object
+        self._object = object
         self.draw_display()
 
     @property
-    def display_object(self):
-        return self._display_object
+    def object(self):
+        return self._object
 
-    @display_object.setter
-    def display_object(self, display_object: Any):
-        self._display_object = display_object
+    @object.setter
+    def object(self, object: Any):
+        self._object = object
 
     def clear_display(self, wait=False):
         self.clear_output(wait=wait)
 
     def draw_display(self):
         with self:
-            if isinstance(self._display_object, str):
-                print(self._display_object)
-            elif self._display_object is not None:
-                display(self._display_object)
+            if isinstance(self._object, str):
+                print(self._object)
+            elif self._object is not None:
+                display(self._object)

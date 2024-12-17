@@ -50,7 +50,7 @@ class CueFigure(CueOutput):
             None, str, List[str], List[List[str]], Sentinel
         ] = None,
         cued: bool = True,
-        no_toolbars: bool = True,
+        show_toolbar: bool = False,
         css_style: Optional[dict] = None,
         **kwargs,
     ):
@@ -87,7 +87,7 @@ class CueFigure(CueOutput):
                 "that should be supported on all systems."
             )
 
-        if no_toolbars:
+        if show_toolbar:
             # hides unnecessary elements shown with %matplotlib widget
             self.figure.canvas.header_visible = False
             self.figure.canvas.footer_visible = False

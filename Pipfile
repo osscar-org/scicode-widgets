@@ -1,0 +1,53 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+#scicode-widgets = {file = "."}
+#scicode-widgets = {file = "."}
+#scicode-widgets = {ref = "92337fb3cf17a4cf9867bfd2acbfd47278c89048", git = "https://github.com/osscar-org/scicode-widgets"}
+scwidgets = {ref = "92337fb3cf17a4cf9867bfd2acbfd47278c89048", git = "https://github.com/osscar-org/scicode-widgets"}
+#scwidgets = {file = "."}
+anywidget = "==0.9.13"
+asttokens = "==3.0.0"
+comm = "==0.2.2"
+contourpy = "==1.3.1"
+cycler = "==0.12.1"
+decorator = "==5.1.1"
+executing = "==2.1.0"
+fonttools = "==4.55.3"
+ipython = "==8.30.0"
+ipywidgets = "==8.1.5"
+jedi = "==0.19.2"
+jupyterlab-widgets = "==3.0.13"
+kiwisolver = "==1.4.7"
+matplotlib = "==3.9.4"
+matplotlib-inline = "==0.1.7"
+numpy = "==1.26.4"
+packaging = "==24.2"
+parso = "==0.8.4"
+pexpect = "==4.9.0"
+pillow = "==11.0.0"
+prompt-toolkit = "==3.0.48"
+psygnal = "==0.11.1"
+ptyprocess = "==0.7.0"
+pure-eval = "==0.2.3"
+pygments = "==2.18.0"
+pyparsing = "==3.2.0"
+python-dateutil = "==2.9.0.post0"
+six = "==1.17.0"
+stack-data = "==0.6.3"
+termcolor = "==2.5.0"
+traitlets = "==5.14.3"
+typing-extensions = "==4.12.2"
+wcwidth = "==0.2.13"
+# cannot do this for now otherwise conflicts with pyproject.toml by the scwidget dep
+#widget-code-input = "==4.0.14"
+#widget-code-input = {ref = "90f731ca929725ef3fcad3da7bcb3e3672d9eefd", git = "https://github.com/agoscinski/widget-code-input"}
+widgetsnbextension = "==4.0.13"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"
