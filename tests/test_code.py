@@ -189,7 +189,7 @@ def get_code_exercise(
                 output = code_ex.params
             else:
                 output = code_ex.run_code(**code_ex.params)
-            code_ex.output.display_object = f"Output:\n{output}"
+            code_ex.output.object = f"Output:\n{output}"
 
     else:
 
@@ -198,7 +198,7 @@ def get_code_exercise(
                 output = code_ex.params
             else:
                 output = code_ex.run_code(**code_ex.params)
-            code_ex.output.display_object = f"Output:\n{output}"
+            code_ex.output.object = f"Output:\n{output}"
 
     code_ex = CodeExercise(
         code=code_input,
@@ -329,7 +329,7 @@ class TestCodeExercise:
         """
 
         def print_success(code_ex: CodeExercise | None):
-            code_ex.output.display_object = "Success"
+            code_ex.output.object = "Success"
 
         cue_output = CueObject("Not initialized")
         exercise_registry = ExerciseRegistry()
