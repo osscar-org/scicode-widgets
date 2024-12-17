@@ -251,7 +251,7 @@ class CodeInput(WidgetCodeInput):
                 line[leading_indent:] if line.strip() else "" for line in lines
             )
 
-        return source
+        return source.strip()
 
     @property
     def function(self) -> types.FunctionType:
