@@ -101,7 +101,7 @@ class ExerciseWidget:
             raise ValueError(
                 "No exercise key given on initialization, save cannot be used"
             )
-        return self._exercise_registry.load_answer(self._exercise_key)
+        return self._exercise_registry.load_answer_from_loaded_file(self._exercise_key)
 
     @property
     def exercise_registry(self):
@@ -341,26 +341,65 @@ class ExerciseRegistry(VBox):
 
             self._loaded_file_name = answers_filename
 
-    def load_answer(self, exercise_key: Hashable) -> str:
+    def load_answer_from_student_name(
+        self, student_name: str, exercise_key: Union[Hashable, ExerciseWidget]
+    ):
         """
-        Only works when file has been loaded
+        Loads the answer with key `exercise_key` from the file corresponding to
+        `student_name`.
 
-        :param exercise_key:
-            unique exercise key for widget to store, so it can be reloaded persistently
-            after a restart of the python kernel
+        :raises KeyError: Corresponding widget to exercise_key cannot be found
+        :raises KeyError: Corresponding key in file cannot be found
+        :raises FileNotFoundError: If the file cannot be found
+        :param student_name: The name of the student
+        :param exercise_key: Unique exercise key for widget to store, so it can
+            be reloaded persistently after a restart of the python kernel
         """
+        self.load_answer(self.get_answer_filename(student_name), exercise_key)
+
+    def load_answer_from_loaded_file(
+        self, exercise_key: Union[Hashable, ExerciseWidget]
+    ) -> str:
+        """
+        Loads the answer with key `exercise_key` from the currently loaded file.
+
+        :raises ValueError: No have has been loaded
+        :raises KeyError: Corresponding widget to exercise_key cannot be found
+        :raises KeyError: Corresponding key in file cannot be found
+        :raises FileNotFoundError: If the file cannot be found
+        :param exercise_key: Unique exercise key for widget to store, so it can
+            be reloaded persistently after a restart of the python kernel
+        """
+        if self._loaded_file_name is None:
+            raise ValueError("No file has been loaded.")
+
+        self.load_answer(self._loaded_file_name, exercise_key)
+        return f"Exercise has been loaded from file {self._loaded_file_name!r}."
+
+    def load_answer(
+        self, answers_filename: str, exercise_key: Union[Hashable, ExerciseWidget]
+    ):
+        """
+        Loads the answer with key `exercise_key` from the `answer_filename`.
+
+        :raises KeyError: Corresponding widget to exercise_key cannot be found
+        :raises KeyError: Corresponding key in file cannot be found
+        :raises FileNotFoundError: If the file cannot be found
+        :param answers_filename: The file with the answer
+        :param exercise_key: Unique exercise key for widget to store, so it can
+            be reloaded persistently after a restart of the python kernel
+        """
+        if isinstance(exercise_key, ExerciseWidget):
+            exercise_key = exercise_key.exercise_key
+
         if exercise_key not in self._widgets.keys():
             raise KeyError(
                 f"There is no widget registered with exercise key {exercise_key!r}."
             )
-        if self._loaded_file_name is None:
-            raise ValueError("No file has been selected in the dropdown list.")
-
-        answers_filename = self._loaded_file_name
 
         if not (os.path.exists(answers_filename)):
             raise FileNotFoundError(
-                "Selected file does not exist anymore. Maybe you have renamed "
+                f"The file {answers_filename!r} does not exist. Maybe you have renamed "
                 "or deleted it? Please choose another file or create a new one."
             )
 
@@ -375,9 +414,6 @@ class ExerciseRegistry(VBox):
         else:
             self._widgets[exercise_key].answer = answers[exercise_key]
         self._loaded_file_name = answers_filename
-        return f"Exercise has been loaded from file {answers_filename!r}."
-
-        self._answers_files_dropdown.value
 
     def load_file_from_dropdown(self) -> str:
         """
@@ -410,7 +446,7 @@ class ExerciseRegistry(VBox):
 
         if not (os.path.exists(answers_filename)):
             raise FileNotFoundError(
-                "Selected file does not exist anymore. Maybe you have renamed "
+                f"The file {answers_filename!r} does not exist. Maybe you have renamed "
                 "or deleted it? Please choose another file or create a new one."
             )
 
