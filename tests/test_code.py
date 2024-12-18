@@ -344,7 +344,7 @@ class TestCodeExercise:
         )
 
         exercise_registry._student_name_text.value = "test_save_registry-student_name"
-        exercise_registry.create_new_file()
+        exercise_registry.create_new_file_from_dropdown()
         code_ex._save_button.click()
         os.remove("test_save_registry-student_name.json")
 

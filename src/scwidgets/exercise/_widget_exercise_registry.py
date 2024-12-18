@@ -70,14 +70,14 @@ class ExerciseWidget:
     def handle_save_result(self, result: Union[str, Exception]) -> None:
         """
         Function that controls how a save result is handled. If the result is a string,
-        the saving was succesfull. The result contains a string that can be outputed.
+        the saving was successfull. The result contains a string that can be outputed.
         """
         raise NotImplementedError("handle_save_result has not been implemented")
 
     def handle_load_result(self, result: Union[str, Exception]) -> None:
         """
         Function that controls how a load result is handled. If the result is a string,
-        the loading was succesfull. The result contains a string that can be outputed.
+        the loading was successfull. The result contains a string that can be outputed.
         """
         raise NotImplementedError("handle_load_result has not been implemented")
 
@@ -271,7 +271,7 @@ class ExerciseRegistry(VBox):
         return self._widgets.copy()
 
     @property
-    def loaded_file_name(self):
+    def loaded_file_name(self) -> Union[str, None]:
         return self._loaded_file_name
 
     def register_widget(self, widget: ExerciseWidget, exercise_key: Hashable):
@@ -284,24 +284,46 @@ class ExerciseRegistry(VBox):
         """
         self._widgets[exercise_key] = widget
 
-    def create_new_file(self) -> str:
-        FilenameParser.verify_valid_student_name(self._student_name_text.value)
+    def create_new_file_from_dropdown(self) -> str:
+        """Creates a new file containing all students answers from the selected
+        file in the dropdown menu.
+
+        :raises FileExistsError: If the file arleady exists
+        :return: A message to print
+        """
+        self.create_new_file_from_student_name(self._student_name_text.value)
+        return f"File {self._loaded_file_name!r} created and loaded."
+
+    def get_answer_filename(self, student_name: str) -> str:
+        """Returns the filename containing all answers for the student name.
+
+        :param student_name: The name of the student used for the filename
+        :raises ValueError: If student name is not valid
+        :return: The filename
+        """
+        FilenameParser.verify_valid_student_name(student_name)
 
         answers_filename = ""
         # if prefix is defined, it is added to the filename
         if self._filename_prefix is not None:
             answers_filename += self._filename_prefix + "-"
-        student_name_standardized = FilenameParser.standardize_filename(
-            self._student_name_text.value
-        )
+        student_name_standardized = FilenameParser.standardize_filename(student_name)
         answers_filename += student_name_standardized + ".json"
+        return answers_filename
+
+    def create_new_file_from_student_name(self, student_name: str):
+        """Creates a new exercise file containing all students answers.
+
+        :param student_name: The name of the student used for the exercise file
+        :raises FileExistsError: If the file arleady exists
+        :return: A message to print
+        """
+        answers_filename = self.get_answer_filename(student_name)
 
         if os.path.exists(answers_filename):
-            raise ValueError(
-                "The name "
-                f"{student_name_standardized!r} "
-                f"is already used in file {answers_filename!r}. Please provide a "
-                "new name."
+            raise FileExistsError(
+                f"The name is already used for file {answers_filename!r}."
+                " Please provide a new name."
             )
         else:
             answers = {key: widget.answer for key, widget in self._widgets.items()}
@@ -318,7 +340,6 @@ class ExerciseRegistry(VBox):
             self._show_lower_panel_box()
 
             self._loaded_file_name = answers_filename
-            return f"File {answers_filename!r} created and loaded."
 
     def load_answer(self, exercise_key: Hashable) -> str:
         """
@@ -356,9 +377,11 @@ class ExerciseRegistry(VBox):
         self._loaded_file_name = answers_filename
         return f"Exercise has been loaded from file {answers_filename!r}."
 
-    def load_file(self) -> str:
+        self._answers_files_dropdown.value
+
+    def load_file_from_dropdown(self) -> str:
         """
-        Loads all answers from selected file in the dropdown menu
+        Loads all answers from the selected file in the dropdown menu.
         """
         if (
             self._answers_files_dropdown.value
@@ -366,19 +389,29 @@ class ExerciseRegistry(VBox):
         ):
             raise ValueError("No file has been selected in the dropdown list.")
         if self._loaded_file_name is None:
-            if (
-                self._answers_files_dropdown.value
-                == self._create_new_file_dropdown_option()
-            ):
-                raise ValueError("No file has been selected in the dropdown list.")
             answers_filename = self._answers_files_dropdown.value
         else:
             answers_filename = self._loaded_file_name
 
+        self.load_file(answers_filename)
+        return f"All answers loaded from file {self._loaded_file_name!r}."
+
+    def load_file_from_student_name(self, student_name: str):
+        self.load_file(self.get_answer_filename(student_name))
+
+    def load_file(self, answers_filename: str):
+        """
+        Loads all answers from the selected file in the dropdown menu.
+
+        :raises FileNotFoundError: If the file cannot be found
+        :raises ValueError: If the loaded file contains an answer with key that
+            has not been registered
+        """
+
         if not (os.path.exists(answers_filename)):
             raise FileNotFoundError(
                 "Selected file does not exist anymore. Maybe you have renamed "
-                "or deleted it?Please choose another file or create a new one."
+                "or deleted it? Please choose another file or create a new one."
             )
 
         with open(answers_filename, "r") as answers_file:
@@ -393,11 +426,15 @@ class ExerciseRegistry(VBox):
                 self._widgets[exercise_key].answer = answer
         self._loaded_file_name = answers_filename
 
-        # only notifiy all widgets when result was successful
+        # only notify all widgets when result was successful
         for widget in self._widgets.values():
             result = f"Exercise has been loaded from file {self._loaded_file_name!r}."
             widget.handle_load_result(result)
-        return f"All answers loaded from file {answers_filename!r}."
+
+        self._answers_files_dropdown.value = answers_filename
+        self._disable_upper_panel_box()
+        self._enable_lower_panel_box()
+        self._show_lower_panel_box()
 
     def save_answer(self, exercise_key: Hashable) -> str:
         if not (exercise_key in self._widgets.keys()):
@@ -482,10 +519,7 @@ class ExerciseRegistry(VBox):
         self._output.clear_output(wait=True)
         with self._output:
             try:
-                result = self.load_file()
-                self._disable_upper_panel_box()
-                self._enable_lower_panel_box()
-                self._show_lower_panel_box()
+                result = self.load_file_from_dropdown()
                 print(Formatter.color_success_message(result))
             except Exception as exception:
                 print(Formatter.color_error_message("Error raised while loading file:"))
@@ -510,7 +544,7 @@ class ExerciseRegistry(VBox):
         self._output.clear_output(wait=True)
         with self._output:
             try:
-                result = self.create_new_file()
+                result = self.create_new_file_from_dropdown()
                 print(Formatter.color_success_message(result))
             except Exception as exception:
                 print(
