@@ -37,7 +37,9 @@ class CueBox(VBox, CueWidget):
     def __init__(
         self,
         widgets_to_observe: Union[List[Widget], Widget],
-        traits_to_observe: Union[str, List[str], List[List[str]], Sentinel] = "value",
+        traits_to_observe: Union[
+            str, Sentinel, List[Union[str, Sentinel, List[str]]]
+        ] = "value",
         widget_to_cue: Optional[Widget] = None,
         cued: bool = True,
         css_style: Optional[dict] = None,
@@ -112,7 +114,9 @@ class SaveCueBox(CueBox):
     def __init__(
         self,
         widgets_to_observe: Widget,
-        traits_to_observe: Union[str, List[str], Sentinel] = "value",
+        traits_to_observe: Union[
+            str, Sentinel, List[Union[str, Sentinel, List[str]]]
+        ] = "value",
         widget_to_cue: Optional[Widget] = None,
         cued: bool = True,
         *args,
@@ -151,7 +155,9 @@ class CheckCueBox(CueBox):
     def __init__(
         self,
         widgets_to_observe: Widget,
-        traits_to_observe: Union[str, List[str], Sentinel] = "value",
+        traits_to_observe: Union[
+            str, Sentinel, List[Union[str, Sentinel, List[str]]]
+        ] = "value",
         widget_to_cue: Optional[Widget] = None,
         cued: bool = True,
         *args,
@@ -190,7 +196,9 @@ class UpdateCueBox(CueBox):
     def __init__(
         self,
         widgets_to_observe: Widget,
-        traits_to_observe: Union[str, List[str], Sentinel] = "value",
+        traits_to_observe: Union[
+            str, Sentinel, List[Union[str, Sentinel, List[str]]]
+        ] = "value",
         widget_to_cue: Optional[Widget] = None,
         cued: bool = True,
         *args,

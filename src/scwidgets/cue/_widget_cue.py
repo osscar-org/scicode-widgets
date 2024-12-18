@@ -56,7 +56,7 @@ class CueWidget:
                             "traits_to_observe cannot contain lists when "
                             "widgets_to_observe is not a list."
                         )
-            traits_to_observe = [traits_to_observe]
+            traits_to_observe = [traits_to_observe]  # type: ignore[list-item]
         else:
             if not (isinstance(traits_to_observe, list)):
                 raise ValueError(
