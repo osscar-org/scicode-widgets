@@ -124,8 +124,8 @@ class FilenameParser:
         ) and (filename.endswith("json"))
 
     @staticmethod
-    def standardize_filename(filename):
-        return filename
+    def standardize_filename(filename: str) -> str:
+        return filename.lower().replace(" ", "_")
 
     @property
     def filename_prefix(self):
