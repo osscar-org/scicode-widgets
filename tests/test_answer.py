@@ -213,7 +213,8 @@ class TestExerciseRegistry:
         # Tests if error is raised on moved file
         os.rename(f"{self.prefix}-{self.student_name}.json", "tmp.json")
         with pytest.raises(
-            FileNotFoundError, match=r".*Selected file does not exist anymore.*"
+            FileNotFoundError,
+            match=r".*The file 'pytest-test-answer-registry.json' does not exist.*",
         ):
             answer_registry.load_file_from_dropdown()
         os.rename("tmp.json", f"{self.prefix}-{self.student_name}.json")
@@ -236,18 +237,26 @@ class TestExerciseRegistry:
         assert answer_widget_1.answer == "update_1"
         assert answer_widget_2.answer == "update_2"
 
-    def test_load_answer(self):
+    def test_load_answer_from_loaded_file(self):
         answers = {"exercise_1": "answer_1", "exercise_2": "answer_2"}
         with open(f"{self.prefix}-{self.student_name}.json", "w") as answer_file:
             json.dump(answers, answer_file)
 
         answer_registry = ExerciseRegistry(filename_prefix=self.prefix)
+        with pytest.raises(
+            ValueError,
+            match=r".*No file has been loaded*",
+        ):
+            answer_registry.load_answer_from_loaded_file("notkey")
 
+        # To avoid the no loaded file error
+        answer_registry._loaded_file_name = "some"
         with pytest.raises(
             KeyError,
             match=r".*There is no widget registered with exercise key 'notkey'.*",
         ):
-            answer_registry.load_answer("notkey")
+            answer_registry.load_answer_from_loaded_file("notkey")
+        answer_registry._loaded_file_name = None
 
         exercise_key_1 = "exercise_1"
         answer_widget_1 = mock_answer_widget(answer_registry, exercise_key_1)
@@ -259,10 +268,8 @@ class TestExerciseRegistry:
         answer_registry._answers_files_dropdown.value = (
             answer_registry._create_new_file_dropdown_option()
         )
-        with pytest.raises(
-            ValueError, match=r".*No file has been selected in the dropdown list.*"
-        ):
-            answer_registry.load_answer(exercise_key_1)
+        with pytest.raises(ValueError, match=r".*No file has been loaded.*"):
+            answer_registry.load_answer_from_loaded_file(exercise_key_1)
         # select back file to load
         answer_registry._answers_files_dropdown.value = (
             f"{self.prefix}-{self.student_name}.json"
@@ -272,15 +279,16 @@ class TestExerciseRegistry:
         # Tests if error is raised on moved file
         os.rename(f"{self.prefix}-{self.student_name}.json", "tmp.json")
         with pytest.raises(
-            FileNotFoundError, match=r".*Selected file does not exist anymore.*"
+            FileNotFoundError,
+            match=r".*The file 'pytest-test-answer-registry.json' does not exist.*",
         ):
-            answer_registry.load_answer(exercise_key_1)
+            answer_registry.load_answer_from_loaded_file(exercise_key_1)
         os.rename("tmp.json", f"{self.prefix}-{self.student_name}.json")
 
         # Test that file is contains only the updated answer
         answer_widget_1.answer = "update_1"
         answer_widget_2.answer = "update_2"
-        result = answer_registry.load_answer(exercise_key_1)
+        result = answer_registry.load_answer_from_loaded_file(exercise_key_1)
         assert (
             result == "Exercise has been loaded from file "
             "'pytest-test-answer-registry.json'."
