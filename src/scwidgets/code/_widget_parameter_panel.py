@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Union
+from typing import Any, Callable, Dict, List, Union
 
 from ipywidgets import Output, VBox, Widget, fixed, interactive
 from traitlets.utils.sentinel import Sentinel
@@ -39,41 +39,60 @@ class ParameterPanel(VBox):
             "Assumed that interactive returns an output as last child. "
             "Parameter will be wrongly initialized if this is not True."
         )
-        self._parameters_widget = list(self._interactive_widget.children[:-1])
-        super().__init__(self._parameters_widget)
+        # Because interact only keeps a list of the widgets we build a map
+        # so the params can be changed in arbitrary order.
+        # Last widget is an output that interact adds to the widgets.
+        self._param_to_widget_map = {
+            key: widget
+            for key, widget in zip(
+                parameters.keys(), self._interactive_widget.kwargs_widgets
+            )
+        }
+        super().__init__(self.panel_params_widget)
 
     @property
-    def parameters_widget(self) -> List[Widget]:
-        return self._parameters_widget
+    def param_to_widget_map(self) -> dict[str, Widget]:
+        return self._param_to_widget_map
 
     @property
-    def parameters_trait(self) -> List[str]:
-        return ["value"] * len(self._parameters_widget)
+    def panel_params_trait(self) -> List[str]:
+        return ["value"] * len(self.panel_params)
 
     @property
-    def params(self) -> dict:
+    def panel_params_widget(self) -> List[Widget]:
+        """
+        :return: Only parameters that are tunable in the parameter panel are returned.
+            Fixed parameters are ignored.
+        """
+        return [
+            widget
+            for widget in self._param_to_widget_map.values()
+            if not (isinstance(widget, fixed))
+        ]
+
+    @property
+    def params(self) -> Dict[str, Any]:
         """
         :return: All parameters that were given on initialization are returned,
             also including also fixed parameters.
         """
-        return self._interactive_widget.kwargs.copy()
-
-    @params.setter
-    def params(self, parameters: dict):
-        for i, key in enumerate(self._interactive_widget.kwargs.keys()):
-            self._interactive_widget.kwargs_widgets[i].value = parameters[key]
+        return {key: widget.value for key, widget in self._param_to_widget_map.items()}
 
     @property
-    def panel_parameters(self) -> dict:
+    def panel_params(self) -> Dict[str, Any]:
         """
         :return: Only parameters that are tunable in the parameter panel are returned.
             Fixed parameters are ignored.
         """
         return {
-            key: self._interactive_widget.kwargs_widgets[i].value
-            for i, key in enumerate(self._interactive_widget.kwargs.keys())
-            if not (isinstance(self._interactive_widget.kwargs_widgets[i], fixed))
+            key: widget.value
+            for key, widget in self._param_to_widget_map.items()
+            if not (isinstance(widget, fixed))
         }
+
+    def update_params(self, new_params: Dict[str, Any]):
+        for key, value in new_params.items():
+            self.param_to_widget_map[key].value = value
 
     def observe_parameters(
         self,
@@ -82,7 +101,7 @@ class ParameterPanel(VBox):
         notification_type: Union[None, str, Sentinel] = "change",
     ):
         """ """
-        for widget in self._parameters_widget:
+        for widget in self.panel_params_widget:
             widget.observe(handler, trait_name, notification_type)
 
     def unobserve_parameters(
@@ -91,10 +110,10 @@ class ParameterPanel(VBox):
         trait_name: Union[str, Sentinel, List[str]],
         notification_type: Union[None, str, Sentinel] = "change",
     ):
-        for widget in self._parameters_widget:
+        for widget in self.panel_params_widget:
             widget.unobserve(handler, trait_name, notification_type)
 
     def set_parameters_widget_attr(self, name: str, value):
-        for widget in self._parameters_widget:
+        for widget in self.panel_params_widget:
             if hasattr(widget, name):
                 setattr(widget, name, value)
