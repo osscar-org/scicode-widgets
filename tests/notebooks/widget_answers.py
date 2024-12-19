@@ -36,9 +36,7 @@ exercise_registry
 # -------
 # Test if TextExercise shows correct output
 
-text_exercise = TextExercise(
-    exercise_registry=exercise_registry, exercise_key="exercise_1"
-)
+text_exercise = TextExercise(exercise_registry=exercise_registry, key="exercise_1")
 text_exercise
 
 # Test 3:
@@ -56,7 +54,7 @@ code_ex = CodeExercise(
     parameters={"x": (0, 2, 1)},
     update_mode="manual",
     exercise_registry=exercise_registry,
-    exercise_key="exercise_2",
+    key="exercise_2",
 )
 code_ex
 # -

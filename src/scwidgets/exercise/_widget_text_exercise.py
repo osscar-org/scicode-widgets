@@ -14,39 +14,47 @@ class TextExercise(VBox, ExerciseWidget):
         a custom textarea with custom styling, if not specified the standard parameters
         are given.
 
-    the (keyword) arguments are passed to VBox
+    :param key:
+        The key that is used to store the exercise in the json file.
+
+    :param description:
+        A string describing the exercises that will be put into an HTML widget
+        above the exercise.
+
+    :param title:
+        A title for the exercise. If not given the key is used.
     """
 
     def __init__(
         self,
         value: Optional[str] = None,
-        exercise_key: Optional[str] = None,
+        key: Optional[str] = None,
         exercise_registry: Optional[ExerciseRegistry] = None,
-        exercise_description: Optional[str] = None,
-        exercise_title: Optional[str] = None,
+        description: Optional[str] = None,
+        title: Optional[str] = None,
         *args,
         **kwargs,
     ):
-        self._exercise_description = exercise_description
-        if exercise_description is None:
-            self._exercise_description_html = None
+        self._description = description
+        if description is None:
+            self._description_html = None
         else:
-            self._exercise_description_html = HTMLMath(self._exercise_description)
-        if exercise_title is None:
-            if exercise_key is None:
-                self._exercise_title = None
-                self._exercise_title_html = None
+            self._description_html = HTMLMath(self._description)
+        if title is None:
+            if key is None:
+                self._title = None
+                self._title_html = None
             else:
-                self._exercise_title = exercise_key
-                self._exercise_title_html = HTML(f"<b>{exercise_key}</b>")
+                self._title = key
+                self._title_html = HTML(f"<b>{key}</b>")
         else:
-            self._exercise_title = exercise_title
-            self._exercise_title_html = HTML(f"<b>{exercise_title}</b>")
+            self._title = title
+            self._title_html = HTML(f"<b>{title}</b>")
 
-        if self._exercise_description_html is not None:
-            self._exercise_description_html.add_class("exercise-description")
-        if self._exercise_title_html is not None:
-            self._exercise_title_html.add_class("exercise-title")
+        if self._description_html is not None:
+            self._description_html.add_class("exercise-description")
+        if self._title_html is not None:
+            self._title_html.add_class("exercise-title")
 
         layout = kwargs.pop("layout", Layout(width="auto", height="150px"))
         self._textarea = Textarea(value, *args, layout=layout, **kwargs)
@@ -98,13 +106,13 @@ class TextExercise(VBox, ExerciseWidget):
                 layout=Layout(justify_content="flex-end"),
             )
 
-        ExerciseWidget.__init__(self, exercise_registry, exercise_key)
+        ExerciseWidget.__init__(self, exercise_registry, key)
 
         widget_children = [CssStyle()]
-        if self._exercise_title_html is not None:
-            widget_children.append(self._exercise_title_html)
-        if self._exercise_description_html is not None:
-            widget_children.append(self._exercise_description_html)
+        if self._title_html is not None:
+            widget_children.append(self._title_html)
+        if self._description_html is not None:
+            widget_children.append(self._description_html)
         widget_children.append(self._cue_textarea)
         if self._button_panel:
             widget_children.append(self._button_panel)
@@ -117,12 +125,12 @@ class TextExercise(VBox, ExerciseWidget):
         )
 
     @property
-    def exercise_title(self) -> Union[str, None]:
-        return self._exercise_title
+    def title(self) -> Union[str, None]:
+        return self._title
 
     @property
-    def exercise_description(self) -> Union[str, None]:
-        return self._exercise_description
+    def description(self) -> Union[str, None]:
+        return self._description
 
     @property
     def answer(self) -> dict:
