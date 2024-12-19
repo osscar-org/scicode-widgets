@@ -15,7 +15,7 @@ from widget_code_input.utils import CodeValidationError
 from .._utils import Formatter
 from ..check import Check, CheckableWidget, CheckRegistry, CheckResult
 from ..code._widget_code_input import CodeInput
-from ..code._widget_parameter_panel import ParametersPanel
+from ..code._widget_parameters_panel import ParametersPanel
 from ..css_style import CssStyle
 from ..cue import (
     CheckCueBox,
