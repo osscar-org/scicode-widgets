@@ -235,6 +235,17 @@ class TestCodeExercise:
         "code_ex",
         [
             get_code_exercise(
+                [single_param_check(use_fingerprint=False, failing=False, buggy=False)],
+            )
+        ],
+    )
+    def test_parameters_panel(self, code_ex):
+        assert code_ex.parameters_panel.parameters == code_ex.parameters
+
+    @pytest.mark.parametrize(
+        "code_ex",
+        [
+            get_code_exercise(
                 [single_param_check(use_fingerprint=False, failing=False, buggy=False)]
             ),
             get_code_exercise(

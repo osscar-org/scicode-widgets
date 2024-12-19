@@ -554,6 +554,14 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             self._load_button.observe_widgets()
 
     @property
+    def parameters_panel(self) -> Union[ParametersPanel, None]:
+        """
+        :return: The parametergs panel widget.
+        """
+
+        return self._parameters_panel
+
+    @property
     def panel_parameters(self) -> Dict[str, Check.FunInParamT]:
         """
         :return: Only parameters that are tunable in the parameter panel are returned.
