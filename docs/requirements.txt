@@ -1,1 +1,5 @@
+ipython
+ipykernel
 sphinx
+nbsphinx
+sphinx-material

@@ -5,4 +5,11 @@ scicode-widgets
    :start-after: marker-package-description
 
 .. toctree::
-    contributing
+   :hidden:
+
+   getting_started
+   exercises
+   check
+   nbgrader
+   api
+   developers
