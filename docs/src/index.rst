@@ -12,4 +12,4 @@ scicode-widgets
    check
    nbgrader
    api
-   developers/index
+   developers

@@ -1,5 +1,5 @@
-DevTools
-========
+Developers
+==========
 
 This is an instruction of the developer tools that help you contributing.
 
