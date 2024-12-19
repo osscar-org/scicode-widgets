@@ -42,7 +42,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
     :param check_registry:
         a check registry that is used to register checks
 
-    :param params:
+    :param parameters:
         Input parameters for the :py:class:`ParameterPanel` class or an initialized
         :py:class:`ParameterPanel` object. Specifies the arguments in the parameter
         panel.
@@ -66,7 +66,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         check_registry: Optional[CheckRegistry] = None,
         exercise_registry: Optional[ExerciseRegistry] = None,
         exercise_key: Optional[str] = None,
-        params: Optional[
+        parameters: Optional[
             Union[Dict[str, Union[Check.FunInParamT, Widget]], ParameterPanel]
         ] = None,
         update_mode: str = "manual",
@@ -139,15 +139,15 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             self._exercise_title_html.add_class("exercise-title")
 
         # verify if input argument `parameter` is valid
-        if params is not None:
+        if parameters is not None:
             allowed_parameter_types = [dict, ParameterPanel]
             parameter_type_allowed = False
             for allowed_parameter_type in allowed_parameter_types:
-                if isinstance(params, allowed_parameter_type):
+                if isinstance(parameters, allowed_parameter_type):
                     parameter_type_allowed = True
             if not (parameter_type_allowed):
                 raise TypeError(
-                    f"Got parameter {type(params)!r} but only "
+                    f"Got parameter {type(parameters)!r} but only "
                     f"{allowed_parameter_types} are allowed."
                 )
 
@@ -160,20 +160,20 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                 f"WidgetCodeInput but got {type(code)!r}"
             )
 
-        # check compability between code and params, can only be checked if
+        # check compability between code and parameters, can only be checked if
         # update_func is not used because we cannot know how the code input is used
-        if update is None and code is not None and params is not None:
-            if isinstance(params, dict):
+        if update is None and code is not None and parameters is not None:
+            if isinstance(parameters, dict):
                 compatibility_result = code.compatible_with_signature(
-                    list(params.keys())
+                    list(parameters.keys())
                 )
-            elif isinstance(params, ParameterPanel):
+            elif isinstance(parameters, ParameterPanel):
                 compatibility_result = code.compatible_with_signature(
-                    list(params.params.keys())
+                    list(parameters.parameters.keys())
                 )
             if compatibility_result != "":
                 raise ValueError(
-                    "code and params do no match:  " + compatibility_result
+                    "code and parameters do no match:  " + compatibility_result
                 )
 
         name = kwargs.get("name", exercise_key)
@@ -205,10 +205,10 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                 self._cue_outputs.append(CueObject(output))
 
         self._parameter_panel: Union[ParameterPanel, None]
-        if isinstance(params, dict):
-            self._parameter_panel = ParameterPanel(**params)
-        elif isinstance(params, ParameterPanel):
-            self._parameter_panel = params
+        if isinstance(parameters, dict):
+            self._parameter_panel = ParameterPanel(**parameters)
+        elif isinstance(parameters, ParameterPanel):
+            self._parameter_panel = parameters
         else:
             self._parameter_panel = None
 
@@ -301,8 +301,8 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                     update_button_disable_during_action = True
 
                     self._cue_parameter_panel = UpdateCueBox(
-                        self._parameter_panel.panel_params_widget,
-                        self._parameter_panel.panel_params_trait,  # type: ignore
+                        self._parameter_panel.panel_parameters_widget,
+                        self._parameter_panel.panel_parameters_trait,  # type: ignore
                         self._parameter_panel,
                     )
 
@@ -311,14 +311,14 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                             # TODO this has to be made public
                             cue_output._widgets_to_observe = [
                                 self._code
-                            ] + self._parameter_panel.panel_params_widget
+                            ] + self._parameter_panel.panel_parameters_widget
                             # fmt: off
                             cue_output._traits_to_observe = (
 
                                 [  # type: ignore[assignment]
                                     "function_body"
                                 ]
-                                + self._parameter_panel.panel_params_trait
+                                + self._parameter_panel.panel_parameters_trait
                             )
                             # fmt: on
 
@@ -326,10 +326,10 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                         else:
                             # TODO this has to be made public
                             cue_output._widgets_to_observe = (
-                                self._parameter_panel.panel_params_widget
+                                self._parameter_panel.panel_parameters_widget
                             )
                             cue_output._traits_to_observe = (
-                                self._parameter_panel.panel_params_trait  # type: ignore[assignment] # noqa: E501
+                                self._parameter_panel.panel_parameters_trait  # type: ignore[assignment] # noqa: E501
                             )
                             cue_output.observe_widgets()
             elif self._code is not None:
@@ -397,9 +397,11 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
 
             if self._parameter_panel is not None:
                 save_widgets_to_observe.extend(
-                    self._parameter_panel.panel_params_widget
+                    self._parameter_panel.panel_parameters_widget
                 )
-                save_traits_to_observe.extend(self._parameter_panel.panel_params_trait)
+                save_traits_to_observe.extend(
+                    self._parameter_panel.panel_parameters_trait
+                )
 
             if self._cue_code is not None:
                 self._cue_code = SaveCueBox(
@@ -521,7 +523,9 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         return {
             "code": None if self._code is None else self._code.function_body,
             "parameter_panel": (
-                None if self._parameter_panel is None else self._parameter_panel.params
+                None
+                if self._parameter_panel is None
+                else self._parameter_panel.parameters
             ),
         }
 
@@ -537,7 +541,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         if answer["code"] is not None and self._code is not None:
             self._code.function_body = answer["code"]
         if answer["parameter_panel"] is not None and self._parameter_panel is not None:
-            self._parameter_panel.update_params(answer["parameter_panel"])
+            self._parameter_panel.update_parameters(answer["parameter_panel"])
 
         if self._save_cue_box is not None:
             self._save_cue_box.observe_widgets()
@@ -559,12 +563,12 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         )
 
     @property
-    def params(self) -> Dict[str, Check.FunInParamT]:
+    def parameters(self) -> Dict[str, Check.FunInParamT]:
         """
         :return: All parameters that were given on initialization are returned,
             also including also fixed parameters.
         """
-        return {} if self._parameter_panel is None else self._parameter_panel.params
+        return {} if self._parameter_panel is None else self._parameter_panel.parameters
 
     @property
     def exercise_title(self) -> Union[str, None]:
@@ -721,7 +725,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                     else:
                         self._update_func(self)  # type: ignore[call-arg]
                 elif self._code is not None:
-                    self.run_code(**self.params)
+                    self.run_code(**self.parameters)
 
                 for cue_output in self.outputs:
                     if hasattr(cue_output, "draw_display"):

@@ -18,12 +18,12 @@ from .test_check import multi_param_check, single_param_check
 
 class TestParameterPanel:
 
-    def test_params(self):
+    def test_parameters(self):
         from ipywidgets import fixed
 
         panel = ParameterPanel(**{"x": (0, 1, 0.5), "y": (2, 3, 1), "z": fixed(5)})
-        assert panel.params == {"x": 0.0, "y": 2, "z": 5}
-        assert panel.panel_params == {"x": 0.0, "y": 2}
+        assert panel.parameters == {"x": 0.0, "y": 2, "z": 5}
+        assert panel.panel_parameters == {"x": 0.0, "y": 2}
 
 
 class TestCodeInput:
@@ -196,24 +196,24 @@ def get_code_exercise(
 
         def update_print():
             if code_input is None:
-                output = code_ex.params
+                output = code_ex.parameters
             else:
-                output = code_ex.run_code(**code_ex.params)
+                output = code_ex.run_code(**code_ex.parameters)
             code_ex.output.object = f"Output:\n{output}"
 
     else:
 
         def update_print(code_ex: CodeExercise):
             if code_input is None:
-                output = code_ex.params
+                output = code_ex.parameters
             else:
-                output = code_ex.run_code(**code_ex.params)
+                output = code_ex.run_code(**code_ex.parameters)
             code_ex.output.object = f"Output:\n{output}"
 
     code_ex = CodeExercise(
         code=code_input,
         check_registry=CheckRegistry() if include_checks is True else None,
-        params=parameters if include_params is True else None,
+        parameters=parameters if include_params is True else None,
         outputs=[CueObject("Not initialized")],
         update=update_print,
         update_mode=update_mode,
@@ -308,7 +308,7 @@ class TestCodeExercise:
         ],
     )
     def test_run_code(self, code_ex):
-        output = code_ex.run_code(**code_ex.params)
+        output = code_ex.run_code(**code_ex.parameters)
         assert np.allclose((output,), code_ex.checks[0].outputs_references[0])
 
     @pytest.mark.parametrize(
@@ -324,7 +324,7 @@ class TestCodeExercise:
             CodeValidationError,
             match="name 'bug' is not defined.*",
         ):
-            code_ex.run_code(**code_ex.params)
+            code_ex.run_code(**code_ex.parameters)
 
     @pytest.mark.parametrize(
         "function",
@@ -346,7 +346,7 @@ class TestCodeExercise:
 
         code_ex = CodeExercise(
             code=function,
-            params={"parameter": fixed(5)},
+            parameters={"parameter": fixed(5)},
             exercise_registry=exercise_registry,
             exercise_key="test_save_registry_ex",
             outputs=[cue_output],

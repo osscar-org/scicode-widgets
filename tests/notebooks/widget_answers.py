@@ -53,7 +53,7 @@ def foo(x):
 
 code_ex = CodeExercise(
     foo,
-    params={"x": (0, 2, 1)},
+    parameters={"x": (0, 2, 1)},
     update_mode="manual",
     exercise_registry=exercise_registry,
     exercise_key="exercise_2",

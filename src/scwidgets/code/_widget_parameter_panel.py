@@ -48,18 +48,18 @@ class ParameterPanel(VBox):
                 parameters.keys(), self._interactive_widget.kwargs_widgets
             )
         }
-        super().__init__(self.panel_params_widget)
+        super().__init__(self.panel_parameters_widget)
 
     @property
     def param_to_widget_map(self) -> dict[str, Widget]:
         return self._param_to_widget_map
 
     @property
-    def panel_params_trait(self) -> List[str]:
-        return ["value"] * len(self.panel_params)
+    def panel_parameters_trait(self) -> List[str]:
+        return ["value"] * len(self.panel_parameters)
 
     @property
-    def panel_params_widget(self) -> List[Widget]:
+    def panel_parameters_widget(self) -> List[Widget]:
         """
         :return: Only parameters that are tunable in the parameter panel are returned.
             Fixed parameters are ignored.
@@ -71,7 +71,7 @@ class ParameterPanel(VBox):
         ]
 
     @property
-    def params(self) -> Dict[str, Any]:
+    def parameters(self) -> Dict[str, Any]:
         """
         :return: All parameters that were given on initialization are returned,
             also including also fixed parameters.
@@ -79,7 +79,7 @@ class ParameterPanel(VBox):
         return {key: widget.value for key, widget in self._param_to_widget_map.items()}
 
     @property
-    def panel_params(self) -> Dict[str, Any]:
+    def panel_parameters(self) -> Dict[str, Any]:
         """
         :return: Only parameters that are tunable in the parameter panel are returned.
             Fixed parameters are ignored.
@@ -90,8 +90,8 @@ class ParameterPanel(VBox):
             if not (isinstance(widget, fixed))
         }
 
-    def update_params(self, new_params: Dict[str, Any]):
-        for key, value in new_params.items():
+    def update_parameters(self, new_parameters: Dict[str, Any]):
+        for key, value in new_parameters.items():
             self.param_to_widget_map[key].value = value
 
     def observe_parameters(
@@ -101,7 +101,7 @@ class ParameterPanel(VBox):
         notification_type: Union[None, str, Sentinel] = "change",
     ):
         """ """
-        for widget in self.panel_params_widget:
+        for widget in self.panel_parameters_widget:
             widget.observe(handler, trait_name, notification_type)
 
     def unobserve_parameters(
@@ -110,10 +110,10 @@ class ParameterPanel(VBox):
         trait_name: Union[str, Sentinel, List[str]],
         notification_type: Union[None, str, Sentinel] = "change",
     ):
-        for widget in self.panel_params_widget:
+        for widget in self.panel_parameters_widget:
             widget.unobserve(handler, trait_name, notification_type)
 
     def set_parameters_widget_attr(self, name: str, value):
-        for widget in self.panel_params_widget:
+        for widget in self.panel_parameters_widget:
             if hasattr(widget, name):
                 setattr(widget, name, value)
