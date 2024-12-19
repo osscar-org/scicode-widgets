@@ -1,16 +1,12 @@
 __version__ = "0.1.0-dev0"
 __authors__ = "the scicode-widgets developer team"
 
-from ._css_style import CssStyle, get_css_style
 from .check import *  # noqa: F403
 from .code import *  # noqa: F403
 from .cue import *  # noqa: F403
 from .exercise import *  # noqa: F403
 
 __all__ = [  # noqa: F405
-    # css_style
-    "CssStyle",
-    "get_css_style",
     # cue
     "CueWidget",
     "CheckCueBox",

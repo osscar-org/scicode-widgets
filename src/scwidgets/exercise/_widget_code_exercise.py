@@ -12,11 +12,11 @@ from matplotlib.figure import Figure
 from widget_code_input import WidgetCodeInput
 from widget_code_input.utils import CodeValidationError
 
-from .._css_style import CssStyle
 from .._utils import Formatter
 from ..check import Check, CheckableWidget, CheckRegistry, CheckResult
 from ..code._widget_code_input import CodeInput
 from ..code._widget_parameter_panel import ParameterPanel
+from ..css_style import CssStyle
 from ..cue import (
     CheckCueBox,
     CheckResetCueButton,
