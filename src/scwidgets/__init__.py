@@ -8,15 +8,6 @@ from .exercise import *  # noqa: F403
 
 __all__ = [  # noqa: F405
     # cue
-    "CueWidget",
-    "CheckCueBox",
-    "CueBox",
-    "SaveCueBox",
-    "UpdateCueBox",
-    "ResetCueButton",
-    "SaveResetCueButton",
-    "CheckResetCueButton",
-    "UpdateResetCueButton",
     "CueOutput",
     "CueObject",
     "CueFigure",
@@ -24,11 +15,7 @@ __all__ = [  # noqa: F405
     "CodeInput",
     "ParameterPanel",
     # check
-    "Check",
-    "CheckResult",
-    "AssertResult",
     "CheckRegistry",
-    "CheckableWidget",
     "assert_equal",
     "assert_shape",
     "assert_numpy_allclose",
@@ -38,6 +25,5 @@ __all__ = [  # noqa: F405
     # exercise
     "CodeExercise",
     "TextExercise",
-    "ExerciseWidget",
     "ExerciseRegistry",
 ]
