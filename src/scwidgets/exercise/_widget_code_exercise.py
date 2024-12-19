@@ -567,6 +567,13 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         return {}
 
     @property
+    def prameter_panel(self) -> Union[ParameterPanel, None]:
+        """
+        :return: The panel with the parameters when created otherwise None
+        """
+        return self._parameter_panel
+
+    @property
     def exercise_title(self) -> Union[str, None]:
         return self._exercise_title
 
