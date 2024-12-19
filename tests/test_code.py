@@ -9,19 +9,19 @@ from matplotlib.figure import Figure
 from widget_code_input.utils import CodeValidationError
 
 from scwidgets.check import Check, CheckRegistry, CheckResult
-from scwidgets.code import CodeInput, ParameterPanel
+from scwidgets.code import CodeInput, ParametersPanel
 from scwidgets.cue import CueObject
 from scwidgets.exercise import CodeExercise, ExerciseRegistry
 
 from .test_check import multi_param_check, single_param_check
 
 
-class TestParameterPanel:
+class TestParametersPanel:
 
     def test_parameters(self):
         from ipywidgets import fixed
 
-        panel = ParameterPanel(**{"x": (0, 1, 0.5), "y": (2, 3, 1), "z": fixed(5)})
+        panel = ParametersPanel(**{"x": (0, 1, 0.5), "y": (2, 3, 1), "z": fixed(5)})
         assert panel.parameters == {"x": 0.0, "y": 2, "z": 5}
         assert panel.panel_parameters == {"x": 0.0, "y": 2}
 

@@ -13,7 +13,7 @@ __all__ = [  # noqa: F405
     "CueFigure",
     # code
     "CodeInput",
-    "ParameterPanel",
+    "ParametersPanel",
     # check
     "CheckRegistry",
     "assert_equal",

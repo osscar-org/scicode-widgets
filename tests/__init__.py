@@ -11,7 +11,7 @@ from scwidgets import (  # noqa: F401
     CueOutput,
     ExerciseRegistry,
     ExerciseWidget,
-    ParameterPanel,
+    ParametersPanel,
     TextExercise,
     assert_equal,
     assert_numpy_allclose,
