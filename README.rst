@@ -19,15 +19,9 @@ The core features of scicode-widgets are:
 
 **Customizable coding exercises and demos**
 
-TODO gif
-
 **Checks for students to verify their solution**
 
-TODO gif
-
 **Automatic grading using nbgrader**
-
-TODO gif
 
 Please continue with our `getting started page <getting_started.html>`_  
 for a more detailed overview of our features.
