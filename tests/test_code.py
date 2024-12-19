@@ -359,7 +359,7 @@ class TestCodeExercise:
             code=function,
             parameters={"parameter": fixed(5)},
             exercise_registry=exercise_registry,
-            exercise_key="test_save_registry_ex",
+            key="test_save_registry_ex",
             outputs=[cue_output],
             update=print_success,
         )
@@ -431,15 +431,15 @@ class TestCodeExercise:
         `CheckRegistry` we need to ensure the `CodeExercise` can be run with
         each individual one and both"""
         CodeExercise(
-            exercise_key="some_key",
+            key="some_key",
             check_registry=CheckRegistry(),
         )
         CodeExercise(
-            exercise_key="some_key",
+            key="some_key",
             exercise_registry=ExerciseRegistry(),
         )
         CodeExercise(
-            exercise_key="some_key",
+            key="some_key",
             check_registry=CheckRegistry(),
             exercise_registry=ExerciseRegistry(),
         )

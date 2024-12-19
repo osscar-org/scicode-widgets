@@ -40,7 +40,14 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         A function or CodeInput that is the input of code
 
     :param check_registry:
-        a check registry that is used to register checks
+        A check registry that is used to register checks
+
+    :param exercise_registry:
+        A exercise registry that is used to register the answers to save them
+        later. If specified the save and load panel will appear.
+
+    :param key:
+        The key that is used to store the exercise in the json file.
 
     :param parameters:
         Input parameters for the :py:class:`ParametersPanel` class or an initialized
@@ -58,6 +65,12 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         A function that is run during the update process. The function takes as argument
         the CodeExercise, so it can update all cue_ouputs
 
+    :param description:
+        A string describing the exercises that will be put into an HTML widget
+        above the exercise.
+
+    :param title:
+        A title for the exercise. If not given the key is used.
     """
 
     def __init__(
@@ -65,7 +78,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         code: Union[None, WidgetCodeInput, types.FunctionType] = None,
         check_registry: Optional[CheckRegistry] = None,
         exercise_registry: Optional[ExerciseRegistry] = None,
-        exercise_key: Optional[str] = None,
+        key: Optional[str] = None,
         parameters: Optional[
             Union[Dict[str, Union[Check.FunInParamT, Widget]], ParametersPanel]
         ] = None,
@@ -77,8 +90,8 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                 Callable[[], Union[Any, Check.FunOutParamsT]],
             ]
         ] = None,
-        exercise_description: Optional[str] = None,
-        exercise_title: Optional[str] = None,
+        description: Optional[str] = None,
+        title: Optional[str] = None,
         *args,
         **kwargs,
     ):
@@ -117,26 +130,26 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         else:
             self._update_func_nb_nondefault_args = None
 
-        self._exercise_description = exercise_description
-        if exercise_description is None:
-            self._exercise_description_html = None
+        self._description = description
+        if description is None:
+            self._description_html = None
         else:
-            self._exercise_description_html = HTMLMath(self._exercise_description)
-        if exercise_title is None:
-            if exercise_key is None:
-                self._exercise_title = None
-                self._exercise_title_html = None
+            self._description_html = HTMLMath(self._description)
+        if title is None:
+            if key is None:
+                self._title = None
+                self._title_html = None
             else:
-                self._exercise_title = exercise_key
-                self._exercise_title_html = HTML(f"<b>{exercise_key}</b>")
+                self._title = key
+                self._title_html = HTML(f"<b>{key}</b>")
         else:
-            self._exercise_title = exercise_title
-            self._exercise_title_html = HTML(f"<b>{exercise_title}</b>")
+            self._title = title
+            self._title_html = HTML(f"<b>{title}</b>")
 
-        if self._exercise_description_html is not None:
-            self._exercise_description_html.add_class("exercise-description")
-        if self._exercise_title_html is not None:
-            self._exercise_title_html.add_class("exercise-title")
+        if self._description_html is not None:
+            self._description_html.add_class("exercise-description")
+        if self._title_html is not None:
+            self._title_html.add_class("exercise-title")
 
         # verify if input argument `parameter` is valid
         if parameters is not None:
@@ -176,10 +189,10 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                     "code and parameters do no match:  " + compatibility_result
                 )
 
-        name = kwargs.get("name", exercise_key)
+        name = kwargs.get("name", key)
         CheckableWidget.__init__(self, check_registry, name)
         if exercise_registry is not None:
-            ExerciseWidget.__init__(self, exercise_registry, exercise_key)
+            ExerciseWidget.__init__(self, exercise_registry, key)
         else:
             # otherwise ExerciseWidget constructor will raise an error
             ExerciseWidget.__init__(self, None, None)
@@ -464,10 +477,10 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             )
 
         demo_children = [CssStyle()]
-        if self._exercise_title_html is not None:
-            demo_children.append(self._exercise_title_html)
-        if self._exercise_description_html is not None:
-            demo_children.append(self._exercise_description_html)
+        if self._title_html is not None:
+            demo_children.append(self._title_html)
+        if self._description_html is not None:
+            demo_children.append(self._description_html)
 
         if self._cue_code is not None:
             demo_children.append(self._cue_code)
@@ -584,12 +597,12 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         )
 
     @property
-    def exercise_title(self) -> Union[str, None]:
-        return self._exercise_title
+    def title(self) -> Union[str, None]:
+        return self._title
 
     @property
-    def exercise_description(self) -> Union[str, None]:
-        return self._exercise_description
+    def description(self) -> Union[str, None]:
+        return self._description
 
     def _on_trait_parameters_changed(self, change: dict):
         self.run_update()
