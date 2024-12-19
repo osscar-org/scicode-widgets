@@ -16,10 +16,10 @@
 # +
 from ipywidgets import Text, VBox
 
-import scwidgets
+from scwidgets.css_style import get_css_style
 from scwidgets.cue import CheckCueBox, CueBox, ResetCueButton, SaveCueBox, UpdateCueBox
 
-scwidgets.get_css_style()
+get_css_style()
 # -
 
 # Test 1:

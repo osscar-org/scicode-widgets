@@ -2,8 +2,8 @@ from typing import Optional, Union
 
 from ipywidgets import HTML, HBox, HTMLMath, Layout, Output, Textarea, VBox
 
-from .._css_style import CssStyle
 from .._utils import Formatter
+from ..css_style import CssStyle
 from ..cue import SaveCueBox, SaveResetCueButton
 from ._widget_exercise_registry import ExerciseRegistry, ExerciseWidget
 

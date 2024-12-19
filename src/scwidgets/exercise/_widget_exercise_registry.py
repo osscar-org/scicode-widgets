@@ -11,8 +11,8 @@ from typing import Hashable, Optional, Union
 from IPython.display import display
 from ipywidgets import Button, Dropdown, HBox, Label, Layout, Output, Text, VBox
 
-from .._css_style import CssStyle
 from .._utils import Formatter
+from ..css_style import CssStyle
 
 
 class ExerciseWidget:

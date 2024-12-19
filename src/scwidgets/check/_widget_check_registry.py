@@ -7,8 +7,8 @@ from typing import Callable, List, Optional, Union
 
 from ipywidgets import Button, HBox, Layout, Output, VBox, Widget
 
-from .._css_style import CssStyle
 from .._utils import Formatter
+from ..css_style import CssStyle
 from ._check import Check, CheckResult
 
 
