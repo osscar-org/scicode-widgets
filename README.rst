@@ -23,7 +23,7 @@ The core features of scicode-widgets are:
 
 **Automatic grading using nbgrader**
 
-Please continue with our `getting started page <getting_started.html>`_  
+Please continue with our `getting started page <https://scicode-widgets.readthedocs.io/en/latest/getting_started.html>`_  
 for a more detailed overview of our features.
 
 Supportde jupyter environments
