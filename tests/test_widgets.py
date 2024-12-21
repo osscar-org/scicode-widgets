@@ -979,10 +979,10 @@ def test_widget_check_registry(selenium_driver):
         """
 
         buttons = nb_cell.find_elements(By.CLASS_NAME, BUTTON_CLASS_NAME)
-        set_all_references_button = buttons[0]
-        assert set_all_references_button.get_property("title") == "Set all references"
-        check_all_widgets_button = buttons[1]
+        check_all_widgets_button = buttons[0]
         assert check_all_widgets_button.get_property("title") == "Check all widgets"
+        set_all_references_button = buttons[1]
+        assert set_all_references_button.get_property("title") == "Set all references"
 
         WebDriverWait(driver, 5).until(
             expected_conditions.element_to_be_clickable(check_all_widgets_button)

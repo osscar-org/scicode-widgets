@@ -27,7 +27,7 @@ from tests.test_check import single_param_check  # noqa: E402
 
 
 def create_check_registry(use_fingerprint, failing, buggy):
-    check_registry = CheckRegistry()
+    check_registry = CheckRegistry(display_set_all_references_button=True)
 
     check = single_param_check(
         use_fingerprint=use_fingerprint, failing=failing, buggy=buggy
