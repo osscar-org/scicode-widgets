@@ -9,8 +9,8 @@ code and interpret computational experiments while hiding technical details and
 boiler plate code that are not essential for the learning experience. The logic
 is purely written in Python to simplify the development process for scientific
 researchers as they usually are more capable in writing Python code than
-JavaScript. It therefore builds on top of widgets provided by ipywidgets to
-creating a framework out of it.
+JavaScript. It therefore builds on top of ipywidgets to create framework out of
+it.
 
 Features
 --------
@@ -18,6 +18,8 @@ Features
 The core features of scicode-widgets are:
 
 **Customizable coding exercises and demos**
+
+![](./docs/gifs/scwidgets-check-720p.gif)
 
 **Checks for students to verify their solution**
 
