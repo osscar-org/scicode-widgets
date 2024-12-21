@@ -17,16 +17,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-
-    - Name: Install pandoc
-      with:
-        sudo apt-get install pandoc
-
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - run: pip install tox
+    - run: |
+        sudo apt-get install pandoc
+        pip install tox
 
-    - name: run sphinx docs build
+    - name: Build sphinx docs
       run: tox -e docs 
