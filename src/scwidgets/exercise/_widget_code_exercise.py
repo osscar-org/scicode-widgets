@@ -667,7 +667,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
     def handle_checks_result(self, results: List[Union[CheckResult, Exception]]):
         self._output.clear_output(wait=True)
         with self._output:
-            for result in results:
+            for i, result in enumerate(results):
                 if isinstance(result, Exception):
                     raise result
                 elif isinstance(result, CheckResult):
@@ -681,6 +681,9 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                         print(result.message())
                 else:
                     print(result)
+                # add linebreak if not end
+                if i != len(results):
+                    print()
 
     def handle_save_result(self, result: Union[str, Exception]):
         self._output.clear_output(wait=True)
