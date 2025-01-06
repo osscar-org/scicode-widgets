@@ -247,11 +247,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             )
 
         self._cue_parameters_panel = self._parameters_panel
-        if (
-            self._parameters_panel is None
-            and self._update_func is None
-            and self._code is None
-        ):
+        if self._parameters_panel is None and self._update_func is None:
             self._update_button = None
             self._cue_parameters_panel = None
         else:
