@@ -36,6 +36,12 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[project.urls]
+Documentation = "https://scicode-widgets.readthedocs.io/en/latest/"
+Repository = "https://github.com/osscar-org/scicode-widgets"
+Issues = "https://github.com/osscar-org/scicode-widgets/issues"
+Changelog = "https://github.com/osscar-org/scicode-widgets/blob/main/CHANGELOG.md"
+
 [tool.setuptools.dynamic]
 version = {attr = "scwidgets.__version__"}
 readme = {file = ["README.rst"]}
