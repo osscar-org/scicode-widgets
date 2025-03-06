@@ -8,36 +8,35 @@ from ._widget_cue import CueWidget
 
 class ResetCueButton(Button, CueWidget):
     """
-    A button that resets the cueing of the :param cue_widgets: on a successful action.
+    A button that resets the cueing of the `cue_widgets` on a successful action.
 
     :param cue_widgets:
-       List of cue boxes the button resets on successuful click
+       List of cue boxes the button resets on successful click
        We assert that all boxes observe the same traits of the same widget
     :param action:
-        A callable that returns a boolean that specifies if the action was successul.
-        If is called on a button click. The cues in :param cue_widgets:
-        are removed if it
-        was successful, if False nothing happens.
+        A callable that returns a boolean that specifies if the action was successful.
+        It is called on a button click, and the cues in `cue_widgets` are removed
+        if it was successful. If set to ``False``, nothing happens.
     :param disable_on_successful_action:
         Specifies if the button should be disabled on a successful action
     :param disable_during_action:
         Specifies if the button should be disabled during the action
-    :param css_syle:
+    :param css_style:
         - **base**: the css style of the box during initialization
-        - **cue**: the css style that is added when :param
-          traits_to_observe: in widget :param widget_to_observe: changes.
+        - **cue**: the css style that is added when `traits_to_observe`
+          in widget `widget_to_observe` changes.
           It is supposed to change the style of the box such that the user has a visual
-          cue that :param widget_to_cue: has changed.
+          cue that `widget_to_cue` has changed.
     :param widgets_to_observe:
-        The widget to observe if the :param traits_to_observe: has changed. If ``None``
-        then widgets from :param cue_widgets: are taken.
+        The widget to observe if the `traits_to_observe` has changed. If ``None``
+        then widgets from `cue_widgets` are taken.
     :param traits_to_observe:
-        The trait from the :param widgets_to_observe: to observe if changed.
+        The trait from the `widgets_to_observe` to observe changes of.
         Specify `traitlets.All` to observe all traits. If ``None`` then traits
-        from :param cue_widgets: are taken.
+        from `cue_widgets` are taken.
     :param cued:
         Specifies if it is cued on initialization. If ``None`` then the button is
-        cued when :param cue_widgets: is cued.
+        cued when `cue_widgets` is cued.
 
     Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Button`.
     """
@@ -105,12 +104,12 @@ class ResetCueButton(Button, CueWidget):
     ):
         """
         :param cue_widgets:
-           List of cue boxes the button resets on successuful click
+           List of cue boxes the button resets on successful click
            We assert that all boxes observe the same traits of the same widget
 
-        :param overwrite_observes:
-            specifies if observes related to cueing of button should be overwritten by
-            the widgets ant traits of the :param cue_widgets:
+        :param overwrite_cue_observes:
+            If `True`, the function will override the existing observation settings
+            based on `cue_widgets`.
         """
         # set new cue widgets
         widgets_to_observe = []
@@ -168,30 +167,29 @@ class ResetCueButton(Button, CueWidget):
 
 class SaveResetCueButton(ResetCueButton):
     """
-    A button that resets the cueing of the :param cue_widgets: on a successful action.
+    A button that resets the cueing of the `cue_widgets` on a successful Save action.
 
     :param cue_widgets:
-       List of cue boxes the button resets on successuful click
+       List of cue boxes the button resets on successful click
        We assert that all boxes observe the same traits of the same widget
     :param action:
-        A callable that returns a boolean that specifies if the action was successul.
-        If is called on a button click. The cues in :param cue_widgets:
-        are removed if it
-        was successful, if False nothing happens.
+        A callable that returns a boolean that specifies if the action was successful.
+        It is called on a button click, and the cues in `cue_widgets` are removed
+        if it was successful. If set to ``False``, nothing happens.
     :param disable_on_successful_action:
         Specifies if the button should be disabled on a successful action
     :param disable_during_action:
         Specifies if the button should be disabled during the action
     :param widgets_to_observe:
-        The widget to observe if the :param traits_to_observe: has changed. If ``None``
-        then widgets from :param cue_widgets: are taken.
+        The widget to observe if the `traits_to_observe` has changed. If ``None``
+        then widgets from `cue_widgets` are taken.
     :param traits_to_observe:
-        The trait from the :param widgets_to_observe: to observe if changed.
-        Specify `traitlets.All` to observe all traits. If ``None`` then traits
-        from :param cue_widgets: are taken.
+        The trait from the `widgets_to_observe` to observe changes of.
+        Specify `traitlets.All` to observe all traits. If ``None``, traits
+        from `cue_widgets` are taken.
     :param cued:
         Specifies if it is cued on initialization. If ``None`` then the button is
-        cued when :param cue_widgets: is cued.
+        cued when `cue_widget`: is cued.
 
     Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Button`.
     """
@@ -230,30 +228,30 @@ class SaveResetCueButton(ResetCueButton):
 
 class CheckResetCueButton(ResetCueButton):
     """
-    A button that resets the cueing of the :param cue_widgets: on a successful action.
+    A button that resets the cueing of the :param cue_widgets: on a successful check
+    action.
 
     :param cue_widgets:
-       List of cue boxes the button resets on successuful click
+       List of cue boxes the button resets on successful click
        We assert that all boxes observe the same traits of the same widget
     :param action:
-        A callable that returns a boolean that specifies if the action was successul.
-        If is called on a button click. The cues in :param cue_widgets:
-        are removed if it
-        was successful, if False nothing happens.
+        A callable that returns a boolean that specifies if the action was successful.
+        It is called on a button click, and the cues in `cue_widgets` are removed
+        if it was successful. If set to ``False``, nothing happens.
     :param disable_on_successful_action:
         Specifies if the button should be disabled on a successful action
     :param disable_during_action:
         Specifies if the button should be disabled during the action
     :param widgets_to_observe:
-        The widget to observe if the :param traits_to_observe: has changed. If ``None``
-        then widgets from :param cue_widgets: are taken.
+        The widget to observe if the `traits_to_observe` has changed. If ``None``
+        then widgets from `cue_widgets` are taken.
     :param traits_to_observe:
-        The trait from the :param widgets_to_observe: to observe if changed.
-        Specify `traitlets.All` to observe all traits. If ``None`` then traits
-        from :param cue_widgets: are taken.
+        The trait from the `widgets_to_observe` to observe changes of.
+        Specify `traitlets.All` to observe all traits. If ``None``, traits
+        from `cue_widgets` are taken.
     :param cued:
         Specifies if it is cued on initialization. If ``None`` then the button is
-        cued when :param cue_widgets: is cued.
+        cued when `cue_widget`: is cued.
 
     Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Button`.
     """
@@ -292,30 +290,30 @@ class CheckResetCueButton(ResetCueButton):
 
 class UpdateResetCueButton(ResetCueButton):
     """
-    A button that resets the cueing of the :param cue_widgets: on a successful action.
+    A button that resets the cueing of the :param cue_widgets: on a successful update
+    action.
 
     :param cue_widgets:
-       List of cue boxes the button resets on successuful click
+       List of cue boxes the button resets on successful click
        We assert that all boxes observe the same traits of the same widget
     :param action:
-        A callable that returns a boolean that specifies if the action was successul.
-        If is called on a button click. The cues in :param cue_widgets:
-        are removed if it
-        was successful, if False nothing happens.
+        A callable that returns a boolean that specifies if the action was successful.
+        It is called on a button click, and the cues in `cue_widgets` are removed
+        if it was successful. If set to ``False``, nothing happens.
     :param disable_on_successful_action:
         Specifies if the button should be disabled on a successful action
     :param disable_during_action:
         Specifies if the button should be disabled during the action
     :param widgets_to_observe:
-        The widget to observe if the :param traits_to_observe: has changed. If ``None``
-        then widgets from :param cue_widgets: are taken.
+        The widget to observe if the `traits_to_observe` has changed. If ``None``
+        then widgets from `cue_widgets` are taken.
     :param traits_to_observe:
-        The trait from the :param widgets_to_observe: to observe if changed.
-        Specify `traitlets.All` to observe all traits. If ``None`` then traits
-        from :param cue_widgets: are taken.
+        The trait from the `widgets_to_observe` to observe changes of.
+        Specify `traitlets.All` to observe all traits. If ``None``, traits
+        from `cue_widgets` are taken.
     :param cued:
         Specifies if it is cued on initialization. If ``None`` then the button is
-        cued when :param cue_widgets: is cued.
+        cued when `cue_widget`: is cued.
 
     Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Button`.
     """

@@ -1,12 +1,12 @@
 Developers
 ==========
 
-This is an instruction of the developer tools that help you contributing.
+This is an instruction of the developer tools that help you contribute.
 
 Running tests
 -------------
 
-Tests can be with run using
+Tests can be run by using
 
 .. code-block:: bash
 
@@ -21,15 +21,14 @@ You can source the test environment of tox after a run using
 Converting notebook test files
 ##############################
 
-The we store the notebooks as converted Python file using `jupytext` for the conversion
-for better versioning
+We store the notebooks as converted Python file using `jupytext` for better versioning
 
 .. code-block:: bash
 
   jupytext tests/notebooks/*.py --to ipynb
 
-Be aware that when runnng the tests with tox all `*.ipynb` are overwriten by their
-corresponding `*.py` file. For example, the file `test_widget_cue_box.ipynb` is
+Be aware that when running the tests with tox all `*.ipynb` are overwritten by the
+corresponding `*.py` files. For example, the file `test_widget_cue_box.ipynb` is
 overwritten by the conversion of `test_widget_cue_box.py` when running the test.
 
 
@@ -37,9 +36,9 @@ Running in browser
 ##################
 
 We use selenium to test the widgets on user actions (like a button click). To run it in
-in the CI where no display is available. We run the browsers in headless model to not
-load the UI. For debugging a test however, it is often benificial to see what is
-happening in the window. To run the tests with the browser UI please use
+the CI where no display is available. We run the browsers in the headless mode to not
+load the UI. For debugging a test, however, it is often beneficial to see what is
+happening in the window. To run the tests with the browser UI, please use
 
 .. code-block:: bash
 
@@ -48,15 +47,16 @@ happening in the window. To run the tests with the browser UI please use
 Port issues
 ###########
 
-For the notebook server we fixed the port to 8815, if this port is not available you .
-It can happen that notebook process is not properly killed and remains as zombie
-process. You can check if a notebook with this port is already running using
+For the notebook server, we fixed the port to 8815. If this port is not available, you 
+you need to choose a different one. It can happen that notebook process is not properly
+killed and remains as zombie process. You can check if a notebook with the 8815 port
+is already running using
 
 .. code-block:: bash
     
    jupyter notebook list | grep 8815
 
-or if some process is using it 
+or if some other process is using it 
 
 .. code-block:: bash
 
@@ -88,7 +88,7 @@ To build the docs please use
 
    tox -e docs
 
-To open the doc with for example firefox you can run
+To open the documentation with Firefox, for example, you can run:
 
 .. code-block:: bash
 

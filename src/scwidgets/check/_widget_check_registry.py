@@ -15,7 +15,8 @@ from ._check import Check, CheckResult
 class CheckableWidget:
     """
     A base class for any widget to inherit from to be compatible with the
-    :py:class:`CheckRegistry`. The logic is th
+    :py:class:`CheckRegistry`. The widget can be registered to a `CheckRegistry`,
+    which allows applying checks.
 
     :param check_registry:
         the check registry that registers the checks for this widget
@@ -35,7 +36,7 @@ class CheckableWidget:
         self, *input_args: Check.FunInParamT
     ) -> Check.FunOutParamsT:
         """
-        The widget returns the output that will verified by the added checks.
+        The widget returns the output that will be verified by the added checks.
         """
         raise NotImplementedError("compute_output_to_check has not been implemented")
 
@@ -48,6 +49,10 @@ class CheckableWidget:
         raise NotImplementedError("handle_checks_result has not been implemented")
 
     def add_check(self, *args, **kwargs):
+        """
+        Adds checks to the widget. Accepts either a `Check` object (or list of
+        `Check` objects) directly, or parameters that define a new check.
+        """
         # simple dispatch logic
         if len(args) + len(kwargs) == 1:
             self._add_check_from_check(*args, **kwargs)
@@ -174,7 +179,7 @@ class CheckRegistry(VBox):
     @property
     def checks(self):
         """
-        all registerd checks from widgets to checks
+        Returns all checks registered for each widget.
         """
         return self._checks
 
@@ -196,6 +201,9 @@ class CheckRegistry(VBox):
 
     @property
     def registered_widgets(self):
+        """
+        Returns a copy of all widgets currently registered with this registry.
+        """
         return self._widgets.copy()
 
     def nb_conducted_asserts(self, widget: CheckableWidget):
@@ -227,6 +235,23 @@ class CheckRegistry(VBox):
         ] = None,
         suppress_fingerprint_asserts: bool = True,
     ):
+        """
+        Adds a new check for the specified widget. The check is defined using assert
+        functions, and optional input parameters, output references, and fingerprint
+        function.
+        :param widget:
+            The widget to which the check is being added.
+        :param asserts:
+            Functions to validate the widget's output.
+        :param inputs_parameters:
+            Inputs to provide when calling the widget's output computation method.
+        :param outputs_references:
+            Expected reference outputs used for assertions.
+        :param fingerprint:
+            Optional function to obfuscate outputs before assertions.
+        :param suppress_fingerprint_asserts:
+            If True, suppresses assert messages involving fingerprinted outputs.
+        """
         if not (issubclass(type(widget), CheckableWidget)):
             raise ValueError("Argument widget must be subclass of CheckableWidget")
         if widget not in self._checks.keys():

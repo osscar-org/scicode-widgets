@@ -5,7 +5,7 @@ from ipywidgets import HTML
 
 class CssStyle(HTML):
     """
-    This HTML widget has to be displayed so the css style is loaded in the notebook.
+    This HTML widget has to be displayed so the CSS style is loaded in the notebook.
 
     :param preamble: Text to appear before the style sheet
     """
@@ -19,6 +19,6 @@ class CssStyle(HTML):
 
 def get_css_style() -> HTML:
     return CssStyle(
-        preamble="HTML with scicode-widget css style sheet. "
+        preamble="HTML with scicode-widget CSS style sheet. "
         "Please keep this cell output alive."
     )

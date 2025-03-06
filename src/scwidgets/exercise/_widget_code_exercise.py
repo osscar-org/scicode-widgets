@@ -34,17 +34,17 @@ from ._widget_exercise_registry import ExerciseRegistry, ExerciseWidget
 class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
     """
     A widget to demonstrate code interactively in a variety of ways. It is a combination
-    of the several widgets that allow to check check, run and visualize code.
+    of the several widgets that allow to check, run and visualize code.
 
     :param code:
-        A function or CodeInput that is the input of code
+        A function or :py:class:`CodeInput` that is the input of code
 
     :param check_registry:
         A check registry that is used to register checks
 
     :param exercise_registry:
         A exercise registry that is used to register the answers to save them
-        later. If specified the save and load panel will appear.
+        later. If specified, the save and load panel will appear.
 
     :param key:
         The key that is used to store the exercise in the json file.
@@ -59,18 +59,18 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
         or parameters
 
     :param outputs:
-        List of CueOuputs that are drawn and refreshed
+        List of CueOutputs that are drawn and refreshed
 
     :param update:
         A function that is run during the update process. The function takes as argument
-        the CodeExercise, so it can update all cue_ouputs
+        the CodeExercise, so it can update all cue_outputs
 
     :param description:
         A string describing the exercises that will be put into an HTML widget
         above the exercise.
 
     :param title:
-        A title for the exercise. If not given the key is used.
+        A title for the exercise. If not given, `key` is used.
     """
 
     def __init__(
@@ -173,7 +173,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                 f"WidgetCodeInput but got {type(code)!r}"
             )
 
-        # check compability between code and parameters, can only be checked if
+        # check compatibility between code and parameters, can only be checked if
         # update_func is not used because we cannot know how the code input is used
         if update is None and code is not None and parameters is not None:
             if isinstance(parameters, dict):
@@ -565,7 +565,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
     @property
     def parameters_panel(self) -> Union[ParametersPanel, None]:
         """
-        :return: The parametergs panel widget.
+        :return: The parameters panel widget.
         """
 
         return self._parameters_panel
@@ -586,7 +586,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
     def parameters(self) -> Dict[str, Check.FunInParamT]:
         """
         :return: All parameters that were given on initialization are returned,
-            also including also fixed parameters.
+            including fixed parameters.
         """
         return (
             {} if self._parameters_panel is None else self._parameters_panel.parameters
@@ -772,9 +772,8 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
 
     def run_update(self):
         """
-        Invokes an update run, the same that is invoked by a click on the update button
-        or for :param update_mode: "release" and "continuous" when a parameter panel
-        parameter is changed
+        Invokes an update run, the same that is invoked by a click on the update button,
+        or when a parameter is changed for `update_mode` "release" and "continuous"
         """
         if self._update_button is not None:
             # to also invoke the reset cue action, we click the cued button
@@ -787,7 +786,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
     def run_code(self, *args, **kwargs) -> Check.FunOutParamsT:
         """
         Runs the `code` with the given (keyword) arguments and returns the output of the
-        `code`. If no `code` was given on intialization, then a `ValueError` is raised.
+        `code`. If no `code` was given on initialization, then a `ValueError` is raised.
         """
         try:
             if self._code is None:

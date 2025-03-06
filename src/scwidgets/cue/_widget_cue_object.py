@@ -13,24 +13,24 @@ from ._widget_cue_output import CueOutput
 
 class CueObject(CueOutput):
     """
-    A cued displayable ipywidget.Output for any Python object.  Provides utilities to
-    clear and redraw the object, for example after an update.
+    A cued displayable `ipywidget.Output` for any Python object.  Provides utilities to
+    clear and redraw the object, for example, after an update.
 
     :param object:
         The object to display
     :param widgets_to_observe:
-        The widget to observe if the :param traits_to_observe: has changed.
+        The widget to observe if the `traits_to_observe` has changed.
     :param traits_to_observe:
-        The trait from the :param widgets_to_observe: to observe if changed.
+        The trait from the `widgets_to_observe` to observe if changed.
         Specify `traitlets.All` to observe all traits.
     :param cued:
         Specifies if it is cued on initialization
-    :param css_syle:
+    :param css_style:
         - **base**: the css style of the box during initialization
-        - **cue**: the css style that is added when :param
-          traits_to_observe: in widget :param widgets_to_observe: changes.
+        - **cue**: the css style that is added when
+          `traits_to_observe` in widget `widgets_to_observe` changes.
           It is supposed to change the style of the box such that the user has a visual
-          cue that :param widget_to_cue: has changed.
+          cue that `widget_to_cue` has changed.
     """
 
     def __init__(

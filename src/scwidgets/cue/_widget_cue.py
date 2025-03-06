@@ -6,13 +6,13 @@ from traitlets.utils.sentinel import Sentinel
 
 class CueWidget:
     """
-    Observes a list of traits of widgets and sets cue when one of the widgets traits
+    Observes a list of traits of widgets and sets cue when one of the widgets' traits
     change. The behavior when the cue is set has to be implemented by children class.
 
     :param widgets_to_observe:
-        The widget to observe if the :param traits_to_observe: has changed.
+        The widget to observe if the `traits_to_observe` has changed.
     :param traits_to_observe:
-        The trait from the :param widgets_to_observe: to observe if changed.
+        The trait from the `widgets_to_observe` to observe if changed.
         Specify `traitlets.All` to observe all traits.
     :param cued:
         Specifies if it is cued on initialization
