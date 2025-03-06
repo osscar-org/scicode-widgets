@@ -8,14 +8,12 @@ from ..check import Check
 
 class ParametersPanel(VBox):
     """
-    A wrapper around ipywidgets.interactive to have more control how to connect the
-    parameters and the observation of parameters by buttons and the panels
-
+    A wrapper around `ipywidgets.interactive` to have more control on how the
+    parameters are connected and the parameters are observed by the buttons and panels
     :param parameters:
-        Can be any input that is allowed as keyword arguments in ipywidgets.interactive
-        for the parameters. _options and other widget layout parameter are controlled
-        by CodeExercise.
-
+        Can be any input that is allowed as keyword arguments in
+        `ipywidgets.interactive` for the parameters. `_option` and other widget layout
+        parameters are controlled by `CodeExercise`.
     """
 
     def __init__(
@@ -24,8 +22,8 @@ class ParametersPanel(VBox):
     ):
         if "_option" in parameters.keys():
             raise ValueError(
-                "Found interactive argument `_option` in paramaters, but "
-                "ParametersPanels should be controled by an exercise widget "
+                "Found interactive argument `_option` in parameters, but "
+                "ParametersPanel should be controlled by an exercise widget "
                 "to ensure correct initialization."
             )
 
@@ -52,6 +50,9 @@ class ParametersPanel(VBox):
 
     @property
     def param_to_widget_map(self) -> dict[str, Widget]:
+        """
+        :return: A dictionary mapping parameter names to their corresponding widgets.
+        """
         return self._param_to_widget_map
 
     @property
@@ -74,7 +75,7 @@ class ParametersPanel(VBox):
     def parameters(self) -> Dict[str, Any]:
         """
         :return: All parameters that were given on initialization are returned,
-            also including also fixed parameters.
+            also including fixed parameters.
         """
         return {key: widget.value for key, widget in self._param_to_widget_map.items()}
 
@@ -100,7 +101,6 @@ class ParametersPanel(VBox):
         trait_name: Union[str, Sentinel, List[str]],
         notification_type: Union[None, str, Sentinel] = "change",
     ):
-        """ """
         for widget in self.panel_parameters_widget:
             widget.observe(handler, trait_name, notification_type)
 

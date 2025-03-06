@@ -11,18 +11,18 @@ from ._widget_exercise_registry import ExerciseRegistry, ExerciseWidget
 class TextExercise(VBox, ExerciseWidget):
     """
     :param textarea:
-        a custom textarea with custom styling, if not specified the standard parameters
-        are given.
+        a custom `textarea` with custom styling. If not specified, the standard
+        parameters are given.
 
     :param key:
-        The key that is used to store the exercise in the json file.
+        The key that is used to store the exercise in the JSON file.
 
     :param description:
         A string describing the exercises that will be put into an HTML widget
         above the exercise.
 
     :param title:
-        A title for the exercise. If not given the key is used.
+        A title for the exercise. If not given, the key is used.
     """
 
     def __init__(

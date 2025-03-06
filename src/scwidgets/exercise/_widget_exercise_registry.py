@@ -18,14 +18,14 @@ from ..css_style import CssStyle
 class ExerciseWidget:
     """
     Any widget inheriting from this class can be (de)serialized
-    :py:class:`WidgetStateRegistry`. The serialization offered by ipywidgets
-    cannot be loaded out-of-the-box for restarted notebook since the widget IDs change
+    by :py:class:`WidgetStateRegistry`. The serialization offered by `ipywidgets`
+    cannot be loaded out-of-the-box for a restarted notebook since the widget IDs change
 
     :param exercise_registry:
         the exercise registry that registers the answers for this widget
 
     :param exercise_key:
-        Identifier for the widget, must be unique for each regestired widget
+        Identifier for the widget, must be unique for each registered widget
 
     Reference
     ---------
@@ -70,14 +70,14 @@ class ExerciseWidget:
     def handle_save_result(self, result: Union[str, Exception]) -> None:
         """
         Function that controls how a save result is handled. If the result is a string,
-        the saving was successfull. The result contains a string that can be outputed.
+        the saving was successful. The result contains a string that can be outputed.
         """
         raise NotImplementedError("handle_save_result has not been implemented")
 
     def handle_load_result(self, result: Union[str, Exception]) -> None:
         """
         Function that controls how a load result is handled. If the result is a string,
-        the loading was successfull. The result contains a string that can be outputed.
+        the loading was successful. The result contains a string that can be outputed.
         """
         raise NotImplementedError("handle_load_result has not been implemented")
 
@@ -99,7 +99,7 @@ class ExerciseWidget:
             )
         if self._exercise_key is None:
             raise ValueError(
-                "No exercise key given on initialization, save cannot be used"
+                "No exercise key given on initialization, load cannot be used"
             )
         return self._exercise_registry.load_answer_from_loaded_file(self._exercise_key)
 
@@ -147,7 +147,7 @@ class FilenameParser:
     @staticmethod
     def verify_valid_student_name(student_name: str):
         if FilenameParser.is_name_empty(student_name):
-            raise ValueError("Your name is empty. Please provide a new one.")
+            raise ValueError("Your name is empty. Please provide one.")
 
         forbidden_characters = FilenameParser.extract_forbidden_characters(student_name)
         if len(forbidden_characters) > 0:
@@ -277,10 +277,10 @@ class ExerciseRegistry(VBox):
     def register_widget(self, widget: ExerciseWidget, exercise_key: Hashable):
         """
         :param widget:
-            widget answer is save on click of save button
+            widget answer that is saved on click of the save button
         :param exercise_key:
-            unique exercise key for widget to store, so it can be reloaded persistently
-            after a restart of the python kernel
+            unique exercise key for the widget to be stored under,
+            so it can be reloaded persistently after a restart of the python kernel
         """
         self._widgets[exercise_key] = widget
 
@@ -288,8 +288,8 @@ class ExerciseRegistry(VBox):
         """Creates a new file containing all students answers from the selected
         file in the dropdown menu.
 
-        :raises FileExistsError: If the file arleady exists
-        :return: A message to print
+        :raises FileExistsError: If the file already exists
+        :return: The success message
         """
         self.create_new_file_from_student_name(self._student_name_text.value)
         return f"File {self._loaded_file_name!r} created and loaded."
@@ -297,8 +297,8 @@ class ExerciseRegistry(VBox):
     def get_answer_filename(self, student_name: str) -> str:
         """Returns the filename containing all answers for the student name.
 
-        :param student_name: The name of the student used for the filename
-        :raises ValueError: If student name is not valid
+        :param student_name: The name of the student used in the filename
+        :raises ValueError: If the student name is not valid
         :return: The filename
         """
         FilenameParser.verify_valid_student_name(student_name)
@@ -312,10 +312,10 @@ class ExerciseRegistry(VBox):
         return answers_filename
 
     def create_new_file_from_student_name(self, student_name: str):
-        """Creates a new exercise file containing all students answers.
+        """Creates a new exercise file containing all the student's answers.
 
         :param student_name: The name of the student used for the exercise file
-        :raises FileExistsError: If the file arleady exists
+        :raises FileExistsError: If the file already exists
         :return: A message to print
         """
         answers_filename = self.get_answer_filename(student_name)
@@ -348,7 +348,7 @@ class ExerciseRegistry(VBox):
         Loads the answer with key `exercise_key` from the file corresponding to
         `student_name`.
 
-        :raises KeyError: Corresponding widget to exercise_key cannot be found
+        :raises KeyError: Corresponding widget to `exercise_key` cannot be found
         :raises KeyError: Corresponding key in file cannot be found
         :raises FileNotFoundError: If the file cannot be found
         :param student_name: The name of the student
@@ -363,8 +363,8 @@ class ExerciseRegistry(VBox):
         """
         Loads the answer with key `exercise_key` from the currently loaded file.
 
-        :raises ValueError: No have has been loaded
-        :raises KeyError: Corresponding widget to exercise_key cannot be found
+        :raises ValueError: No file has been loaded
+        :raises KeyError: Corresponding widget to `exercise_key` cannot be found
         :raises KeyError: Corresponding key in file cannot be found
         :raises FileNotFoundError: If the file cannot be found
         :param exercise_key: Unique exercise key for widget to store, so it can
@@ -382,7 +382,7 @@ class ExerciseRegistry(VBox):
         """
         Loads the answer with key `exercise_key` from the `answer_filename`.
 
-        :raises KeyError: Corresponding widget to exercise_key cannot be found
+        :raises KeyError: Corresponding widget to `exercise_key` cannot be found
         :raises KeyError: Corresponding key in file cannot be found
         :raises FileNotFoundError: If the file cannot be found
         :param answers_filename: The file with the answer
@@ -500,6 +500,7 @@ class ExerciseRegistry(VBox):
 
     def save_all_answers(self) -> str:
         """
+        Saves all answers to the loaded JSON file.
         Returns a success message or raises an error when failed
         """
         if self._loaded_file_name is None:

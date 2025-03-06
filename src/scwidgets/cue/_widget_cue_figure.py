@@ -16,15 +16,15 @@ from ._widget_cue_output import CueOutput
 
 class CueFigure(CueOutput):
     """
-    A cued displayable ipywidget.Output for a matplotlib figure.  Provides utilities to
-    clear and draw the updated figure.  For the matplotlib inline backend it closes the
-    active figure to prevent any display outside of the container, that happens on the
-    creation of the figure because pyplot does magic behind the curtain that is hard to
-    suppress.  For the matplot interactive widget backend, named "nbagg", it wraps te
-    figure within.
+    A cued, displayable `ipywidget.Output` for a `matplotlib` figure.  Provides
+    utilities to clear and draw the updated figure.  For the `matplotlib inline`
+    backend, it closes the active figure to prevent any display outside of the
+    container, which happens on the creation of the figure because `pyplot` does magic
+    behind the curtain that is hard to suppress.  For the matplotlib interactive widget
+    backend, named "nbagg", it wraps the figure within.
 
     :param figure:
-        The matplotlib figure
+        The `matplotlib` figure
     :param widgets_to_observe:
         The widget to observe if the :param traits_to_observe: has changed.
     :param traits_to_observe:
@@ -34,7 +34,7 @@ class CueFigure(CueOutput):
         Specifies if it is cued on initialization
     :param show_toolbars:
         Hide toolbars and headers when using in widget mode.
-    :param css_syle:
+    :param css_style:
         - **base**: the css style of the box during initialization
         - **cue**: the css style that is added when :param
           traits_to_observe: in widget :param widgets_to_observe: changes.
@@ -99,7 +99,7 @@ class CueFigure(CueOutput):
     def clear_display(self, wait=False):
         """
         :param wait:
-            same meaning as for the `wait` parameter in the ipywidgets.clear_output
+            same meaning as for the `wait` parameter in the `ipywidgets.clear_output`
             function
         """
         if matplotlib.backends.backend in [
@@ -154,7 +154,7 @@ class CueFigure(CueOutput):
 
     def clear_figure(self):
         """
-        Clears the figure while retainin axes. figure.clear() removes the axes
+        Clears the figure while retaining axes as figure.clear() removes the axes
         sometimes.
         """
         for ax in self.figure.get_axes():
