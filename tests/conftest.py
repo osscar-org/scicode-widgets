@@ -23,7 +23,7 @@ def get_jupyter_version() -> Version:
     Function so we can update the jupyter version during initialization
     and use it in other files
     """
-    global JUPYTER_VERSION
+    global JUPYTER_VERSION  # noqa F824
     if JUPYTER_VERSION is None:
         raise ValueError("JUPYTER_VERSION was not correctly on initialization")
     return JUPYTER_VERSION
@@ -81,7 +81,7 @@ def selenium_driver(notebook_service, selenium):
         """
         :param nb_path: jupyter notebook path
         """
-        global JUPYTER_TYPE
+        global JUPYTER_TYPE  # noqa F824
         url, token = notebook_service
 
         if JUPYTER_TYPE == "lab":
