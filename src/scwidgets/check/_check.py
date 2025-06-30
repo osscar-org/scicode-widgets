@@ -50,7 +50,7 @@ class Check:
         obscuring direct comparisons with the `output_references`.
     :param suppress_fingerprint_asserts:
         Specifies if the assert messages that use the fingerprint function output for
-        tests are supressed. The message might be confusing to a student as the output
+        tests are suppressed. The message might be confusing to a student as the output
         is converted by the fingerprint function.
     :param stop_on_assert_error_raised:
         Specifies if running the asserts is stopped as soon as an error is raised in an
