@@ -72,7 +72,7 @@ def notebook_service():
 
 
 @pytest.fixture(scope="function")
-def selenium_driver(notebook_service, selenium, get_jupyter_version):
+def selenium_driver(notebook_service, selenium):
     """
     Returns a function that starts a notebooks at a given path
     """
