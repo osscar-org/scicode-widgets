@@ -24,19 +24,18 @@ class CodeInput(WidgetCodeInput):
     """
     Small wrapper around WidgetCodeInput that controls the output
 
-    :param function: We can automatically parse the function. Note that during
-        parsing the source code might be differently formatted and certain
-        python functionalities are not formatted. If you notice undesired
-        changes by the parsing, please directly specify the function as string
-        using the other parameters.
+    :param function:
+        A Python function to be parse automatically. Note that the parsing
+        may alter the original formatting or lose certain syntactical nuances. If this
+        behavior is undesired, provide the function explicitly using other parameters.
     :param function_name: The name of the function
-    :param function_paramaters: The parameters as continuous string as specified in
+    :param function_paramaters: The parameters as a continuous string as specified in
         the signature of the function. e.g  for `foo(x, y = 5)` it should be
         `"x, y = 5"`
     :param docstring: The docstring of the function
     :param function_body: The function definition without indentation
-    :param builtins: A dict of variable name and value that is added to the
-      globals __builtins__ and thus available on initialization
+    :param builtins: A dictionary containing variable names and values that are added
+        to the globals __builtins__ and thus available on initialization
     """
 
     valid_code_themes = ["nord", "solarizedLight", "basicLight"]
@@ -88,9 +87,9 @@ class CodeInput(WidgetCodeInput):
     @property
     def unwrapped_function(self) -> types.FunctionType:
         """
-        Return the compiled function object.
+        Returns the compiled function object.
 
-        This can be assigned to a variable and then called, for instance::
+        This can be assigned to a variable and then called, for instance:
 
           func = widget.wrapped_function # This can raise a SyntaxError
           retval = func(parameters)
@@ -133,7 +132,7 @@ class CodeInput(WidgetCodeInput):
     def compatible_with_signature(self, parameters: List[str]) -> str:
         """
         This function checks if the arguments are compatible with the function signature
-        and returns a nonempty message if this is not the case explaining what the issue
+        and returns an explanatory message if this is not the case.
         """
         if "**" in self.function_parameters:
             # function has keyword arguments so it is compatible
@@ -148,10 +147,17 @@ class CodeInput(WidgetCodeInput):
 
     @property
     def function_parameters_name(self) -> List[str]:
+        """
+        Returns the names of the function parameters
+        """
         return self.function_parameters.replace(",", "").split(" ")
 
     @staticmethod
     def get_docstring(function: types.FunctionType) -> Union[str, None]:
+        """
+        Returns the docstring of a function, if it exists, without leading or trailing
+        whitespace or triple quotes.
+        """
         docstring = function.__doc__
         return (
             None
@@ -180,6 +186,10 @@ class CodeInput(WidgetCodeInput):
 
     @staticmethod
     def get_function_parameters(function: types.FunctionType) -> str:
+        """
+        Returns the parameters of a function as a continuous string,
+        e.g  for `foo(x, y = 5)` it would return `"x, y = 5"`
+        """
         function_parameters = []
         function_source, function_definition = CodeInput._get_function_source_and_def(
             function
@@ -216,6 +226,10 @@ class CodeInput(WidgetCodeInput):
 
     @staticmethod
     def get_function_body(function: types.FunctionType) -> str:
+        """
+        Extracts the body of the given function, removing the signature, docstrings,
+        and adjusting indentation appropriately.
+        """
         source_lines, _ = inspect.getsourcelines(function)
 
         found_def = False
@@ -228,7 +242,7 @@ class CodeInput(WidgetCodeInput):
         if not (found_def):
             raise ValueError(
                 "Did not find any def definition. Only functions with a "
-                "defition are supported"
+                "definition are supported"
             )
 
         # Remove function definition
@@ -259,15 +273,15 @@ class CodeInput(WidgetCodeInput):
     @property
     def function(self) -> types.FunctionType:
         """
-        Return the compiled function object wrapped by an try-catch block
+        Returns the compiled function object wrapped by an try-catch block
         raising a `CodeValidationError`.
 
-        This can be assigned to a variable and then called, for instance::
+        This can be assigned to a variable and then called, for instance:
 
-          func = widget.wrapped_function # This can raise a SyntaxError
+          func = widget.function # This can raise a CodeValidationError
           retval = func(parameters)
 
-        :raise SyntaxError: if the function code has syntax errors (or if
+        :raise CodeValidationError: if the function code has syntax errors (or if
           the function name is not a valid identifier)
         """
 
@@ -300,12 +314,12 @@ class CodeInput(WidgetCodeInput):
 # is merged
 def format_generic_error_msg(exc, code_widget):
     """
-    Return a string reproducing the traceback of a typical error.
+    Returns a string reproducing the traceback of a typical error.
     This includes line numbers, as well as neighboring lines.
 
     It will require also the code_widget instance, to get the actual source code.
 
-    :note: this must be called from withou the exception, as it will get the
+    :note: this must be called from within the exception, as it will get the
         current traceback state.
 
     :param exc: The exception that is being processed.

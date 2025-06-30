@@ -8,28 +8,27 @@ from ._widget_cue import CueWidget
 
 class CueBox(VBox, CueWidget):
     """
-    A box around the widget :param widget_to_cue: that adds a visual cue defined in the
-    :param css_style: when the trait :param traits_to_observe: in the widget :param
-    widgets_to_observe: changes. If the :param widgets_to_observe: is a list then for
-    each widget is observed.
+    A box around the widget `widget_to_cue` that adds a visual cue defined in the
+    `css_style` when the trait `traits_to_observe` in the widget `widgets_to_observe`
+    changes. If the `widgets_to_observe` is a list, each widget is observed separately.
 
     :param widgets_to_observe:
-        The widget to observe if the :param traits_to_observe: has changed.
+        The widget to observe if the `traits_to_observe` has changed.
     :param traits_to_observe:
-        The trait from the :param widgets_to_observe: to observe if changed.
+        The trait from the `widgets_to_observe` to observe if changed.
         Specify `traitlets.All` to observe all traits.
     :param widget_to_cue:
-        The widget to wrap the box around to give a visual cue, once :param
-        traits_to_observe: has changed
-        If None, then the :param widget_to_cue: is set to :param widgets_to_observe:.
+        The widget to wrap the box around to give a visual cue, once
+        `traits_to_observe` has changed
+        If None, then the `widget_to_cue` is set to `widgets_to_observe`.
     :param cued:
         Specifies if it is cued on initialization
-    :param css_syle:
+    :param css_style:
         - **base**: the css style of the box during initialization
-        - **cue**: the css style that is added when :param
-          traits_to_observe: in widget :param widgets_to_observe: changes.
+        - **cue**: the css style that is added when `traits_to_observe`
+          in widget `widgets_to_observe` changes.
           It is supposed to change the style of the box such that the user has a visual
-          cue that :param widget_to_cue: has changed.
+          cue that `widget_to_cue` has changed.
 
     Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Box`.
     """
@@ -92,21 +91,20 @@ class CueBox(VBox, CueWidget):
 
 class SaveCueBox(CueBox):
     """
-    A box around the widget :param widget_to_cue: that adds a visual cue defined in the
-    :param css_style: when the trait :param traits_to_observe: in the widget :param
-    widgets_to_observe: changes.
+    A box around the widget `widget_to_cue` that adds a visual cue related to saving
+    when the trait `traits_to_observe` in the widget `widgets_to_observe` changes.
 
     :param widgets_to_observe:
-        The widget to observe if the :param traits_to_observe: has changed.
+        The widget to observe if the `traits_to_observe` has changed.
     :param traits_to_observe:
-        The trait from the :param widgets_to_observe: to observe if changed.
+        The trait from the `widgets_to_observe` to observe if changed.
         Specify `traitlets.All` to observe all traits.
     :param cued:
         Specifies if it is cued on initialization
     :param widget_to_cue:
-        The widget to wrap the box around to give a visual cue, once :param
-        traits_to_observe: has changed
-        If None, then the :param widget_to_cue: is set to :param widgets_to_observe:.
+        The widget to wrap the box around to give a visual cue, once
+        `traits_to_observe` has changed
+        If None, then the `widget_to_cue` is set to `widgets_to_observe`.
 
     Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Box`.
     """
@@ -133,19 +131,18 @@ class SaveCueBox(CueBox):
 
 class CheckCueBox(CueBox):
     """
-    A box around the widget :param widget_to_cue: that adds a visual cue defined in the
-    :param css_style: when the trait :param traits_to_observe: in the widget :param
-    widgets_to_observe: changes.
+    A box around the widget `widget_to_cue` that adds a visual cue related to checking
+    when the trait `traits_to_observe` in the widget `widgets_to_observe` changes.
 
     :param widgets_to_observe:
-        The widget to observe if the :param traits_to_observe: has changed.
+        The widget to observe if the `traits_to_observe` has changed.
     :param traits_to_observe:
-        The trait from the :param widgets_to_observe: to observe if changed.
+        The trait from the `widgets_to_observe` to observe if changed.
         Specify `traitlets.All` to observe all traits.
     :param widget_to_cue:
-        The widget to wrap the box around to give a visual cue, once :param
-        traits_to_observe: has changed
-        If None, then the :param widget_to_cue: is set to :param widgets_to_observe:.
+        The widget to wrap the box around to give a visual cue, once
+        `traits_to_observe` has changed
+        If None, then the `widget_to_cue` is set to `widgets_to_observe`.
     :param cued:
         Specifies if it is cued on initialization
 
@@ -174,21 +171,20 @@ class CheckCueBox(CueBox):
 
 class UpdateCueBox(CueBox):
     """
-    A box around the widget :param widget_to_cue: that adds a visual cue defined in the
-    :param css_style: when the trait :param traits_to_observe: in the widget :param
-    widgets_to_observe: changes.
+    A box around the widget `widget_to_cue` that adds a visual cue related to updating
+    when the trait `traits_to_observe` in the widget `widgets_to_observe` changes.
 
     :param widgets_to_observe:
-        The widget to observe if the :param traits_to_observe: has changed.
+        The widget to observe if the `traits_to_observe` has changed.
     :param traits_to_observe:
-        The trait from the :param widgets_to_observe: to observe if changed.
+        The trait from the `widgets_to_observe` to observe if changed.
         Specify `traitlets.All` to observe all traits.
-    :param widget_to_cue:
-        The widget to wrap the box around to give a visual cue, once :param
-        traits_to_observe: has changed
-        If None, then the :param widget_to_cue: is set to :param widgets_to_observe:.
     :param cued:
         Specifies if it is cued on initialization
+    :param widget_to_cue:
+        The widget to wrap the box around to give a visual cue, once
+        `traits_to_observe` has changed
+        If None, then the `widget_to_cue` is set to `widgets_to_observe`.
 
     Further accepts the same (keyword) arguments as :py:class:`ipywidgets.Box`.
     """

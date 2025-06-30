@@ -14,6 +14,10 @@ def assert_equal(
     output_references: Check.FunOutParamsT,
     parameters_to_check: Union[Iterable[int], str] = "all",
 ) -> AssertResult:
+    """
+    Check if output_parameters are equal to output_references using simple Python
+    equality check.
+    """
     assert len(output_parameters) == len(
         output_references
     ), "output_parameters and output_references have to have the same length"
@@ -59,6 +63,9 @@ def assert_shape(
     output_references: Check.FunOutParamsT,
     parameters_to_check: Union[Iterable[int], str] = "auto",
 ) -> AssertResult:
+    """
+    Check that the shape of output parameters matches the reference.
+    """
     assert len(output_parameters) == len(
         output_references
     ), "output_parameters and output_references have to have the same length"
@@ -114,6 +121,10 @@ def assert_numpy_allclose(
     atol=1e-08,
     equal_nan=False,
 ) -> AssertResult:
+    """
+    Check if output_parameters are numerically close to output_references using
+    numpy.allclose().
+    """
     assert len(output_parameters) == len(
         output_references
     ), "output_parameters and output_references have to have the same length"
@@ -196,6 +207,9 @@ def assert_type(
     output_references: Check.FunOutParamsT,
     parameters_to_check: Union[Iterable[int], str] = "all",
 ) -> AssertResult:
+    """
+    Check that output parameters have the correct type.
+    """
     assert len(output_parameters) == len(
         output_references
     ), "output_parameters and output_references have to have the same length"
@@ -242,6 +256,9 @@ def assert_numpy_sub_dtype(
     numpy_type: Union[np.dtype, type],
     parameters_to_check: Union[Iterable[int], str] = "all",
 ) -> AssertResult:
+    """
+    Check that output parameters have the correct numpy sub-dtype.
+    """
     if parameters_to_check == "all":
         parameter_indices = range(len(output_parameters))
     elif isinstance(parameters_to_check, abc.Iterable):

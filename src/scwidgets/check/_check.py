@@ -25,37 +25,36 @@ ExecutionInfo = Tuple[
 
 class Check:
     """
-    A check verifies the correctness of a function for a set of inputs parameters using
+    A check verifies the correctness of a function for a set of input parameters using
     a list of univariate and bivariate asserts with the option to obscure the reference
     outputs.
 
     :param function_to_check:
-        The function must that accepts each input parameters in :params
-        input_parameters:
-    :param inputs_parameters:
+        The function that accepts each input parameters in `input_parameters`
+    :param input_parameters:
         A dict or a list of dictionaries each containing the argument name and its value
-        as (key, value) pair that is used as input for the function
-        :param function_to_check:
+        as (key, value) pair that is used as input for the function `function_to_check`.
     :param outputs_references:
-        A list or a list of lists each containing the expected output of the function
-        :param function_to_check: of :param function_to_check: for the inputs in the
-        :param input_parameters:
+        A tuple or a list of tuples each containing the expected output of the function
+        `function_to_check` for the inputs in the `input_parameters`
     :param asserts:
-        A list of assert functions. An assert function can the output parameters of
-        :param function_to_check: to run assert. If output references has been set it
-        can take additional output references to compare with. If a fingerprint is given
-        then the fingerprints are compared while assert functions with a single argument
-        are always applied on the output parameters.
+        A list of assert functions. Each assert function verifies the outputs from
+        `function_to_check`. Assert functions can be univariate (accepting only output),
+        bivariate (accepting output and reference output), or nullvariate (accepting no
+        arguments). If output references have been set, it can take additional output
+        references to compare with. If a fingerprint is given, the it is compared while
+        assert functions with a single argument are always applied on the output
+        parameters.
     :param fingerprint:
-        A one-way function that takes as input the output parameters of function :param
-        function_to_check: and obscures the :param output_references:.
+        A one-way function that transforms the outputs from `function_to_check`,
+        obscuring direct comparisons with the `output_references`.
     :param suppress_fingerprint_asserts:
         Specifies if the assert messages that use the fingerprint function output for
-        tests are surpressed. The message might be confusing to a student as the output
+        tests are suppressed. The message might be confusing to a student as the output
         is converted by the fingerprint function.
     :param stop_on_assert_error_raised:
         Specifies if running the asserts is stopped as soon as an error is raised in an
-        assert. If a lot of asserts are specified the printing of a lot of error
+        assert. If a lot of asserts are specified, the printing of a lot of error
         tracebacks might make debugging harder.
     """
 
@@ -207,7 +206,7 @@ class Check:
 
     def check_function(self) -> CheckResult:
         """
-        Returns for each input (first depth list) the result message for each assert
+        For each input (first depth list) returns the result message for each assert
         (second depth list).  If a result message is empty, the assert was successful,
         otherwise it contains information about the failure.
         """
@@ -218,7 +217,7 @@ class Check:
                     "outputs_references (second positional argument)"
                 )
             assert len(self._inputs_parameters) == len(self._outputs_references), (
-                "Number of inputs and reference outputs  "
+                "Number of inputs and reference outputs "
                 "are mismatching: len inputs parameters != len outputs parameters "
                 f"[{len(self._inputs_parameters)} != {len(self._outputs_references)}]."
             )
@@ -303,6 +302,11 @@ class Check:
 
 
 class CheckResult:
+    """
+    Represents the result of a check, storing information about the assert results,
+    assert names, input parameters, and suppressed assert messages.
+    """
+
     def __init__(self):
         self._assert_results = []
         self._assert_names = []
@@ -432,11 +436,22 @@ class CheckResult:
 
 class AssertResult:
     """
+    Represents the result of an assertion check, storing information about
+    the assertion name, parameter indices, parameter values, and messages.
+    If any of `parameter_indices`, `parameter_values`, or `messages` is a list,
+    then all must be lists of the same length.
+
     :param assert_name:
-        TODO
+        The name of the assertion being checked.
     :param parameter_indices:
-        TODO
-    TODO...
+        The index or indices of the parameters that were evaluated in the assertion.
+        If a single index is provided, it will be converted into a list.
+    :param parameter_values:
+        The value(s) of the parameters at the given indices that were checked in the
+        assertion. If a single value is provided, it will be converted into a list.
+    :param messages:
+        A message or list of messages describing the assertion result for each parameter
+        index. If a single message is provided, it will be converted into a list.
     """
 
     def __init__(
@@ -457,14 +472,14 @@ class AssertResult:
                 or not (isinstance(messages, list))
             ):
                 raise ValueError(
-                    "If one of the inputs parameter_indices, paramater_values or "
+                    "If one of the inputs parameter_indices, parameter_values or "
                     "messages is a list, then all must be lists of the same size."
                 )
             elif len(parameter_indices) != len(parameter_values) or len(
                 parameter_indices
             ) != len(messages):
                 raise ValueError(
-                    "If one of the inputs parameter_indices, paramater_values or "
+                    "If one of the inputs parameter_indices, parameter_values or "
                     "messages is a list, then all must be lists of the same size, "
                     "but got len(parameter_indices), len(parameter_values), "
                     f"len(messages) [{len(parameter_indices)}, "
