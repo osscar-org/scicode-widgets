@@ -18,10 +18,11 @@ classifiers = [
     "Operating System :: POSIX",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Chemistry",
     "Topic :: Scientific/Engineering :: Physics",
@@ -35,6 +36,12 @@ dependencies = [
   "termcolor"
 ]
 dynamic = ["version"]
+
+[project.urls]
+Documentation = "https://scicode-widgets.readthedocs.io/en/latest/"
+Repository = "https://github.com/osscar-org/scicode-widgets"
+Issues = "https://github.com/osscar-org/scicode-widgets/issues"
+Changelog = "https://github.com/osscar-org/scicode-widgets/blob/main/CHANGELOG.md"
 
 [tool.setuptools.dynamic]
 version = {attr = "scwidgets.__version__"}
