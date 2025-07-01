@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "0e04da4d7d5d4391e36df94242e784acfbbdc0564625db7bd157619a933915dd"
+            "sha256": "0f43305b1cdaecbb0f43ad49bbb6a40d4ebd915079350f47a59ffbdb44cafcf8"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -635,9 +635,8 @@
             "version": "==2.9.0.post0"
         },
         "scwidgets": {
-            "git": "https://github.com/osscar-org/scicode-widgets",
-            "markers": "python_version >= '3.9'",
-            "ref": "92337fb3cf17a4cf9867bfd2acbfd47278c89048"
+            "file": ".",
+            "markers": "python_version >= '3.9'"
         },
         "six": {
             "hashes": [
@@ -692,9 +691,12 @@
             "version": "==0.2.13"
         },
         "widget-code-input": {
-            "git": "git+https://github.com/agoscinski/widget-code-input",
+            "hashes": [
+                "sha256:4305eaa20523b3a78be8e1e4f759e0d3d685cae6f410d537f68f0e2031671345",
+                "sha256:9471c5cc97c4a403eecf7898f7d32eb98ce082fd066800a3f61d51af109d84db"
+            ],
             "markers": "python_version >= '3.9'",
-            "ref": "90f731ca929725ef3fcad3da7bcb3e3672d9eefd"
+            "version": "==4.0.17"
         },
         "widgetsnbextension": {
             "hashes": [
