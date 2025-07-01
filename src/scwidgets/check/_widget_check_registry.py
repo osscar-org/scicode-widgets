@@ -234,6 +234,7 @@ class CheckRegistry(VBox):
             Callable[[Check.FunOutParamsT], Check.FingerprintT]
         ] = None,
         suppress_fingerprint_asserts: bool = True,
+        stop_on_assert_error_raised: bool = False,
     ):
         """
         Adds a new check for the specified widget. The check is defined using assert
@@ -265,6 +266,7 @@ class CheckRegistry(VBox):
             outputs_references,
             fingerprint,
             suppress_fingerprint_asserts,
+            stop_on_assert_error_raised,
         )
         self._checks[widget].append(check)
 
