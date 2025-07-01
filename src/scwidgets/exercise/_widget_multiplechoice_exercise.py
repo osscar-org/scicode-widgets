@@ -64,6 +64,7 @@ class MultipleChoiceExercise(VBox, ExerciseWidget):
         else:
             self._description_html = None
 
+        self._title: Union[str, None]
         if title is None:
             if key is not None:
                 self._title = key
@@ -77,6 +78,7 @@ class MultipleChoiceExercise(VBox, ExerciseWidget):
         if self._title_html is not None:
             self._title_html.add_class("exercise-title")
 
+        self._options_dict: Union[dict, None]
         if isinstance(options, dict):
             self._options_dict = options
             options_list = [(value, key) for key, value in options.items()]
@@ -174,11 +176,8 @@ class MultipleChoiceExercise(VBox, ExerciseWidget):
         return self._description
 
     @property
-    def answer(self) -> tuple:
-        if self.allow_multiple:
-            return tuple(self._selection_widget.value)
-        else:
-            return (self._selection_widget.value,)
+    def answer(self) -> dict:
+        return {"selection": self._selection_widget.value}
 
     @answer.setter
     def answer(self, answer) -> None:
@@ -189,10 +188,7 @@ class MultipleChoiceExercise(VBox, ExerciseWidget):
         if self._load_button is not None:
             self._load_button.unobserve_widgets()
 
-        if len(answer) == 1:
-            self._selection_widget.value = answer[0]
-        else:
-            self._selection_widget.value = answer
+        self._selection_widget.value = answer["selection"]
 
         if hasattr(self._cue_selection, "observe_widgets"):
             self._cue_selection.observe_widgets()
