@@ -19,7 +19,13 @@ The core features of scicode-widgets are:
 
 **Customizable coding exercises and demos**
 
+.. image:: https://github.com/osscar-org/scicode-widgets/blob/assets/assets/exercises.gif
+   :alt: Customizable coding exercises and demos 
+
 **Checks for students to verify their solution**
+
+.. image:: https://github.com/osscar-org/scicode-widgets/blob/assets/assets/checks.gif
+   :alt: Checks for students to verify their solution
 
 **Automatic grading using nbgrader**
 
