@@ -15,12 +15,13 @@ Features
 
 **Customizable coding exercises and demos**
 
-.. image:: https://github.com/osscar-org/scicode-widgets/blob/assets/assets/exercises.gif
+.. image:: https://raw.githubusercontent.com/osscar-org/scicode-widgets/assets/assets/exercises.gif
    :alt: Customizable coding exercises and demos 
 
 **Checks for students to verify their solution**
 
-.. image:: https://github.com/osscar-org/scicode-widgets/blob/assets/assets/checks.gif
+.. image:: https://raw.githubusercontent.com/osscar-org/scicode-widgets/assets/assets/checks.gif
+
    :alt: Checks for students to verify their solution
 
 **Automatic grading using nbgrader**
