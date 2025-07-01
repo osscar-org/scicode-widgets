@@ -259,11 +259,3 @@ class MultipleChoiceExercise(VBox, ExerciseWidget):
                 if self._save_button is not None:
                     self._save_button.cued = False
                 print(Formatter.color_success_message(result))
-
-    def check_correct_answers(self, *correct_answers) -> bool:
-        if isinstance(correct_answers[0], (list, tuple, set)):
-            correct_answers = correct_answers[0]
-        if self.allow_multiple:
-            return sorted(self.answer) == sorted(correct_answers)
-        else:
-            return self.answer[0] == correct_answers[0]
