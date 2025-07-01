@@ -28,7 +28,9 @@ We support the following jupyter environments:
 Installation
 ------------
 
-`pip install scwidgets`
+.. code-block:: bash
+
+    pip install scwidgets
 
 Please continue with our `getting started page <https://scicode-widgets.readthedocs.io/en/latest/getting_started.html>`_  
 for a more detailed overview of our features.
