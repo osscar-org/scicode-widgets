@@ -25,7 +25,7 @@ Features
 
 **Automatic grading using nbgrader**
 
-`See nbgrader integration tutorial <https://scicode-widgets.readthedocs.io/en/latest/nbgrader.html>`_
+See `how you can integrate scwidgets with the nbgrader framework <https://scicode-widgets.readthedocs.io/en/latest/nbgrader.html>`_
 
 **Supported jupyter environments:**
 
