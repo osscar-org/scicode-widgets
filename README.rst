@@ -12,6 +12,7 @@ researchers as they usually are more capable in writing Python code than
 JavaScript. It therefore builds on top of widgets provided by ipywidgets to
 creating a framework out of it.
 
+
 Features
 --------
 
@@ -27,7 +28,7 @@ The core features of scicode-widgets are:
 .. image:: https://github.com/osscar-org/scicode-widgets/blob/assets/assets/checks.gif
    :alt: Checks for students to verify their solution
 
-**[Automatic grading using nbgrader](https://scicode-widgets.readthedocs.io/en/latest/nbgrader.html)**
++**Automatic grading using nbgrader**
 
 Please continue with our `getting started page <https://scicode-widgets.readthedocs.io/en/latest/getting_started.html>`_  
 for a more detailed overview of our features.
