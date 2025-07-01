@@ -5,6 +5,11 @@ scicode-widgets
 
 *scicode-widgets* is a widget library for the purpose of creating computational experiments for educational content. It is targeted to teach students how to code and interpret computational experiments while abstracting away technical details and boilerplate code that are not essential for the learning experience. The logic is purely written in Python to simplify the development process for scientific researchers as they are typically more comfortable with Python than JavaScript. Built on top of ipywidgets, the library provides a framework for building interactive educational applications.
 
+Getting started
+---------------
+
+Please continue with our `getting started page <https://scicode-widgets.readthedocs.io/en/latest/getting_started.html>`_.
+
 Features
 --------
 
@@ -18,19 +23,11 @@ Features
 .. image:: https://github.com/osscar-org/scicode-widgets/blob/assets/assets/checks.gif
    :alt: Checks for students to verify their solution
 
-**Automatic grading using nbgrader** `See tutorial <https://scicode-widgets.readthedocs.io/en/latest/nbgrader.html>`_
+**Automatic grading using nbgrader**
 
-We support the following jupyter environments:
+`See tutorial <https://scicode-widgets.readthedocs.io/en/latest/nbgrader.html>`_
+
+**Supported jupyter environments:**
 
 * jupyterlab
 * notebook < 7
-
-Installation
-------------
-
-.. code-block:: bash
-
-    pip install scwidgets
-
-Please continue with our `getting started page <https://scicode-widgets.readthedocs.io/en/latest/getting_started.html>`_  
-for a more detailed overview of our features.
