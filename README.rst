@@ -12,7 +12,6 @@ researchers as they usually are more capable in writing Python code than
 JavaScript. It therefore builds on top of widgets provided by ipywidgets to
 creating a framework out of it.
 
-
 Features
 --------
 
