@@ -27,7 +27,7 @@ The core features of scicode-widgets are:
 .. image:: https://github.com/osscar-org/scicode-widgets/blob/assets/assets/checks.gif
    :alt: Checks for students to verify their solution
 
-+**Automatic grading using nbgrader**
+**Automatic grading using nbgrader**
 
 Please continue with our `getting started page <https://scicode-widgets.readthedocs.io/en/latest/getting_started.html>`_  
 for a more detailed overview of our features.
