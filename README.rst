@@ -45,6 +45,13 @@ License
 `scicode-widgets` are released under the open BSD 3-Clause License.
 See the `LICENSE.txt` file for more details.
 
+Citing
+------
+
+If you use `scicode-widgets`, we are grateful if you could cite:
+
+  Alexander Goscinski, Taylor James Baird, Dou Du, João Prado, Divya Suman, Tulga-Erdene Sodjargal, Sara Bonella, Giovanni Pizzi, Michele Ceriotti, `scicode-widgets: Bringing Computational Experiments to the Classroom with Jupyter Widgets <https://arxiv.org/abs/2507.05734>`_, **arXiv:2507.05734** (2025).
+
 Acknowledgements
 ----------------
 
