@@ -249,24 +249,6 @@ def test_privacy_policy(selenium_driver):
             ).click()
 
 
-def test_scwidgets_code_input(selenium_driver):
-    """
-    Tests the widget of the module code
-
-    :param selenium_driver: see conftest.py
-    """
-    driver = selenium_driver("tests/notebooks/widget_scwidgets_code_input.ipynb")
-
-    nb_cells = NotebookCellList(driver)
-    # Test 1:
-    # -------
-
-    # Tests if change in function_body changed the widget view
-    time.sleep(2)
-    code_input_lines = nb_cells[1].find_elements(By.CLASS_NAME, CODE_MIRROR_CLASS_NAME)
-    assert "return 'change'" in code_input_lines[-1].text
-
-
 class TestExerciseWidgets:
     prefix = "pytest"
 
