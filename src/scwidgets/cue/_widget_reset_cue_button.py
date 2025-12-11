@@ -75,7 +75,8 @@ class ResetCueButton(Button, CueWidget):
 
         self._css_style = css_style
 
-        Button.__init__(self, *args, **kwargs)
+        tooltip = kwargs.pop("button_tooltip", None)
+        Button.__init__(self, *args, tooltip=tooltip, **kwargs)
 
         if widgets_to_observe is None:
             widgets_to_observe = []
@@ -88,7 +89,12 @@ class ResetCueButton(Button, CueWidget):
         if cued is None:
             cued = any([cue_widget.cued for cue_widget in cue_widgets])
 
-        CueWidget.__init__(self, widgets_to_observe, traits_to_observe, cued)
+        CueWidget.__init__(
+            self,
+            widgets_to_observe=widgets_to_observe,
+            traits_to_observe=traits_to_observe,
+            cued=cued,
+        )
         self._cue_widgets = cue_widgets
 
         self.on_click(self._on_click)

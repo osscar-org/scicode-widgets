@@ -307,5 +307,5 @@ def assert_numpy_sub_dtype(
 
 
 assert_numpy_floating_sub_dtype = functools.partial(
-    assert_numpy_sub_dtype, numpy_type=np.floating
+    assert_numpy_sub_dtype, numpy_type=float
 )
