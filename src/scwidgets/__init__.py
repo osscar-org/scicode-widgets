@@ -1,4 +1,4 @@
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __authors__ = "the scicode-widgets developer team"
 
 from .check import *  # noqa: F403
