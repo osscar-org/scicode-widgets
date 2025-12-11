@@ -26,7 +26,7 @@ class CheckableWidget:
     """
 
     def __init__(
-        self, check_registry: Optional[CheckRegistry], name: Optional[str] = None
+        self, check_registry: Optional[CheckRegistry] = None, name: Optional[str] = None
     ):
         self._check_registry = check_registry
         if self._check_registry is not None:
