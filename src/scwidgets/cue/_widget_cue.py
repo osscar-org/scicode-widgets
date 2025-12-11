@@ -20,7 +20,7 @@ class CueWidget:
 
     def __init__(
         self,
-        widgets_to_observe: Union[List[Widget], Widget],
+        widgets_to_observe: Union[List[Widget], Widget, None] = None,
         traits_to_observe: Union[
             str, Sentinel, List[Union[str, Sentinel, List[str]]]
         ] = "value",
@@ -30,7 +30,9 @@ class CueWidget:
     ):
         self._widgets_to_observe: List[Widget] = []
         self._traits_to_observe: List[Union[str, Sentinel, List[str]]] = []
-        self.set_widgets_to_observe(widgets_to_observe, traits_to_observe)
+        if widgets_to_observe is not None:
+            # normal usage (your explicit calls)
+            self.set_widgets_to_observe(widgets_to_observe, traits_to_observe)
 
         self.cued = cued
 
