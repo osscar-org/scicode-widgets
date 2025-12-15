@@ -819,7 +819,7 @@ def test_widgets_cue(selenium_driver):
 
         # Check if unused text input does not effect cueing of button
         unused_text_input.send_keys("a")
-        time.sleep(0.1)
+        time.sleep(0.5)
         assert unused_text_input.get_attribute("value") == "Unuseda"
         assert (
             sum(
@@ -847,7 +847,7 @@ def test_widgets_cue(selenium_driver):
             )
             assert not (reset_cue_button.is_enabled())
         else:
-            time.sleep(0.1)
+            time.sleep(0.5)
             assert reset_cue_button.is_enabled()
 
         # Checks if two more widgets are cued on change
@@ -884,7 +884,7 @@ def test_widgets_cue(selenium_driver):
             )
             assert not (reset_cue_button.is_enabled())
         else:
-            time.sleep(0.1)
+            time.sleep(0.5)
             assert reset_cue_button.is_enabled()
 
         assert (
@@ -993,7 +993,7 @@ def test_widget_check_registry(selenium_driver):
             # button is obscured so we need to click with action on the cell
             ActionChains(driver).click(nb_cell).perform()
         check_all_widgets_button.click()
-        time.sleep(0.1)
+        time.sleep(0.5)
         outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
         assert (
             sum(
@@ -1011,7 +1011,7 @@ def test_widget_check_registry(selenium_driver):
         WebDriverWait(driver, 5).until(
             expected_conditions.element_to_be_clickable(set_all_references_button)
         ).click()
-        time.sleep(0.1)
+        time.sleep(0.5)
         outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
         assert (
             sum(
@@ -1029,7 +1029,7 @@ def test_widget_check_registry(selenium_driver):
         WebDriverWait(driver, 5).until(
             expected_conditions.element_to_be_clickable(check_all_widgets_button)
         ).click()
-        time.sleep(0.1)
+        time.sleep(0.5)
         outputs = nb_cell.find_elements(By.CLASS_NAME, OUTPUT_CLASS_NAME)
         assert (
             sum(
