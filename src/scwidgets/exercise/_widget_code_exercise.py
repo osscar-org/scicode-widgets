@@ -190,7 +190,6 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
                 )
 
         name = kwargs.get("name", key)
-        CheckableWidget.__init__(self, check_registry, name)
         if exercise_registry is not None:
             ExerciseWidget.__init__(self, exercise_registry, key)
         else:
@@ -227,7 +226,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
 
         self._cue_code = self._code
 
-        if self._check_registry is None or self._code is None:
+        if check_registry is None or self._code is None:
             self._check_button = None
         else:
             self._cue_code = CheckCueBox(
@@ -521,6 +520,7 @@ class CodeExercise(VBox, CheckableWidget, ExerciseWidget):
             *args,
             **kwargs,
         )
+        CheckableWidget.__init__(self, check_registry, name)
         # In this case there is no code to be written by the student, so the code
         # exercise should work out of the box. Since the cues for the parameters
         # are also disabled, we update at the beginning once.
