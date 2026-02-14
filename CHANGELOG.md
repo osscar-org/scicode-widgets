@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.2
+
+Fixed a bug preventing initialization of check registry
+
 ## v0.2.1
 
 Updated to support numpy 2.0
