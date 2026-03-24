@@ -53,13 +53,13 @@ The package facilitates the creation of interactive exercises and demonstrations
 Students are asked to provide pedagogically meaningful contributions in terms of theoretical understanding, coding ability, and analytical skills.
 The library provides the tools to connect custom pre- and post-processing of students' code, which runs seamlessly "behind the scenes", with the ability to test and verify the solution, as well as to convert it into live interactive visualizations driven by Jupyter widgets.
 
-# Statement of Need
+# Statement of need
 
 This work introduces scicode-widgets, an open-source Python library that transforms Jupyter notebooks into interactive, self-contained learning applications. By hiding boilerplate code behind a clean widget interface, it allows students to focus on core physics concepts, algorithms, and data analysis with instant visual feedback. The widget configuration is fully implemented in Python, enabling flexible creation of diverse teaching exercises—particularly valuable for the research community, given Python’s widespread use in academic, educational, and research settings.
 
 We demonstrate its educational value through a ridge regression exercise that combines interactive code input, real-time controls, and automated visual feedback supported by a color-coded cue system. Used in one undergraduate course at EPFL (MSE-305), the tool has already supported nearly 100 students and received highly positive feedback.
 
-# Introduction
+# State of the field
 
 Jupyter notebooks [@jupyter] have been used extensively for the creation
 of educational contents, with applications in
@@ -286,7 +286,7 @@ corresponding plot provides students with direct feedback (and the
 instructor can further hint at certain relationships in subsequent
 questions).
 
-# Technical challenges and solutions
+# Software design
 
 `scicode-widgets` depends on several external libraries that implement
 the widgets used as components in the applications. In addition to the
@@ -376,7 +376,7 @@ extensively within a unit test framework, using the package
 interactions (e.g. typing on the keyboard or clicking with the mouse)
 via the web browser, and test the graphical output of the application.
 
-# Conclusion
+# Research impact statement
 
 In this work, we presented how an interactive widget application that
 combines a coding environment and visualization can be used to provide
@@ -404,6 +404,11 @@ The code producing the `scicode-widgets` applications underlying each
 figure is available on Zenodo [@supplementary-code]. The notebooks used
 in the MSE-305 course are distributed in a dedicated
 repository [@iam-notebooks].
+
+# AI usage disclosure
+
+No AI tools were used for the development of the package `scicode-widgets`
+or to write this manuscript.
 
 # Acknowledgements
 
