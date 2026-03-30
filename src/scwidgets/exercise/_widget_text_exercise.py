@@ -10,19 +10,27 @@ from ._widget_exercise_registry import ExerciseRegistry, ExerciseWidget
 
 class TextExercise(VBox, ExerciseWidget):
     """
-    :param textarea:
-        a custom `textarea` with custom styling. If not specified, the standard
-        parameters are given.
+    :param value:
+        Initial text value for the textarea.
 
     :param key:
         The key that is used to store the exercise in the JSON file.
 
+    :param exercise_registry:
+        An exercise registry that is used to register the answers to save them later.
+        If specified the save and load panel will appear.
+
     :param description:
-        A string describing the exercises that will be put into an HTML widget
+        A string describing the exercise that will be put into an HTML widget
         above the exercise.
 
     :param title:
         A title for the exercise. If not given, the key is used.
+
+    :param max_length:
+        Optional maximum number of characters allowed in the textarea. When set,
+        a character counter is displayed below the textarea and saving is blocked
+        if the text exceeds the limit.
     """
 
     def __init__(
@@ -32,6 +40,7 @@ class TextExercise(VBox, ExerciseWidget):
         exercise_registry: Optional[ExerciseRegistry] = None,
         description: Optional[str] = None,
         title: Optional[str] = None,
+        max_length: Optional[int] = None,
         *args,
         **kwargs,
     ):
@@ -56,10 +65,20 @@ class TextExercise(VBox, ExerciseWidget):
         if self._title_html is not None:
             self._title_html.add_class("exercise-title")
 
+        self._max_length = max_length
         layout = kwargs.pop("layout", Layout(width="auto", height="150px"))
         self._textarea = Textarea(value, *args, layout=layout, **kwargs)
         self._cue_textarea = self._textarea
         self._output = Output()
+
+        if self._max_length is not None:
+            self._char_counter = HTML()
+            self._update_char_counter()
+            self._textarea.observe(
+                lambda change: self._update_char_counter(), names="value"
+            )
+        else:
+            self._char_counter = None
 
         if exercise_registry is None:
             self._save_button = None
@@ -114,6 +133,8 @@ class TextExercise(VBox, ExerciseWidget):
         if self._description_html is not None:
             widget_children.append(self._description_html)
         widget_children.append(self._cue_textarea)
+        if self._char_counter is not None:
+            widget_children.append(self._char_counter)
         if self._button_panel:
             widget_children.append(self._button_panel)
 
@@ -122,6 +143,24 @@ class TextExercise(VBox, ExerciseWidget):
         VBox.__init__(
             self,
             widget_children,
+        )
+
+    def _update_char_counter(self):
+        current = len(self._textarea.value)
+        limit = self._max_length
+        if current > limit:
+            self._char_counter.value = (
+                f'<span style="color: red;">{current} / {limit} characters'
+                f" (exceeded by {current - limit})</span>"
+            )
+        else:
+            self._char_counter.value = f"{current} / {limit} characters"
+
+    @property
+    def _exceeds_max_length(self) -> bool:
+        return (
+            self._max_length is not None
+            and len(self._textarea.value) > self._max_length
         )
 
     @property
@@ -157,6 +196,16 @@ class TextExercise(VBox, ExerciseWidget):
             self._load_button.observe_widgets()
 
     def _on_click_save_action(self) -> bool:
+        if self._exceeds_max_length:
+            self._output.clear_output(wait=True)
+            with self._output:
+                print(
+                    Formatter.color_error_message(
+                        f"Cannot save: text exceeds the character limit"
+                        f" ({len(self._textarea.value)} / {self._max_length})."
+                    )
+                )
+            return False
         self._output.clear_output(wait=True)
         raised_error = False
         with self._output:
