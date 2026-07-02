@@ -45,6 +45,22 @@ License
 `scicode-widgets` are released under the open BSD 3-Clause License.
 See the `LICENSE.txt` file for more details.
 
+Reporting issues
+----------------
+
+If you encounter any issues with the code, please report them by opening a
+`GitHub issue <https://github.com/osscar-org/scicode-widgets/issues/new>`_. 
+
+Requests for support
+--------------------
+
+For support requests, please contact any of the people listed below: 
+
+- `Alexander Goscinski <https://www.psi.ch/de/lms/people/alexander-jan-goscinski>`_
+- `Giovanni Pizzi <https://www.psi.ch/en/lms/people/giovanni-pizzi>`_
+- `Michele Ceriotti <https://people.epfl.ch/michele.ceriotti?lang=en>`_
+
+
 Citing
 ------
 
