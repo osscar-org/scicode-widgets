@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.3
+
+- Update the link to the developer documentation in the contributing guide.
+- Add guidance for reporting issues and requesting support in the README.
+
 ## v0.2.2
 
 Fixed a bug preventing initialization of check registry
