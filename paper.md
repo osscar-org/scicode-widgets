@@ -55,14 +55,14 @@ The library provides the tools to connect custom pre- and post-processing of stu
 
 # Statement of need
 
-This work introduces scicode-widgets, an open-source Python library that transforms Jupyter notebooks into interactive, self-contained learning applications. By hiding boilerplate code behind a clean widget interface, it allows students to focus on core physics concepts, algorithms, and data analysis with instant visual feedback. The widget configuration is fully implemented in Python, enabling flexible creation of diverse teaching exercises—particularly valuable for the research community, given Python’s widespread use in academic, educational, and research settings.
+This work introduces `scicode-widgets`, an open-source Python library that transforms Jupyter notebooks into interactive, self-contained learning applications. By hiding boilerplate code behind a clean widget interface, it allows students to focus on core physics concepts, algorithms, and data analysis with instant visual feedback. The widget configuration is fully implemented in Python, enabling flexible creation of diverse teaching exercises—particularly valuable for the research community, given Python’s widespread use in academic, educational, and research settings.
 
-We demonstrate its educational value through a ridge regression exercise that combines interactive code input, real-time controls, and automated visual feedback supported by a color-coded cue system. Used in one undergraduate course at EPFL (MSE-305), the tool has already supported nearly 100 students and received highly positive feedback.
+We demonstrate its educational value through a ridge regression exercise that combines interactive code input, real-time controls, and automated visual feedback supported by a color-coded cue system. The tool has been used by nearly 100 students in an undergraduate course at EPFL (MSE-305) and was refined based on student feedback.
 
 # State of the field
 
 Jupyter notebooks [@jupyter] have been used extensively for the creation
-of educational contents, with applications in
+of educational content, with applications in
 chemistry [@notebooks-in-chemistry],
 physics [@notebooks-in-physics; @urcelay-olabarria_jupyter_2017; @tufino_using_2025]
 and mathematics [@notebooks-in-mathematics]. The cell-based structure of
@@ -131,10 +131,10 @@ in the upper panel of Fig. [1](#fig:exercise-code){reference-type="ref"
 reference="fig:exercise-code"}) that defines the logic to process the
 parameters specified in the parameters panel, and to input these as
 arguments to the code supplied by the students, along with functionality
-to visualize the results of the code execution, e.g. in
+to visualize the results of the code execution, e.g., in
 Fig. [1](#fig:exercise-code){reference-type="ref"
 reference="fig:exercise-code"} in the form of a plot. This process
-function is then executed by a click of the "Run code" button (marked in
+function is then executed by a click of the "Run Code" button (marked in
 orange in the bottom panel of
 Fig. [1](#fig:exercise-code){reference-type="ref"
 reference="fig:exercise-code"}). Alternatively, the code exercise can be
@@ -150,7 +150,7 @@ built-in Python type, shape and value closeness between the output of
 the students' code and some reference output provided by the teacher.
 The blue check verifies the periodicity of the function provided by the
 students, i.e., $\sin(0) = \sin(2\pi)$. The yellow-green check uses a
-fingerprint function, demonstrating how to prevent disclosing the
+fingerprint function, demonstrating how to reduce disclosure of the
 reference output to the students. For instance, in this example only the
 sum of the values of the function on a specified grid of $x$ values
 (here only composed of three points for illustrative purposes) is
@@ -169,7 +169,7 @@ equality checks, as well as shape and numerical closeness checks for
 `numpy` arrays. These checks work as unit tests, validating the output
 of the code of the students for a set of input and reference values
 provided by the teacher. The instructor can also create checks that
-validate specific functional behavior, e.g. periodicity for
+validate specific functional behavior, e.g., periodicity for
 trigonometric functions (for an example, see the check framed by a blue
 box in Fig. [2](#fig:check-code){reference-type="ref"
 reference="fig:check-code"}). One noteworthy point is that, for certain
@@ -177,13 +177,14 @@ exercises, the reference values can contain hints of the solution, which
 can be exploited by students to solve the exercise. As the reference
 values need to be part of the notebook, they cannot be safely hidden
 from the students. The library therefore provides an option to pass a
-one-way function, analogous to a hashing or fingerprint function, that
-post-processes the output before the check is run. Since no inference
-can be made once the output is processed through a one-way function, the
-reference values of the checks do not reveal any information about the
-actual solution of the exercise. This fingerprint function depends
-highly on the domain and therefore needs to be provided by the
-instructor. Nevertheless, the library exposes a simple interface to
+fingerprint function that post-processes the output before the check is
+run. Comparing fingerprints instead of full reference outputs reduces
+direct disclosure of the expected solution. However, fingerprints may
+reveal partial information or admit collisions; for example, summing
+outputs reveals an aggregate value and is not a cryptographic hash.
+These checks provide pedagogical feedback, not a security guarantee.
+The fingerprint function depends highly on the domain and therefore
+needs to be provided by the instructor. Nevertheless, the library exposes a simple interface to
 facilitate providing such checks. An example of a check using the
 fingerprint functionality can be seen in
 Fig. [2](#fig:check-code){reference-type="ref"
@@ -192,11 +193,11 @@ reference="fig:check-code"}, framed by a yellow-green box.
 ![An example of how the cue system works, showing a sequence of widget
 interactions. Panel a) shows both blue and red cues active, resulting
 for instance from a previous change by the student of both the code and
-the value of the $x$ parameter, without yet having rerun neither the
-code (to update the visualization) nor the checks. From a) to b) the
+the value of the $x$ parameter, without yet having rerun either the
+code (to update the visualization) or the checks. From a) to b) the
 "Check Code" button is pressed, removing the blue cues from the button
 and the code input (but keeping the red cues, as the code has not been
-rerun yet, and thus any related visualization are not yet updated). From
+rerun yet, and thus any related visualizations are not yet updated). From
 a) to c) the "Run Code" button is pressed, removing the red cues from
 the code input, the parameter panel and the button (but keeping the blue
 cues, as the checks have not been run yet). From c) to d) the parameter
@@ -214,7 +215,7 @@ therefore implemented a cue system that highlights the parts of the
 widget application that were modified since the last update and thus
 need to be rerun. When a student modifies an input in the widget, the
 system highlights the affected part with vertical bars of different
-colors -- referred to as a "cues" -- depending on the corresponding
+colors -- referred to as "cues" -- depending on the corresponding
 needed action: blue for checking, and red for running the code. This
 indicates that the corresponding output is outdated and immediately
 visualizes which inputs have been changed. An example of several
@@ -228,7 +229,7 @@ more dynamic learning process.
 # Learning ridge regression through an interactive notebook
 
 ![An example notebook covering the topic of ridge regression, divided
-into exercises demanding mathematical coding and analytical skills. It
+into exercises demanding mathematical, coding, and analytical skills. It
 includes both our exercise widget and free-text boxes for answering
 questions. Even just generating this simple plot requires more than $30$
 lines of Python code. Thanks to `scicode-widgets`, this code is hidden
@@ -256,7 +257,8 @@ the problem lies. While the instructor could provide explicit checks so
 that students can validate their solution, a more engaging learning
 experience is created by providing hints on how to use the visualization
 for validation. Students could then for instance reason that, when the
-noise and regularization strength are very small, the solution of ridge
+noise and regularization strength are very small and the fitted polynomial
+degree is at least that of the ground-truth function, the solution of ridge
 regression approaches the exact solution, which is clearly illustrated
 in the plot produced by the widget app. The instructor could help focus
 students' attention by hinting at this fact with a question of the form
@@ -264,7 +266,7 @@ students' attention by hinting at this fact with a question of the form
 observe this with your code?", thereby provoking the train of thought to
 use this as a validation. Such an experience teaches students to find
 mistakes in complex processes, requiring them to systematically exclude
-parts by validating their correctness and identify the parts that are
+parts by validating their correctness and to identify the parts that are
 relevant for investigation.
 
 ## Observe relationships through interactivity
@@ -279,7 +281,7 @@ plot) effectively communicates to students the impact of each parameter
 on a visual level. Second, through the manipulation of the parameters,
 students can analyze their relationship, e.g., how the regularization
 strength $\lambda$ and the number of data points $n_\text{samples}$
-affect the test error for different degrees of the polynomial function
+affect the test error for different maximum polynomial degrees
 $d_\text{max}$ used for fitting. While this is typically a challenging
 task, as it requires exploring the interplay of four parameters, the
 corresponding plot provides students with direct feedback (and the
@@ -290,11 +292,11 @@ questions).
 
 `scicode-widgets` depends on several external libraries that implement
 the widgets used as components in the applications. In addition to the
-package `ipywidgets`, that provides most of the standard widgets used
+package `ipywidgets`, which provides most of the standard widgets used
 for the applications, the coding environment relies on our package
 `widget-code-input`, providing the editable text box where students can
 input their code, where the function signature (and possibly function
-documentation in the format of a standard Python \"docstring\") are
+documentation in the format of a standard Python `docstring`) is
 hardcoded and read-only (see its appearance in
 Figs. [1](#fig:exercise-code){reference-type="ref"
 reference="fig:exercise-code"},
@@ -319,9 +321,9 @@ blocks provided by its dependencies. In comparison to a two-language
 solution that would use JavaScript for the frontend combined with a
 Python interface for the code, this design choice has the advantage that
 the library is easier to maintain, as well as being accessible to a
-broader range of teaching instructors for code adaption, given Python's
-position as one of the most commonly used languages in an academic,
-education and research setting. In the following, we further discuss in
+broader range of teaching instructors for code adaptation, given Python's
+position as one of the most commonly used languages in academic,
+educational, and research settings. In the following, we further discuss in
 more detail some of the technical challenges that we encountered during
 the development and the solutions we implemented.
 
@@ -331,11 +333,11 @@ The exercise widget app is modular, allowing flexible initialization
 with only the components needed for a given use case. For example, the
 parameter box can be disabled in fixed experimental settings. The
 initialization process needs to handle several cases, which complicates
-the logic. To reduce the code redundancy, the logic for the system is
-handled in dedicated "cue widgets", that activate the appropriate visual
-cue when it observes a change in one of the traits [@traitlets] in a
+the logic. To reduce code redundancy, the logic for the cue system is
+handled in dedicated "cue widgets", which activate the appropriate visual
+cue when they observe a change in one of the traits [@traitlets] in a
 list of widgets provided on initialization (i.e., in any of the other
-widgets that it observes for change). For the majority of the cueing, we
+widgets they observe for changes). For the majority of the cueing, we
 use a `cue box` that wraps around an existing widget to highlight it
 around the edges. The behavioral change when a widget is cued is defined
 in a CSS file to allow for customization by the teaching instructor
@@ -360,7 +362,7 @@ static widget state, including the solutions provided by the students.
 To solve this issue, we implemented a custom saving mechanism for the
 exercise widgets, which stores both the code and the parameter values in
 a JavaScript Object Notation (JSON) file. The logic responsible for
-storing and loading the answers is in the exercise manager Python class,
+storing and loading the answers is in the `ExerciseRegistry` Python class,
 which retrieves the answer of an exercise widget.
 
 ## Testing of the user interface
@@ -369,11 +371,11 @@ For an effective teaching experience, the robustness of the exercise
 application is essential. Indeed, the students are already required to
 consider errors in their understanding of the theory, the code, and
 interpretation of results. Adding failure of the widgets on top of these
-hurdles would affect very negatively the teaching experience. We
+hurdles would very negatively affect the teaching experience. We
 therefore test the user interface of the exercise application
 extensively within a unit test framework, using the package
 `selenium` [@selenium], which allows us to simulate realistic user
-interactions (e.g. typing on the keyboard or clicking with the mouse)
+interactions (e.g., typing on the keyboard or clicking with the mouse)
 via the web browser, and test the graphical output of the application.
 
 # Research impact statement
@@ -384,7 +386,7 @@ an engaging learning experience for students. The creation of the widget
 application leaves enough room for flexibility to implement arbitrary
 logic for processing the student code, while taking care of the widget
 logic for the teaching instructor. This allows the teaching instructor
-to let arbitrary pre- and postprocessing of the student code happen
+to let arbitrary pre- and post-processing of the student code happen
 "behind the scenes", so that students can fully focus on the main
 learning goal. We demonstrated the usage of `scicode-widgets` for
 teaching ridge regression, showing how the interactivity of the widgets
@@ -407,8 +409,10 @@ repository [@iam-notebooks].
 
 # AI usage disclosure
 
-No AI tools were used for the development of the package `scicode-widgets`
-or to write this manuscript.
+AI tools were used to assist with proofreading and editorial revisions to this
+manuscript, including typography, grammar, and reference formatting. The authors
+reviewed and approved the resulting changes. No AI tools were used to develop
+the `scicode-widgets` package.
 
 # Acknowledgements
 
