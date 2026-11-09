@@ -48,8 +48,8 @@ colorlinks: true
 
 "Computational experiments" use code and interactive visualizations to convey mathematical and physical concepts in an intuitive way, and are increasingly used to support *ex cathedra* lecturing in scientific and engineering disciplines.
 Jupyter notebooks are particularly well-suited to implement them, but involve large amounts of ancillary code to process data and generate illustrations, which can distract students from the core learning outcomes. 
-For a more engaging learning experience that only exposes relevant code to students---allowing them to focus on the interplay between code, theory and physical insights---we developed `scicode-widgets` (released as scwidgets), a Python package to build Jupyter-based applications. 
-The package facilitates the creation of interactive exercises and demonstrations for students in any discipline in science, technology and engineering.
+For a more engaging learning experience that only exposes relevant code to students---allowing them to focus on the interplay between code, theory, and physical insights---we developed `scicode-widgets` (released as scwidgets), a Python package to build Jupyter-based applications.
+The package facilitates the creation of interactive exercises and demonstrations for students in any discipline in science, technology, and engineering.
 Students are asked to provide pedagogically meaningful contributions in terms of theoretical understanding, coding ability, and analytical skills.
 The library provides the tools to connect custom pre- and post-processing of students' code, which runs seamlessly "behind the scenes", with the ability to test and verify the solution, as well as to convert it into live interactive visualizations driven by Jupyter widgets.
 
@@ -64,7 +64,7 @@ We demonstrate its educational value through a ridge regression exercise that co
 Jupyter notebooks [@jupyter] have been used extensively for the creation
 of educational content, with applications in
 chemistry [@notebooks-in-chemistry],
-physics [@notebooks-in-physics; @urcelay-olabarria_jupyter_2017; @tufino_using_2025]
+physics [@notebooks-in-physics; @urcelay-olabarria_jupyter_2017; @tufino_using_2025],
 and mathematics [@notebooks-in-mathematics]. The cell-based structure of
 the notebook supports conveying the teaching material in smaller units
 that can be connected in a sequential coherent narrative, thereby
@@ -108,10 +108,10 @@ code, parameters, and results (such as interactive plots) to students,
 while hiding the unnecessary details in the background, thus helping
 them focus first on the core scientific and computational concepts.
 
-![An example of how the coding environment, the parameter panel and the
+![An example of how the coding environment, the parameter panel, and the
 visualization of an interactive exercise widget are defined by the
 teacher (top) and how they are visualized by the corresponding widgets
-(bottom).](fig1.pdf){#fig:exercise-code width="49%"}
+(bottom).](fig1.png){#fig:exercise-code width="49%"}
 
 # Computational Experiments
 
@@ -146,7 +146,7 @@ helps the student focus on pedagogically meaningful elements.
 
 ![Examples of the check functionality. Each check is framed with the
 same color as its corresponding output. The purple check verifies the
-built-in Python type, shape and value closeness between the output of
+built-in Python type, shape, and value closeness between the output of
 the students' code and some reference output provided by the teacher.
 The blue check verifies the periodicity of the function provided by the
 students, i.e., $\sin(0) = \sin(2\pi)$. The yellow-green check uses a
@@ -154,7 +154,7 @@ fingerprint function, demonstrating how to reduce disclosure of the
 reference output to the students. For instance, in this example only the
 sum of the values of the function on a specified grid of $x$ values
 (here only composed of three points for illustrative purposes) is
-checked against a reference value.](fig2.pdf){#fig:check-code
+checked against a reference value.](fig2.png){#fig:check-code
 width="49%"}
 
 ## Check solutions
@@ -199,10 +199,10 @@ code (to update the visualization) or the checks. From a) to b) the
 and the code input (but keeping the red cues, as the code has not been
 rerun yet, and thus any related visualizations are not yet updated). From
 a) to c) the "Run Code" button is pressed, removing the red cues from
-the code input, the parameter panel and the button (but keeping the blue
+the code input, the parameter panel, and the button (but keeping the blue
 cues, as the checks have not been run yet). From c) to d) the parameter
 $x$ is changed, resulting in a new red cue both on the parameter panel
-and the button.](fig3.pdf){#fig:cue-system width="50%"}
+and the button.](fig3.png){#fig:cue-system width="50%"}
 
 ## Cues for readability
 
@@ -215,7 +215,7 @@ therefore implemented a cue system that highlights the parts of the
 widget application that were modified since the last update and thus
 need to be rerun. When a student modifies an input in the widget, the
 system highlights the affected part with vertical bars of different
-colors -- referred to as "cues" -- depending on the corresponding
+colors---referred to as "cues"---depending on the corresponding
 needed action: blue for checking, and red for running the code. This
 indicates that the corresponding output is outdated and immediately
 visualizes which inputs have been changed. An example of several
@@ -258,7 +258,8 @@ that students can validate their solution, a more engaging learning
 experience is created by providing hints on how to use the visualization
 for validation. Students could then for instance reason that, when the
 noise and regularization strength are very small and the fitted polynomial
-degree is at least that of the ground-truth function, the solution of ridge
+degree is at least that of the ground-truth function ($d_\text{max} \geq 5$ in
+this example), the solution of ridge
 regression approaches the exact solution, which is clearly illustrated
 in the plot produced by the widget app. The instructor could help focus
 students' attention by hinting at this fact with a question of the form
@@ -301,7 +302,7 @@ hardcoded and read-only (see its appearance in
 Figs. [1](#fig:exercise-code){reference-type="ref"
 reference="fig:exercise-code"},
 [2](#fig:check-code){reference-type="ref" reference="fig:check-code"},
-[3](#fig:cue-system){reference-type="ref" reference="fig:cue-system"}
+[3](#fig:cue-system){reference-type="ref" reference="fig:cue-system"},
 and [4](#fig:ridge){reference-type="ref" reference="fig:ridge"}). While
 this widget might seem redundant, as notebook cells already allow
 students to edit code, it becomes essential when our widgets are
@@ -390,7 +391,7 @@ to let arbitrary pre- and post-processing of the student code happen
 "behind the scenes", so that students can fully focus on the main
 learning goal. We demonstrated the usage of `scicode-widgets` for
 teaching ridge regression, showing how the interactivity of the widgets
-enables seamless transitions between theory, code and analysis,
+enables seamless transitions between theory, code, and analysis,
 resulting in interactions that would not occur as easily without them.
 `scicode-widgets` supports the most recent JupyterLab [@jupyterlab]
 version (version 4 at the point of writing) and can be easily installed
@@ -424,9 +425,9 @@ Competence in Research, funded by the Swiss National Science Foundation
 dissemination activities. A.G. and G.P. acknowledge funding by the
 SwissTwins project, funded by the Swiss State Secretariat for Education,
 Research and Innovation (SERI). M.C. and D.S. acknowledge funding from
-the European Research Council (ERC) under the research and innovation
-program (Grant Agreement No. 101001890-FIAMMA). We acknowledge useful
+the European Research Council (ERC) under the European Union's Horizon 2020
+research and innovation programme (grant agreement No. 101001890). We acknowledge useful
 discussions and feedback from Cécile Hardebolle and the students of the
-EPFL MSE-305 course -- especially those of the academic year 2021-2022.
+EPFL MSE-305 course---especially those of the academic year 2021–2022.
 
 # References
