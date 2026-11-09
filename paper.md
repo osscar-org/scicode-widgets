@@ -71,11 +71,11 @@ that can be connected in a sequential coherent narrative, thereby
 facilitating learning [@jupyter-narrative]. In addition to bare
 notebooks, custom Jupyter widgets have been developed both in research
 contexts [@aiidalab] and in educational contexts to create virtual lab
-applications, e.g., allowing students to explore the experimental
+applications, e.g., allowing students to explore the relevant
 parameter space
 interactively [@sutchenkov2020active; @du2023osscar; @du2024widget] or
 simply serving as a replacement for a hands-on lab
-experience [@vrl-survey]. Indeed, studies in control education have
+experience [@vrl-survey]. Indeed, studies in control engineering education have
 observed that these learning experiences can reach a similar
 effectiveness as their hands-on counterparts [@vrl-survey]. These
 examples usually focus on conveying the interaction between theory and
@@ -84,8 +84,8 @@ create and design these computational experiments, a skill that is
 becoming more essential for all fields of computational science.
 Although related skills are taught in separate courses, the interplay of
 theoretical understanding, algorithmic design, and interpretation of the
-results is typically only taught in more advanced courses. A crucial
-contributing factor to its late introduction in the curriculum is the
+results is typically only taught in more advanced classes. A crucial
+contributing factor to the late introduction in the curriculum is the
 amount of boilerplate code that needs to be written to process and
 visualize the data, together with the amount of time needed to get
 acquainted with the domain-specific tools that help with this kind of
@@ -95,7 +95,7 @@ by ancillary code that does not contribute to the core learning
 outcomes. In addition, for an interactive experience, computational
 experiments need to be rerun frequently to assess the results under
 different conditions. While parameters in a notebook cell can be changed
-and rerun, it still adds friction to the experience of students if
+and simulations can be rerun, it still adds friction to the experience of students if
 multiple actions are required to rerun an experiment (such as changing
 values in several cells and rerunning them in a specific order). Due to
 these aspects, learning is hindered by having to perform repetitive
@@ -174,7 +174,7 @@ trigonometric functions (for an example, see the check framed by a blue
 box in Fig. [2](#fig:check-code){reference-type="ref"
 reference="fig:check-code"}). One noteworthy point is that, for certain
 exercises, the reference values can contain hints of the solution, which
-can be exploited by students to solve the exercise. As the reference
+can be exploited by students to "reverse engineer" the correct answer. As the reference
 values need to be part of the notebook, they cannot be safely hidden
 from the students. The library therefore provides an option to pass a
 fingerprint function that post-processes the output before the check is
@@ -230,7 +230,7 @@ more dynamic learning process.
 
 ![An example notebook covering the topic of ridge regression, divided
 into exercises demanding mathematical, coding, and analytical skills. It
-includes both our exercise widget and free-text boxes for answering
+includes both an exercise widget and free-text boxes for answering
 questions. Even just generating this simple plot requires more than $30$
 lines of Python code. Thanks to `scicode-widgets`, this code is hidden
 from students, so that they can instead focus on understanding the core
@@ -294,7 +294,7 @@ questions).
 `scicode-widgets` depends on several external libraries that implement
 the widgets used as components in the applications. In addition to the
 package `ipywidgets`, which provides most of the standard widgets used
-for the applications, the coding environment relies on our package
+for the applications, the coding environment relies on the package
 `widget-code-input`, providing the editable text box where students can
 input their code, where the function signature (and possibly function
 documentation in the format of a standard Python `docstring`) is
@@ -411,7 +411,8 @@ repository [@iam-notebooks].
 # AI usage disclosure
 
 AI tools were used to assist with proofreading and editorial revisions to this
-manuscript, including typography, grammar, and reference formatting. The authors
+manuscript, including typography, grammar, and reference formatting, and to assist
+with corrections to the supplementary figure notebook and figure regeneration. The authors
 reviewed and approved the resulting changes. No AI tools were used to develop
 the `scicode-widgets` package.
 
