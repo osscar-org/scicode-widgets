@@ -123,8 +123,8 @@ the bottom part of Fig. [1](#fig:exercise-code){reference-type="ref"
 reference="fig:exercise-code"}: A coding environment (red) in which
 students can implement the algorithm derived from the provided theory, a
 panel of parameters (purple) where students can manipulate the
-experimental settings, and a visualization (green) that is generated
-from the code of the students utilizing the experimental settings
+input settings, and a visualization (green) that is generated
+from the code of the students utilizing the settings
 specified in the parameter panel. To provide full flexibility in the
 creation of an exercise, the teacher implements a function (orange box
 in the upper panel of Fig. [1](#fig:exercise-code){reference-type="ref"
@@ -273,7 +273,7 @@ relevant for investigation.
 ## Observe relationships through interactivity
 
 After implementing the code, students can directly proceed with
-experimental observations. The plot in
+their observations. The plot in
 Fig. [4](#fig:ridge){reference-type="ref" reference="fig:ridge"} shows
 the ground truth function $f$, the data points with noise
 $f(x_i) + \epsilon_i$, and the predicted function $\hat{f}(x)$. First,
@@ -332,7 +332,7 @@ the development and the solutions we implemented.
 
 The exercise widget app is modular, allowing flexible initialization
 with only the components needed for a given use case. For example, the
-parameter box can be disabled in fixed experimental settings. The
+parameter box can be disabled in settings with fixed inputs. The
 initialization process needs to handle several cases, which complicates
 the logic. To reduce code redundancy, the logic for the cue system is
 handled in dedicated "cue widgets", which activate the appropriate visual
